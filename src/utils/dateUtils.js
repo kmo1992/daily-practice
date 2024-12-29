@@ -1,4 +1,4 @@
 import moment from 'moment';
 
-export const getChallengeStartDate = () => moment('2024-09-28');
-export const getChallengeEndDate = () => moment('2024-11-08');
+export const getChallengeStartDate = () => moment('2025-01-06');
+export const getChallengeEndDate = () => moment('2025-02-16');
