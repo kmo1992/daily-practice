@@ -70,6 +70,32 @@ To preview the production build locally:
 npm run preview
 ```
 
+## Deploying to Firebase Hosting
+
+1. Create a Firebase project (free tier is fine) and a web app to obtain the values for `.env.local` (see `.env.example`).
+2. Update `.firebaserc` with your Firebase project id if it differs from `whole-life-challenge-tracker`.
+3. Install the Firebase CLI locally if you want to deploy manually:
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   firebase deploy --only hosting
+   ```
+4. The site is built from `dist` (Vite output) and served as a single-page app with rewrites handled in `firebase.json`.
+
+## CI/CD (GitHub Actions → Firebase Hosting)
+
+A workflow is provided at `.github/workflows/firebase-hosting.yml` that:
+
+- Runs on pushes to `main` and any tag (e.g., `v1.0.0`).
+- Installs dependencies with `npm ci`, builds the Vite app, and deploys to Firebase Hosting on the `live` channel.
+
+Before the workflow can deploy, add two secrets in your GitHub repository settings:
+
+- `FIREBASE_SERVICE_ACCOUNT`: JSON for a Firebase service account with the **Firebase Hosting Admin** role (copy the full JSON into the secret).
+- `FIREBASE_PROJECT_ID`: The Firebase project id to deploy to (must match `.firebaserc`).
+
+If you prefer token-based auth instead of a service account, you can set `FIREBASE_TOKEN` (from `firebase login:ci`) and swap the deploy step accordingly.
+
 ---
 
 ## Project Structure
@@ -128,6 +154,5 @@ This project is licensed under the MIT License.
 
 - Inspired by the Whole Life Challenge.
 - Thanks to all the open-source projects that made this possible.
-
 
 
