@@ -13,10 +13,12 @@ function App() {
   const [data, setData] = useState({});
   const [authReady, setAuthReady] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
+       setError('');
       if (firebaseUser) {
         await loadUserData(firebaseUser);
       } else {
@@ -31,47 +33,74 @@ function App() {
 
   const loadUserData = async (firebaseUser) => {
     setLoadingData(true);
-    const daysRef = collection(db, 'users', firebaseUser.uid, 'days');
-    const snapshot = await getDocs(daysRef);
-    const firestoreData = {};
+    try {
+      const daysRef = collection(db, 'users', firebaseUser.uid, 'days');
+      const snapshot = await getDocs(daysRef);
+      const firestoreData = {};
 
-    snapshot.forEach((docSnap) => {
-      firestoreData[docSnap.id] = docSnap.data();
-    });
-
-    // One-time migration from localStorage if this is the first login
-    const localData = JSON.parse(localStorage.getItem('wholeLifeChallengeData')) || {};
-    if (snapshot.empty && Object.keys(localData).length > 0) {
-      const batch = writeBatch(db);
-      Object.entries(localData).forEach(([dateStr, dayData]) => {
-        const dayRef = doc(db, 'users', firebaseUser.uid, 'days', dateStr);
-        batch.set(dayRef, dayData, { merge: true });
-        firestoreData[dateStr] = dayData;
+      snapshot.forEach((docSnap) => {
+        firestoreData[docSnap.id] = docSnap.data();
       });
-      await batch.commit();
-      localStorage.removeItem('wholeLifeChallengeData');
-    }
 
-    setData(firestoreData);
-    setLoadingData(false);
+      // One-time migration from localStorage if this is the first login
+      const localData = JSON.parse(localStorage.getItem('wholeLifeChallengeData')) || {};
+      if (snapshot.empty && Object.keys(localData).length > 0) {
+        const batch = writeBatch(db);
+        Object.entries(localData).forEach(([dateStr, dayData]) => {
+          const dayRef = doc(db, 'users', firebaseUser.uid, 'days', dateStr);
+          batch.set(dayRef, dayData, { merge: true });
+          firestoreData[dateStr] = dayData;
+        });
+        await batch.commit();
+        localStorage.removeItem('wholeLifeChallengeData');
+      }
+
+      setData(firestoreData);
+    } catch (err) {
+      console.error('Failed to load data', err);
+      setError('Unable to load your data right now. Please retry.');
+    } finally {
+      setLoadingData(false);
+    }
   };
 
   const handleUpdateDay = async (dateStr, partialData) => {
     if (!user) return;
     const mergedDay = { ...(data[dateStr] || {}), ...partialData };
-    setData((prev) => ({ ...prev, [dateStr]: mergedDay }));
 
-    const dayRef = doc(db, 'users', user.uid, 'days', dateStr);
-    await setDoc(dayRef, mergedDay, { merge: true });
+    setData((prev) => ({ ...prev, [dateStr]: mergedDay }));
+    setError('');
+
+    try {
+      const dayRef = doc(db, 'users', user.uid, 'days', dateStr);
+      await setDoc(dayRef, mergedDay, { merge: true });
+    } catch (err) {
+      console.error('Save failed', err);
+      setError('Could not save your change. Please retry.');
+      // Revert to previous state on failure
+      setData((prev) => ({ ...prev, [dateStr]: data[dateStr] || {} }));
+    }
   };
 
   const handleSignIn = async () => {
-    await signInWithPopup(auth, googleProvider);
+    setError('');
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      console.error('Sign-in failed', err);
+      setError('Sign-in was interrupted. Please try again.');
+    }
   };
 
   const handleSignOut = async () => {
     setData({});
-    await signOut(auth);
+    setError('');
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error('Sign-out failed', err);
+      setError('Sign-out did not complete. Try again.');
+    }
   };
 
   return (
@@ -97,7 +126,10 @@ function App() {
         </div>
       </div>
 
-      {authReady && user && loadingData && <p>Loading your data...</p>}
+      {error && <p className="status-message error">{error}</p>}
+      {authReady && user && loadingData && (
+        <p className="status-message">Loading your data...</p>
+      )}
       {authReady && user && !loadingData && (
         <>
           <IconKey />

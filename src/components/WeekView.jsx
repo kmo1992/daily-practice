@@ -1,6 +1,6 @@
 // src/components/WeekView.jsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import DayCard from './DayCard';
 import NavigationButtons from './NavigationButtons';
@@ -11,15 +11,20 @@ import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
 function WeekView({ data, onUpdateDay }) {
   const [currentWeekStart, setCurrentWeekStart] = useState(moment().startOf('isoWeek'));
 
-  const startDate = getChallengeStartDate();
-  const endDate = getChallengeEndDate();
+  const startDate = useMemo(() => getChallengeStartDate(), []);
+  const endDate = useMemo(() => getChallengeEndDate(), []);
 
-  // Adjust currentWeekStart to be within the challenge period
-  if (currentWeekStart.isBefore(startDate.clone().startOf('isoWeek'))) {
-    setCurrentWeekStart(startDate.clone().startOf('isoWeek'));
-  } else if (currentWeekStart.isAfter(endDate.clone().startOf('isoWeek'))) {
-    setCurrentWeekStart(endDate.clone().startOf('isoWeek'));
-  }
+  // Keep navigation within the challenge period
+  useEffect(() => {
+    const boundedStart = startDate.clone().startOf('isoWeek');
+    const boundedEnd = endDate.clone().startOf('isoWeek');
+
+    if (currentWeekStart.isBefore(boundedStart)) {
+      setCurrentWeekStart(boundedStart);
+    } else if (currentWeekStart.isAfter(boundedEnd)) {
+      setCurrentWeekStart(boundedEnd);
+    }
+  }, [currentWeekStart, startDate, endDate]);
 
   return (
     <div className="week-view">
