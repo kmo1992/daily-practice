@@ -89,10 +89,19 @@ A workflow is provided at `.github/workflows/firebase-hosting.yml` that:
 - Runs on pushes to `main` and any tag (e.g., `v1.0.0`).
 - Installs dependencies with `npm ci`, builds the Vite app, and deploys to Firebase Hosting on the `live` channel.
 
-Before the workflow can deploy, add two secrets in your GitHub repository settings:
+Before the workflow can deploy, add these GitHub Actions secrets (Settings → Secrets and variables → Actions):
 
-- `FIREBASE_SERVICE_ACCOUNT`: JSON for a Firebase service account with the **Firebase Hosting Admin** role (copy the full JSON into the secret).
-- `FIREBASE_PROJECT_ID`: The Firebase project id to deploy to (must match `.firebaserc`).
+- `FIREBASE_SERVICE_ACCOUNT`: JSON for a Firebase service account with the **Firebase Hosting Admin** role (copy the full JSON).
+- `FIREBASE_PROJECT_ID`: Firebase project id (must match `.firebaserc`).
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID` (optional if you are not using Analytics)
+
+The `VITE_FIREBASE_*` values must match your Firebase web app config; they are injected at build time for production deployments.
 
 If you prefer token-based auth instead of a service account, you can set `FIREBASE_TOKEN` (from `firebase login:ci`) and swap the deploy step accordingly.
 
@@ -154,5 +163,4 @@ This project is licensed under the MIT License.
 
 - Inspired by the Whole Life Challenge.
 - Thanks to all the open-source projects that made this possible.
-
 
