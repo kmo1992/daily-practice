@@ -1,6 +1,6 @@
 // src/components/WeekView.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import DayCard from './DayCard';
 import NavigationButtons from './NavigationButtons';
@@ -8,20 +8,8 @@ import WeeklyChart from './WeeklyChart';
 import EntireChallengeChart from './EntireChallengeChart';
 import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
 
-function WeekView() {
+function WeekView({ data, onUpdateDay }) {
   const [currentWeekStart, setCurrentWeekStart] = useState(moment().startOf('isoWeek'));
-  const [data, setData] = useState({});
-
-  // Load data from localStorage
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('wholeLifeChallengeData')) || {};
-    setData(storedData);
-  }, []);
-
-  // Function to update data
-  const updateData = (updatedData) => {
-    setData(updatedData);
-  };
 
   const startDate = getChallengeStartDate();
   const endDate = getChallengeEndDate();
@@ -44,14 +32,14 @@ function WeekView() {
           const date = currentWeekStart.clone().add(i, 'days');
           const dateStr = date.format('YYYY-MM-DD');
           return (
-            <DayCard
-              key={dateStr}
-              date={date}
-              data={data}
-              updateData={updateData}
-            />
-          );
-        })}
+              <DayCard
+                key={dateStr}
+                date={date}
+                data={data}
+                onUpdateDay={onUpdateDay}
+              />
+            );
+          })}
       </div>
       <WeeklyChart currentWeekStart={currentWeekStart} data={data} />
       <EntireChallengeChart data={data} />
