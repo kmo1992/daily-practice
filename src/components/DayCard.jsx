@@ -7,7 +7,7 @@ import MobilitySection from './MobilitySection';
 import { practices } from '../data/practices';
 import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
 
-function DayCard({ date, data, updateData }) {
+function DayCard({ date, data, onUpdateDay }) {
   const dateStr = date.format('YYYY-MM-DD');
   const today = moment();
   const isToday = date.isSame(today, 'day');
@@ -19,10 +19,7 @@ function DayCard({ date, data, updateData }) {
   const dayData = data[dateStr] || {};
 
   const handleUpdate = (newData) => {
-    const updatedData = { ...data };
-    updatedData[dateStr] = { ...dayData, ...newData };
-    localStorage.setItem('wholeLifeChallengeData', JSON.stringify(updatedData));
-    updateData(updatedData);
+    onUpdateDay(dateStr, newData);
   };
 
   return (
