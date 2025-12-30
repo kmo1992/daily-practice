@@ -82,6 +82,11 @@ npm run preview
    ```
 4. The site is built from `dist` (Vite output) and served as a single-page app with rewrites handled in `firebase.json`.
 
+Deployed URLs (Firebase free hosting):
+
+- https://whole-life-challenge-tracker.web.app
+- https://whole-life-challenge-tracker.firebaseapp.com
+
 ## CI/CD (GitHub Actions → Firebase Hosting)
 
 A workflow is provided at `.github/workflows/firebase-hosting.yml` that:
@@ -163,4 +168,3 @@ This project is licensed under the MIT License.
 
 - Inspired by the Whole Life Challenge.
 - Thanks to all the open-source projects that made this possible.
-
