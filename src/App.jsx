@@ -11,6 +11,7 @@ import './App.css';
 function App() {
   const [user, setUser] = useState(null);
   const [data, setData] = useState({});
+  const [weekGoals, setWeekGoals] = useState({});
   const [authReady, setAuthReady] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
@@ -23,6 +24,7 @@ function App() {
         await loadUserData(firebaseUser);
       } else {
         setData({});
+        setWeekGoals({});
         setLoadingData(false);
       }
       setAuthReady(true);
@@ -35,11 +37,17 @@ function App() {
     setLoadingData(true);
     try {
       const daysRef = collection(db, 'users', firebaseUser.uid, 'days');
-      const snapshot = await getDocs(daysRef);
+      const weeksRef = collection(db, 'users', firebaseUser.uid, 'weeks');
+      const [snapshot, weeksSnapshot] = await Promise.all([getDocs(daysRef), getDocs(weeksRef)]);
       const firestoreData = {};
+      const firestoreWeeks = {};
 
       snapshot.forEach((docSnap) => {
         firestoreData[docSnap.id] = docSnap.data();
+      });
+
+      weeksSnapshot.forEach((docSnap) => {
+        firestoreWeeks[docSnap.id] = docSnap.data();
       });
 
       // One-time migration from localStorage if this is the first login
@@ -56,6 +64,7 @@ function App() {
       }
 
       setData(firestoreData);
+      setWeekGoals(firestoreWeeks);
     } catch (err) {
       console.error('Failed to load data', err);
       setError('Unable to load your data right now. Please retry.');
@@ -82,6 +91,23 @@ function App() {
     }
   };
 
+  const handleUpdateWeek = async (weekStartStr, partialData) => {
+    if (!user) return;
+    const mergedWeek = { ...(weekGoals[weekStartStr] || {}), ...partialData };
+
+    setWeekGoals((prev) => ({ ...prev, [weekStartStr]: mergedWeek }));
+    setError('');
+
+    try {
+      const weekRef = doc(db, 'users', user.uid, 'weeks', weekStartStr);
+      await setDoc(weekRef, mergedWeek, { merge: true });
+    } catch (err) {
+      console.error('Week save failed', err);
+      setError('Could not save your weekly goals. Please retry.');
+      setWeekGoals((prev) => ({ ...prev, [weekStartStr]: weekGoals[weekStartStr] || {} }));
+    }
+  };
+
   const handleSignIn = async () => {
     setError('');
     try {
@@ -94,6 +120,7 @@ function App() {
 
   const handleSignOut = async () => {
     setData({});
+    setWeekGoals({});
     setError('');
     try {
       await signOut(auth);
@@ -133,7 +160,12 @@ function App() {
       {authReady && user && !loadingData && (
         <>
           <IconKey />
-          <WeekView data={data} onUpdateDay={handleUpdateDay} />
+          <WeekView
+            data={data}
+            weekGoals={weekGoals}
+            onUpdateDay={handleUpdateDay}
+            onUpdateWeek={handleUpdateWeek}
+          />
         </>
       )}
       {authReady && !user && (

@@ -1,16 +1,22 @@
 // src/components/DayCard.jsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import moment from 'moment';
 import PracticeItem from './PracticeItem';
 import MobilitySection from './MobilitySection';
 import { practices } from '../data/practices';
 import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
+import { getScheduleForDay, parseCount } from '../utils/scheduleUtils';
+
+const PULLUP_OPTIONS = Array.from({ length: 51 }, (_, index) => index);
 
 function DayCard({ date, data, onUpdateDay }) {
   const dateStr = date.format('YYYY-MM-DD');
   const today = moment();
   const isToday = date.isSame(today, 'day');
+  const dayOfWeek = date.isoWeekday();
+  const schedule = useMemo(() => getScheduleForDay(dayOfWeek), [dayOfWeek]);
+  const isSunday = dayOfWeek === 7;
 
   const startDate = getChallengeStartDate();
   const endDate = getChallengeEndDate();
@@ -22,6 +28,9 @@ function DayCard({ date, data, onUpdateDay }) {
     onUpdateDay(dateStr, newData);
   };
 
+  const pullupsValue = dayData.pullups !== undefined ? parseCount(dayData.pullups) : '';
+  const burpeesValue = dayData.burpeesTotalReps !== undefined ? parseCount(dayData.burpeesTotalReps) : '';
+
   return (
     <div
       className={`day-card ${isToday ? 'today' : ''} ${
@@ -31,19 +40,30 @@ function DayCard({ date, data, onUpdateDay }) {
       <h3>{date.format('ddd D')}</h3>
       <div className="practices-container">
         {inChallenge ? (
-          practices.map((practice) => (
-            <PracticeItem
-              key={practice.name}
-              practice={practice}
-              dayData={dayData}
-              handleUpdate={handleUpdate}
-            />
-          ))
+          <>
+            {practices.map((practice) => (
+              <PracticeItem
+                key={practice.name}
+                practice={practice}
+                dayData={dayData}
+                handleUpdate={handleUpdate}
+              />
+            ))}
+          </>
         ) : (
           <span>Not Part of Challenge</span>
         )}
       </div>
-      <MobilitySection date={date} />
+      <MobilitySection
+        date={date}
+        hideWorkout={schedule.hasBurpees}
+        schedule={schedule}
+        dayData={dayData}
+        onUpdateDay={handleUpdate}
+        pullupsValue={pullupsValue}
+        burpeesValue={burpeesValue}
+        pullupOptions={PULLUP_OPTIONS}
+      />
     </div>
   );
 }

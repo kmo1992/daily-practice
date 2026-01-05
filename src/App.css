@@ -72,7 +72,7 @@ h1 {
 .google-button {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 11px 16px;
   border-radius: 999px;
   background: #fff;
@@ -200,6 +200,145 @@ h1 {
   border-bottom: 1px solid #eee;
 }
 
+.workout-edit-button {
+  border: 1px solid #90caf9;
+  background: #e3f2fd;
+  color: #1f2a44;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.practice-label {
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.practice-select-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.practice-text {
+  margin-right: auto;
+  white-space: nowrap;
+  font-size: inherit;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1976d2;
+}
+
+.weekly-goals-panel {
+  background-color: #fff;
+  padding: 16px;
+  margin-bottom: 20px;
+  margin-top: 24px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.weekly-goals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.weekly-goals-header h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2em;
+}
+
+.weekly-goals-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.weekly-goals-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.weekly-goals-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9em;
+  color: #2c3e50;
+}
+
+.weekly-goals-inputs select {
+  width: 70px;
+  padding: 3px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  text-align: center;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 8px center;
+  background-size: 12px;
+}
+
+.mobility select {
+  width: 70px;
+}
+
+.pace-hint {
+  font-size: 0.8em;
+  color: #2c3e50;
+  margin-top: -4px;
+}
+
+.weekly-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85em;
+  color: #475569;
+}
+
+.progress-meta {
+  font-size: 0.78em;
+  color: #64748b;
+}
+
+.progress-track {
+  background: #e2e8f0;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #1976d2;
+  border-radius: 999px;
+}
+
+
 .practices-container {
   flex-grow: 1;
   display: flex;
@@ -276,7 +415,7 @@ h1 {
 /* Select (Dropdown) Styles */
 .practice select {
   margin-left: auto;
-  width: 50px;
+  width: 70px;
   padding: 3px;
   border-radius: 3px;
   border: 1px solid #ccc;
@@ -300,11 +439,13 @@ h1 {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 12px;
 }
 
 .mobility a {
   color: #1976d2;
   text-decoration: none;
+  font-size: inherit;
 }
 
 .mobility a:hover {
@@ -312,8 +453,40 @@ h1 {
 }
 
 .mobility span {
-  color: #999;
-  font-style: italic;
+  color: #2c3e50;
+}
+
+.mobility-inputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobility-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobility .practice-select-label {
+  justify-content: center;
+  width: auto;
+}
+
+.mobility .practice-text {
+  margin-right: 6px;
+  color: #333;
+  font-size: inherit;
+}
+
+.mobility .practice-select-label select {
+  font-size: inherit;
+}
+
+.mobility .practice-select-label {
+  margin-top: 0;
 }
 
 /* Navigation Buttons Styles */
