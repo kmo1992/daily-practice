@@ -10,7 +10,7 @@ import { getScheduleForDay, parseCount } from '../utils/scheduleUtils';
 
 const PULLUP_OPTIONS = Array.from({ length: 51 }, (_, index) => index);
 
-function DayCard({ date, data, onUpdateDay }) {
+function DayCard({ date, data, onUpdateDay, weekGoals }) {
   const dateStr = date.format('YYYY-MM-DD');
   const today = moment();
   const isToday = date.isSame(today, 'day');
@@ -33,9 +33,8 @@ function DayCard({ date, data, onUpdateDay }) {
 
   return (
     <div
-      className={`day-card ${isToday ? 'today' : ''} ${
-        !inChallenge ? 'not-in-challenge' : ''
-      }`}
+      className={`day-card ${isToday ? 'today' : ''} ${!inChallenge ? 'not-in-challenge' : ''
+        }`}
     >
       <h3>{date.format('ddd D')}</h3>
       <div className="practices-container">
@@ -63,6 +62,7 @@ function DayCard({ date, data, onUpdateDay }) {
         pullupsValue={pullupsValue}
         burpeesValue={burpeesValue}
         pullupOptions={PULLUP_OPTIONS}
+        weekGoals={weekGoals}
       />
     </div>
   );

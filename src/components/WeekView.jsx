@@ -112,6 +112,7 @@ function WeekView({ data, weekGoals, onUpdateDay, onUpdateWeek }) {
               key={dateStr}
               date={date}
               data={data}
+              weekGoals={currentWeekGoals}
               onUpdateDay={onUpdateDay}
             />
           );
