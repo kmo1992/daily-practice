@@ -194,30 +194,16 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
 
     // Check if timer is finished -> Restart
     if (timerState.timeLeft <= 0) {
-      // DEBUG: Start with 30 seconds remaining for testing
-      const DEBUG_REMAINING = 30;
-      const debugTimeLeft = Math.min(DEBUG_REMAINING, TOTAL_TIME);
-      const debugElapsed = TOTAL_TIME - debugTimeLeft;
-
-      let debugCurrentRep = 1;
-      let debugRepTimeLeft = repDuration;
-
-      if (repDuration > 0 && debugElapsed > 0) {
-        debugCurrentRep = Math.floor(debugElapsed / repDuration) + 1;
-        const repProgress = debugElapsed % repDuration;
-        debugRepTimeLeft = Math.max(0, repDuration - repProgress);
-      }
-
       initAudio();
       setTimerState({
         isActive: true, // Auto-start
-        timeLeft: debugTimeLeft,
-        repTimeLeft: debugRepTimeLeft,
-        currentRep: Math.min(debugCurrentRep, totalReps),
-        totalElapsed: debugElapsed
+        timeLeft: TOTAL_TIME,
+        repTimeLeft: repDuration,
+        currentRep: 1,
+        totalElapsed: 0
       });
       startTimeRef.current = 0;
-      prevRepRef.current = Math.min(debugCurrentRep, totalReps);
+      prevRepRef.current = 1;
       warnedRef.current = false;
 
       // Play bell on restart
@@ -229,7 +215,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       initAudio();
       setTimerState(prev => ({ ...prev, isActive: true }));
       // If just starting
-      if (timerState.timeLeft === TOTAL_TIME || (timerState.timeLeft === 30 && TOTAL_TIME > 30)) {
+      if (timerState.timeLeft === TOTAL_TIME) {
         playBell();
         // Reset ref logic based on current rep
         prevRepRef.current = timerState.currentRep;
@@ -240,55 +226,27 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
   };
 
   const resetTimer = () => {
-    // DEBUG: Start with 30 seconds remaining for testing
-    const DEBUG_REMAINING = 30;
-    const debugTimeLeft = Math.min(DEBUG_REMAINING, TOTAL_TIME);
-    const debugElapsed = TOTAL_TIME - debugTimeLeft;
-
-    let debugCurrentRep = 1;
-    let debugRepTimeLeft = repDuration;
-
-    if (repDuration > 0 && debugElapsed > 0) {
-      debugCurrentRep = Math.floor(debugElapsed / repDuration) + 1;
-      const repProgress = debugElapsed % repDuration;
-      debugRepTimeLeft = Math.max(0, repDuration - repProgress);
-    }
-
     setTimerState({
       isActive: false,
-      timeLeft: debugTimeLeft,
-      repTimeLeft: debugRepTimeLeft,
-      currentRep: Math.min(debugCurrentRep, totalReps),
-      totalElapsed: debugElapsed
+      timeLeft: TOTAL_TIME,
+      repTimeLeft: repDuration,
+      currentRep: 1,
+      totalElapsed: 0
     });
     startTimeRef.current = 0;
-    prevRepRef.current = Math.min(debugCurrentRep, totalReps);
+    prevRepRef.current = 1;
     warnedRef.current = false;
   };
 
   // Sync state when config changes (if not active)
   useEffect(() => {
     if (!isActive) {
-      // DEBUG: Start with 30 seconds remaining for testing
-      const DEBUG_REMAINING = 30;
-      const debugTimeLeft = Math.min(DEBUG_REMAINING, TOTAL_TIME);
-      const debugElapsed = TOTAL_TIME - debugTimeLeft;
-
-      let debugCurrentRep = 1;
-      let debugRepTimeLeft = repDuration;
-
-      if (repDuration > 0 && debugElapsed > 0) {
-        debugCurrentRep = Math.floor(debugElapsed / repDuration) + 1;
-        const repProgress = debugElapsed % repDuration;
-        debugRepTimeLeft = Math.max(0, repDuration - repProgress);
-      }
-
       setTimerState(prev => ({
         ...prev,
-        timeLeft: debugTimeLeft,
-        repTimeLeft: debugRepTimeLeft,
-        currentRep: Math.min(debugCurrentRep, totalReps),
-        totalElapsed: debugElapsed
+        timeLeft: TOTAL_TIME,
+        repTimeLeft: repDuration,
+        currentRep: 1,
+        totalElapsed: 0
       }));
     }
   }, [TOTAL_TIME, repDuration]);

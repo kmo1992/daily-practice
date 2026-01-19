@@ -64,7 +64,7 @@ function MobilitySection(props) {
                 <span
                   className="practice-text clickable"
                   onClick={() => setShowTimer(true)}
-                  style={{ cursor: 'pointer', textDecoration: 'underline', color: '#007bff' }}
+                  style={{ cursor: 'pointer', color: '#007bff' }}
                   title={`Click to open timer (Goal: ${goalReps || 'Not Set'})`}
                 >
                   {schedule.burpeeType === 'navy' ? 'Navy SEALs' : 'Burpees'}
