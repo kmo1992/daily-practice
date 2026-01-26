@@ -48,13 +48,15 @@
 - As a user, I want a "minimum viable nutrition win" checklist so nutrition feels doable. (Obvious: appears under Nutrition. Attractive: clear, small targets. Easy: checkboxes. Satisfying: points earned without overthinking.)
 - As a user, I want an identity note attached to each habit so I see the "practitioner" mindset. (Obvious: small label under the habit. Attractive: reinforces identity. Easy: short text field. Satisfying: daily confirmation.)
 - As a user, I want a weekly "1% better" micro-goal so I keep compounding improvements. (Obvious: weekly goals panel. Attractive: one concise goal. Easy: single line. Satisfying: no breaking changes, just steady progress.)
+- As a user, I want a Sunday planning ritual to set next week's workouts so I stay intentional and prepared. (Obvious: Sunday prompt or checklist. Attractive: highlights upcoming wins. Easy: quick plan in one screen. Satisfying: clear plan to start Monday strong.)
 
 ### Developer priority order (Atomic Habits lens)
 
-- P1. Pinned "Morning Stack" card with Start button. (Obvious cue, identity hook for the burpee practitioner, visible progress for the builder.)
+- P1. Pinned "Morning Stack" card with Start button. (Obvious cue, identity hook for the burpee practitioner, visible progress for the builder.) (Complete.)
 - P2. Reward ritual prompt after completion. (Satisfying close to the loop, protects the morning coffee and reading ritual.)
 - P3. Daily points progress bar. (Immediate momentum, low risk, fast UI win for the shipper.)
 - P4. One-tap water logging in Nalgenes. (Easy action, clear visual tally, compounding hydration.)
 - P5. "Minimum viable nutrition win" checklist. (Makes nutrition obvious and easy, avoids decision fatigue.)
 - P6. Identity note per habit. (Attractive for the practitioner, quick confirmation without adding friction.)
-- P7. Weekly "1% better" micro-goal. (Keeps compounding mindset, but needs more context to feel right.)
+- P7. Sunday planning ritual to set next week's workouts. (Weekly cadence, keeps focus on what's next, but needs more context to feel right.)
+- P8. Weekly "1% better" micro-goal. (Keeps compounding mindset, but needs more context to feel right.)
