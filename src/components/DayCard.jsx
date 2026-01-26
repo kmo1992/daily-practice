@@ -1,18 +1,17 @@
 // src/components/DayCard.jsx
 
 import React, { useMemo } from 'react';
-import moment from 'moment';
 import PracticeItem from './PracticeItem';
 import MobilitySection from './MobilitySection';
 import { practices } from '../data/practices';
-import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
+import { getAppToday, getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
 import { getScheduleForDay, parseCount } from '../utils/scheduleUtils';
 
 const PULLUP_OPTIONS = Array.from({ length: 51 }, (_, index) => index);
 
 function DayCard({ date, data, onUpdateDay, weekGoals }) {
   const dateStr = date.format('YYYY-MM-DD');
-  const today = moment();
+  const today = getAppToday();
   const isToday = date.isSame(today, 'day');
   const dayOfWeek = date.isoWeekday();
   const schedule = useMemo(() => getScheduleForDay(dayOfWeek), [dayOfWeek]);
@@ -33,6 +32,7 @@ function DayCard({ date, data, onUpdateDay, weekGoals }) {
 
   return (
     <div
+      id={`day-${dateStr}`}
       className={`day-card ${isToday ? 'today' : ''} ${!inChallenge ? 'not-in-challenge' : ''
         }`}
     >

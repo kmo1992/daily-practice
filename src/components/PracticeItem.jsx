@@ -7,7 +7,6 @@ import {
   FaBed,
   FaTint,
   FaBookOpen,
-  FaPen,
 } from 'react-icons/fa';
 import { GrYoga } from "react-icons/gr";
 
@@ -26,9 +25,23 @@ function PracticeItem({ practice, dayData, handleUpdate }) {
   const nutritionPoints = dayData.nutritionPoints !== undefined ? dayData.nutritionPoints : 'not-set';
 
   const handleCheckboxChange = () => {
+    const nextChecked = !isChecked;
     const updatedPractices = isChecked
       ? dayData.practices.filter((name) => name !== practice.name)
       : [...(dayData.practices || []), practice.name];
+
+    if (practice.name === 'Water') {
+      const storedBottles = Array.isArray(dayData.waterBottles) ? dayData.waterBottles : [];
+      const nextBottles = [0, 1, 2].map((index) => {
+        const stored = storedBottles[index] || {};
+        return {
+          done: nextChecked,
+          size: stored.size ? String(stored.size) : '32',
+        };
+      });
+      handleUpdate({ practices: updatedPractices, waterBottles: nextBottles });
+      return;
+    }
 
     handleUpdate({ practices: updatedPractices });
   };

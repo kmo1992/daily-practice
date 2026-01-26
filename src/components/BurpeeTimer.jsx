@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
 import './BurpeeTimer.css';
 
@@ -312,7 +313,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
 
   if (!isOpen) return null;
 
-  return (
+  const overlay = (
     <div className={`burpee-timer-overlay ${timeLeft <= 0 ? 'finished' : ''}`}>
       <div className="burpee-timer-modal">
 
@@ -417,6 +418,12 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       </div>
     </div>
   );
+
+  if (typeof document === 'undefined') {
+    return overlay;
+  }
+
+  return createPortal(overlay, document.body);
 };
 
 export default BurpeeTimer;
