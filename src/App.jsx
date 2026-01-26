@@ -1,11 +1,12 @@
 // src/App.jsx
 
 import React, { useEffect, useState } from 'react';
+import { FaBars } from 'react-icons/fa';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { collection, doc, getDocs, setDoc, writeBatch } from 'firebase/firestore';
 import WeekView from './components/WeekView';
-import IconKey from './components/IconKey';
 import { auth, googleProvider, db } from './firebase';
+import { getAppToday } from './utils/dateUtils';
 import './App.css';
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
   const [authReady, setAuthReady] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
+  const [appMenuOpen, setAppMenuOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -122,6 +125,8 @@ function App() {
     setData({});
     setWeekGoals({});
     setError('');
+    setAppMenuOpen(false);
+    setActiveModal(null);
     try {
       await signOut(auth);
     } catch (err) {
@@ -130,19 +135,81 @@ function App() {
     }
   };
 
+  const openModal = (modalId) => {
+    setActiveModal(modalId);
+    setAppMenuOpen(false);
+  };
+
+  const today = getAppToday();
+  const dateStr = today.format('YYYY-MM-DD');
+  const dayData = data[dateStr] || {};
+  const nutritionPoints =
+    dayData.nutritionPoints !== undefined ? dayData.nutritionPoints : 5;
+
   return (
     <div className="App">
       <div className="app-header">
         <h1>Healthy Habits Tracker</h1>
         <div className="auth-bar">
           {user ? (
-            <div className="auth-details">
-              <span className="auth-name">
-                Signed in as {user.displayName || user.email || 'Google User'}
-              </span>
-              <button className="secondary-button" onClick={handleSignOut}>
-                Sign out
+            <div className="app-menu">
+              <button
+                className="app-menu-button"
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={appMenuOpen}
+                aria-label="Open menu"
+                onClick={() => setAppMenuOpen((prev) => !prev)}
+              >
+                <FaBars aria-hidden="true" />
               </button>
+              {appMenuOpen && (
+                <div className="app-menu-list" role="menu">
+                  <div className="app-menu-user">
+                    Signed in as {user.displayName || user.email || 'Google User'}
+                  </div>
+                  <button
+                    className={`app-menu-item ${activeModal === 'nutrition' ? 'active' : ''}`}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => openModal('nutrition')}
+                  >
+                    <span className="app-menu-item-label">Nutrition List</span>
+                  </button>
+                  <button
+                    className={`app-menu-item ${activeModal === 'weekly-goals' ? 'active' : ''}`}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => openModal('weekly-goals')}
+                  >
+                    <span className="app-menu-item-label">Weekly Workout Goals</span>
+                  </button>
+                  <button
+                    className={`app-menu-item ${activeModal === 'weekly-progress' ? 'active' : ''}`}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => openModal('weekly-progress')}
+                  >
+                    <span className="app-menu-item-label">Weekly Progress</span>
+                  </button>
+                  <button
+                    className={`app-menu-item ${activeModal === 'challenge-progress' ? 'active' : ''}`}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => openModal('challenge-progress')}
+                  >
+                    <span className="app-menu-item-label">Entire Challenge Progress</span>
+                  </button>
+                  <button
+                    className="app-menu-item"
+                    type="button"
+                    role="menuitem"
+                    onClick={handleSignOut}
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <button className="google-button" onClick={handleSignIn}>
@@ -159,19 +226,19 @@ function App() {
       )}
       {authReady && user && !loadingData && (
         <>
-          <IconKey />
           <WeekView
             data={data}
             weekGoals={weekGoals}
             onUpdateDay={handleUpdateDay}
             onUpdateWeek={handleUpdateWeek}
+            activeModal={activeModal}
+            onCloseModal={() => setActiveModal(null)}
           />
         </>
       )}
       {authReady && !user && (
         <>
           <p>Sign in to start tracking your challenge and sync to Firestore.</p>
-          <IconKey />
         </>
       )}
     </div>

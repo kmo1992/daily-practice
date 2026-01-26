@@ -7,7 +7,6 @@ import {
   FaBed,
   FaTint,
   FaBookOpen,
-  FaPen,
 } from 'react-icons/fa';
 import { GrYoga } from "react-icons/gr";
 

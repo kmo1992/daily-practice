@@ -1,18 +1,29 @@
 // src/components/WeekView.jsx
 
 import React, { useEffect, useMemo, useState } from 'react';
-import moment from 'moment';
 import DayCard from './DayCard';
 import NavigationButtons from './NavigationButtons';
 import WeeklyChart from './WeeklyChart';
 import EntireChallengeChart from './EntireChallengeChart';
-import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
+import MorningFlowTabs from './MorningFlowTabs';
+import NutritionListPanel from './NutritionListPanel';
+import Modal from './Modal';
+import { FaAppleAlt, FaBullseye, FaChartBar, FaTrophy } from 'react-icons/fa';
+import { getAppToday, getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
 import { getScheduleForDay, getWeekStartKey, parseCount } from '../utils/scheduleUtils';
 import WeeklyGoalsPanel from './WeeklyGoalsPanel';
 
-function WeekView({ data, weekGoals, onUpdateDay, onUpdateWeek }) {
-  const [currentWeekStart, setCurrentWeekStart] = useState(moment().startOf('isoWeek'));
-
+function WeekView({
+  data,
+  weekGoals,
+  onUpdateDay,
+  onUpdateWeek,
+  activeModal = null,
+  onCloseModal = null,
+}) {
+  const [currentWeekStart, setCurrentWeekStart] = useState(() =>
+    getAppToday().startOf('isoWeek')
+  );
   const startDate = useMemo(() => getChallengeStartDate(), []);
   const endDate = useMemo(() => getChallengeEndDate(), []);
   const weekStartKey = useMemo(() => getWeekStartKey(currentWeekStart), [currentWeekStart]);
@@ -28,6 +39,7 @@ function WeekView({ data, weekGoals, onUpdateDay, onUpdateWeek }) {
       setCurrentWeekStart(boundedEnd);
     }
   }, [currentWeekStart, startDate, endDate]);
+
 
   const currentWeekGoals = weekGoals[weekStartKey] || {};
   const regularGoalPerSession = parseCount(currentWeekGoals.regularBurpeesGoalTotal);
@@ -97,8 +109,15 @@ function WeekView({ data, weekGoals, onUpdateDay, onUpdateWeek }) {
     };
   }, [currentWeekStart, data, regularGoalPerSession, navyGoalPerSession, pullupsGoalPerSession]);
 
+  const handleCloseModal = () => {
+    if (onCloseModal) {
+      onCloseModal();
+    }
+  };
+
   return (
     <div className="week-view">
+      <MorningFlowTabs data={data} weekGoals={weekGoals} onUpdateDay={onUpdateDay} />
       <NavigationButtons
         currentWeekStart={currentWeekStart}
         setCurrentWeekStart={setCurrentWeekStart}
@@ -118,15 +137,45 @@ function WeekView({ data, weekGoals, onUpdateDay, onUpdateWeek }) {
           );
         })}
       </div>
-      <WeeklyGoalsPanel
-        weekStart={currentWeekStart}
-        weekStartKey={weekStartKey}
-        weekGoals={currentWeekGoals}
-        weeklySummary={weeklySummary}
-        onUpdateWeek={onUpdateWeek}
-      />
-      <WeeklyChart currentWeekStart={currentWeekStart} data={data} />
-      <EntireChallengeChart data={data} />
+      <Modal
+        isOpen={activeModal === 'nutrition'}
+        kicker="Nutrition"
+        title="Nutrition List"
+        icon={<FaAppleAlt />}
+        onClose={handleCloseModal}
+      >
+        <NutritionListPanel />
+      </Modal>
+      <Modal
+        isOpen={activeModal === 'weekly-goals'}
+        title="Weekly Workout Goals"
+        icon={<FaBullseye />}
+        onClose={handleCloseModal}
+      >
+        <WeeklyGoalsPanel
+          weekStart={currentWeekStart}
+          weekStartKey={weekStartKey}
+          weekGoals={currentWeekGoals}
+          weeklySummary={weeklySummary}
+          onUpdateWeek={onUpdateWeek}
+        />
+      </Modal>
+      <Modal
+        isOpen={activeModal === 'weekly-progress'}
+        title="Weekly Progress"
+        icon={<FaChartBar />}
+        onClose={handleCloseModal}
+      >
+        <WeeklyChart currentWeekStart={currentWeekStart} data={data} />
+      </Modal>
+      <Modal
+        isOpen={activeModal === 'challenge-progress'}
+        title="Entire Challenge Progress"
+        icon={<FaTrophy />}
+        onClose={handleCloseModal}
+      >
+        <EntireChallengeChart data={data} />
+      </Modal>
     </div>
   );
 }
