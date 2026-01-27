@@ -507,13 +507,16 @@ h1 {
 
 .nutrition-points-grid-header {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
 }
 
 .nutrition-points-grid-value {
-  font-size: 1.4rem;
+  font-size: 1.875rem;
+  line-height: 1;
   font-weight: 700;
   color: #1f2a44;
 }
@@ -588,12 +591,17 @@ h1 {
   border-color: rgba(15, 23, 42, 0.75);
   background: #1f2a44;
   color: #fff;
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.25);
+  transform: scale(1.05);
 }
 
-.nutrition-points-btn:hover {
+.nutrition-points-btn:hover:not(.active) {
   transform: translateY(-1px);
   border-color: rgba(15, 23, 42, 0.45);
+}
+
+.nutrition-points-btn.active:hover {
+  transform: scale(1.08);
 }
 
 .nutrition-points-btn:focus-visible {
@@ -893,7 +901,7 @@ h1 {
 .morning-stack-progress-track {
   flex: 1;
   min-width: 180px;
-  height: 10px;
+  height: 8px;
   background: #e2e8f0;
   border-radius: 999px;
   overflow: hidden;
@@ -901,13 +909,17 @@ h1 {
 
 .morning-stack-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--heat) 0%, var(--warm) 35%, var(--neutral) 70%, var(--cool) 100%);
+  background: var(
+    --progress-gradient,
+    linear-gradient(90deg, var(--heat) 0%, var(--warm) 35%, var(--neutral) 70%, var(--cool) 100%)
+  );
   border-radius: 999px;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background 0.3s ease;
 }
 
 .morning-stack-progress-fill.complete {
-  background: linear-gradient(90deg, var(--neutral) 0%, var(--cool) 80%);
+  background: linear-gradient(90deg, #fb923c 0%, #facc15 45%, #22c55e 100%);
+  animation: stackPulse 1.6s ease-in-out infinite;
 }
 
 .morning-stack-progress-text {
@@ -948,6 +960,7 @@ h1 {
 
 .morning-stack-action-card {
   flex: 1 1 calc(50% - 12px);
+  min-height: 120px;
   padding: 14px 16px;
   border-radius: 14px;
   background: #f8fafc;
@@ -1038,6 +1051,7 @@ h1 {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
+  min-height: 120px;
   border-radius: 14px;
   background: linear-gradient(90deg, var(--tone-soft, rgba(226, 232, 240, 0.35)) 0%, #fff 70%);
   border: 1px solid #e2e8f0;
@@ -1220,6 +1234,7 @@ h1 {
   font-size: 0.75rem;
   font-weight: 600;
   color: #475569;
+  flex-wrap: wrap;
 }
 
 .morning-step-select {
@@ -1230,6 +1245,85 @@ h1 {
   background: #fff;
   color: #1f2a44;
   cursor: pointer;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper-core {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+.stepper-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: none;
+  background: #1f2a44;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.2);
+}
+
+.stepper-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.stepper-value {
+  min-width: 40px;
+  text-align: center;
+  font-weight: 700;
+  color: #1f2a44;
+  font-size: 0.9rem;
+}
+
+.stepper-quick {
+  border-radius: 999px;
+  border: 1px dashed rgba(34, 197, 94, 0.6);
+  background: rgba(34, 197, 94, 0.12);
+  color: #166534;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.stepper-quick:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(34, 197, 94, 0.2);
+}
+
+.stepper-quick:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.stepper.disabled {
+  opacity: 0.65;
 }
 
 .morning-step-text {
@@ -1264,6 +1358,7 @@ h1 {
 .morning-step-state.done {
   background: rgba(46, 125, 50, 0.12);
   color: #2e7d32;
+  animation: badgePop 0.35s ease;
 }
 
 .morning-step-state.next {
@@ -1320,6 +1415,24 @@ h1 {
   transform: translateX(16px);
 }
 
+.morning-step.accent-done::before {
+  background: #22c55e;
+}
+
+.morning-step.accent-done .morning-step-toggle input:checked + .morning-toggle-track {
+  background: #22c55e;
+  box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
+}
+
+.morning-step.accent-done .morning-toggle-label {
+  color: #166534;
+}
+
+
+.morning-step-toggle input:checked ~ .morning-toggle-label {
+  animation: badgePop 0.35s ease;
+}
+
 .morning-toggle-label {
   font-size: 0.7rem;
   font-weight: 700;
@@ -1364,6 +1477,38 @@ h1 {
   }
 }
 
+@keyframes stackPulse {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morning-stack-progress-fill.complete,
+  .morning-step-state.done,
+  .morning-step-toggle input:checked ~ .morning-toggle-label {
+    animation: none;
+  }
+}
+
 /* Icon Key Styles */
 .icon-key {
   display: flex;
@@ -1401,6 +1546,98 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   margin: -5px;
+}
+
+.week-date-strip {
+  display: flex;
+  gap: 12px;
+  padding: 12px 4px 4px;
+  overflow-x: auto;
+  margin-top: 8px;
+  scrollbar-width: thin;
+}
+
+.week-date-strip::-webkit-scrollbar {
+  height: 6px;
+}
+
+.week-date-strip::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 999px;
+}
+
+.week-date-chip {
+  min-width: 96px;
+  flex: 0 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.week-date-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.12);
+}
+
+.week-date-chip.today {
+  border-color: rgba(34, 197, 94, 0.7);
+  box-shadow: 0 10px 18px rgba(34, 197, 94, 0.2);
+}
+
+.week-date-chip.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.week-date-chip-day {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.week-date-chip-date {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2a44;
+}
+
+.week-date-chip-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.15);
+  color: #166534;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.75rem;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.week-date-chip-check.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.week-date-chip.complete {
+  border-color: rgba(34, 197, 94, 0.5);
 }
 
 .day-card {
@@ -1706,6 +1943,8 @@ h1 {
 .mobility .practice-select-label {
   justify-content: center;
   width: auto;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .mobility .practice-text {

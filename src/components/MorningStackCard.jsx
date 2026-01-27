@@ -4,6 +4,7 @@ import React from 'react';
 import { FaArrowUp, FaBookOpen, FaDumbbell, FaMoon, FaSun } from 'react-icons/fa';
 import { GrYoga } from 'react-icons/gr';
 import BurpeeTimer from './BurpeeTimer';
+import Stepper from './Stepper';
 import { getAppToday, getChallengeStartDate } from '../utils/dateUtils';
 import { getLivingRoomWorkout, getMobilityPractice } from '../utils/practiceUtils';
 import {
@@ -96,8 +97,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
 
   const burpeeReps = parseCount(dayData.burpeesTotalReps);
   const pullupsReps = parseCount(dayData.pullups);
-  const burpeesValue = dayData.burpeesTotalReps !== undefined ? parseCount(dayData.burpeesTotalReps) : '';
-  const pullupsValue = dayData.pullups !== undefined ? parseCount(dayData.pullups) : '';
+  const burpeesValue =
+    dayData.burpeesTotalReps !== undefined ? parseCount(dayData.burpeesTotalReps) : 0;
+  const pullupsValue = dayData.pullups !== undefined ? parseCount(dayData.pullups) : 0;
 
   const isSunday = dayOfWeek === 7;
   const startDate = getChallengeStartDate();
@@ -149,11 +151,11 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
     });
   };
 
-  const handleBurpeeChange = (event) => {
+  const handleBurpeeChange = (nextValue) => {
     if (!onUpdateDay) {
       return;
     }
-    const value = parseCount(event.target.value);
+    const value = parseCount(nextValue);
     const updatedPractices = new Set(practices);
     const shouldMarkExercise = value > 0 && pullupsReps > 0;
     if (shouldMarkExercise) {
@@ -168,11 +170,11 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
     });
   };
 
-  const handlePullupChange = (event) => {
+  const handlePullupChange = (nextValue) => {
     if (!onUpdateDay) {
       return;
     }
-    const value = parseCount(event.target.value);
+    const value = parseCount(nextValue);
     const updatedPractices = new Set(practices);
     if (schedule.hasBurpees) {
       const shouldMarkExercise = value > 0 && burpeeReps > 0;
@@ -218,43 +220,40 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
       : getBurpeeOptions()
     : [];
   const pullupOptions = getPullupOptions();
+  const burpeeMax = burpeeOptions.length > 0 ? burpeeOptions[burpeeOptions.length - 1] : 0;
+  const pullupMax = pullupOptions.length > 0 ? pullupOptions[pullupOptions.length - 1] : 0;
+  const burpeeStep = schedule.burpeeType === 'regular' ? 2 : 1;
 
   const workoutControls = schedule.hasBurpees ? (
-    <label className="morning-step-field">
+    <div className="morning-step-field">
       <span>Reps</span>
-      <select
-        className="morning-step-select"
+      <Stepper
         value={burpeesValue}
-        onChange={handleBurpeeChange}
+        min={0}
+        max={burpeeMax}
+        step={burpeeStep}
+        quickAdd={5}
         disabled={!onUpdateDay}
-      >
-        <option value=""></option>
-        {burpeeOptions.map((value) => (
-          <option key={value} value={value}>
-            {value}
-          </option>
-        ))}
-      </select>
-    </label>
+        ariaLabel="Burpee reps"
+        onChange={handleBurpeeChange}
+      />
+    </div>
   ) : null;
 
   const pullupControls = (
-    <label className="morning-step-field">
+    <div className="morning-step-field">
       <span>Reps</span>
-      <select
-        className="morning-step-select"
+      <Stepper
         value={pullupsValue}
-        onChange={handlePullupChange}
+        min={0}
+        max={pullupMax}
+        step={1}
+        quickAdd={5}
         disabled={!onUpdateDay}
-      >
-        <option value=""></option>
-        {pullupOptions.map((value) => (
-          <option key={value} value={value}>
-            {value}
-          </option>
-        ))}
-      </select>
-    </label>
+        ariaLabel="Pull-up reps"
+        onChange={handlePullupChange}
+      />
+    </div>
   );
 
   const workoutLinks = [];
@@ -395,6 +394,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
     }
     return { ...step, state, stepNumber: index + 1 };
   });
+  const accentDoneIds = new Set(['mobility', 'reward', 'reading']);
 
   const identityLabel = isSunday
     ? 'Relax Day'
@@ -437,7 +437,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
         <div className="morning-stack-progress-track">
           <div
             className={`morning-stack-progress-fill ${completedSteps === steps.length ? 'complete' : ''}`}
-            style={{ width: `${progressPercent}%`, background: progressGradient }}
+            style={{ width: `${progressPercent}%`, '--progress-gradient': progressGradient }}
           ></div>
         </div>
         <span className="morning-stack-progress-text">{progressLabel}</span>
@@ -451,10 +451,14 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
       </div>
 
       <div className="morning-stack-steps">
-        {stepsWithState.map((step) => (
+        {stepsWithState.map((step) => {
+          const accentDone = step.done && accentDoneIds.has(step.id);
+          return (
           <div
             key={step.id}
-            className={`morning-step ${step.state}${step.tone ? ` tone-${step.tone}` : ''}`}
+            className={`morning-step ${step.state}${accentDone ? ' accent-done' : ''}${
+              step.tone ? ` tone-${step.tone}` : ''
+            }`}
           >
             <span className="morning-step-index">
               {String(step.stepNumber).padStart(2, '0')}
@@ -514,7 +518,8 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
               )
             )}
           </div>
-        ))}
+        );
+        })}
       </div>
     </section>
   );

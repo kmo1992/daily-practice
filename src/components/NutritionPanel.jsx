@@ -14,41 +14,41 @@ function NutritionPanel({ nutritionPoints = 5, onNutritionChange = () => {} }) {
 
   return (
     <div className="nutrition-panel-content">
-        <div className="nutrition-points-grid" role="group" aria-label="Points remaining">
-          <div className="nutrition-points-grid-header">
-            <span className="nutrition-points-grid-value">{normalizedPoints}</span>
-            <span className="nutrition-points-grid-label">Points remaining</span>
-          </div>
-          <div className="nutrition-points-controls">
-            <button
-              className="nutrition-points-adjust"
-              type="button"
-              aria-label="Lose a point"
-              onClick={() => updatePoints(normalizedPoints - 1)}
-              disabled={normalizedPoints === 0}
-            >
-              −
-            </button>
-            {[0, 1, 2, 3, 4, 5].map((value) => {
-              const isActive = value === normalizedPoints;
-              return (
-                <button
-                  key={`points-${value}`}
-                  className={`nutrition-points-btn ${isActive ? 'active' : ''}`}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => updatePoints(value)}
-                >
-                  {value}
-                </button>
-              );
-            })}
-            <button
-              className="nutrition-points-adjust"
-              type="button"
-              aria-label="Restore a point"
-              onClick={() => updatePoints(normalizedPoints + 1)}
-              disabled={normalizedPoints === 5}
+      <div className="nutrition-points-grid" role="group" aria-label="Points remaining">
+        <div className="nutrition-points-grid-header">
+          <span className="nutrition-points-grid-value">{normalizedPoints}</span>
+          <span className="nutrition-points-grid-label">Points remaining</span>
+        </div>
+        <div className="nutrition-points-controls">
+          <button
+            className="nutrition-points-adjust"
+            type="button"
+            aria-label="Lose a point"
+            onClick={() => updatePoints(normalizedPoints - 1)}
+            disabled={normalizedPoints === 0}
+          >
+            −
+          </button>
+          {[0, 1, 2, 3, 4, 5].map((value) => {
+            const isActive = value === normalizedPoints;
+            return (
+              <button
+                key={`points-${value}`}
+                className={`nutrition-points-btn ${isActive ? 'active' : ''}`}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => updatePoints(value)}
+              >
+                {value}
+              </button>
+            );
+          })}
+          <button
+            className="nutrition-points-adjust"
+            type="button"
+            aria-label="Restore a point"
+            onClick={() => updatePoints(normalizedPoints + 1)}
+            disabled={normalizedPoints === 5}
           >
             +
           </button>

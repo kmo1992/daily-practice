@@ -3,6 +3,7 @@ import { getMobilityPractice, getLivingRoomWorkout } from '../utils/practiceUtil
 import { getChallengeStartDate } from '../utils/dateUtils';
 import { getBurpeeOptions, getNavyBurpeeOptions, parseCount } from '../utils/scheduleUtils';
 import BurpeeTimer from './BurpeeTimer';
+import Stepper from './Stepper';
 
 function MobilitySection(props) {
   const {
@@ -60,7 +61,7 @@ function MobilitySection(props) {
         {!isSunday && schedule?.hasBurpees && (
           <div className="mobility-inputs">
             {schedule?.hasBurpees && (
-              <label className="practice-select-label">
+              <div className="practice-select-label">
                 <span
                   className="practice-text clickable"
                   onClick={() => setShowTimer(true)}
@@ -69,26 +70,26 @@ function MobilitySection(props) {
                 >
                   {schedule.burpeeType === 'navy' ? 'Navy SEALs' : 'Burpees'}
                 </span>
-                <select
-                  value={burpeesValue}
-                  onChange={(event) =>
+                <Stepper
+                  value={burpeesValue || 0}
+                  min={0}
+                  max={
+                    schedule?.burpeeType === 'navy'
+                      ? getNavyBurpeeOptions().slice(-1)[0] || 0
+                      : getBurpeeOptions().slice(-1)[0] || 0
+                  }
+                  step={schedule?.burpeeType === 'regular' ? 2 : 1}
+                  quickAdd={5}
+                  ariaLabel="Burpee reps"
+                  disabled={!onUpdateDay}
+                  onChange={(nextValue) =>
                     onUpdateDay({
-                      burpeesTotalReps: parseCount(event.target.value),
+                      burpeesTotalReps: parseCount(nextValue),
                       burpeeType: schedule.burpeeType,
                     })
                   }
-                >
-                  <option value=""></option>
-                  {(schedule?.burpeeType === 'navy'
-                    ? getNavyBurpeeOptions()
-                    : getBurpeeOptions()
-                  ).map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                />
+              </div>
             )}
           </div>
         )}
@@ -99,20 +100,19 @@ function MobilitySection(props) {
             </a>
           )}
           {!isSunday && schedule?.hasPullups && (
-            <label className="practice-select-label">
+            <div className="practice-select-label">
               <span className="practice-text">Pull ups</span>
-              <select
-                value={pullupsValue}
-                onChange={(event) => onUpdateDay({ pullups: parseCount(event.target.value) })}
-              >
-                <option value=""></option>
-                {pullupOptions.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <Stepper
+                value={pullupsValue || 0}
+                min={0}
+                max={pullupOptions.slice(-1)[0] || 0}
+                step={1}
+                quickAdd={5}
+                ariaLabel="Pull-up reps"
+                disabled={!onUpdateDay}
+                onChange={(nextValue) => onUpdateDay({ pullups: parseCount(nextValue) })}
+              />
+            </div>
           )}
           <a href={mobilityPractice.url} target="_blank" rel="noopener noreferrer">
             {mobilityPractice.name}

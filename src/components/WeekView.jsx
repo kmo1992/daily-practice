@@ -24,9 +24,11 @@ function WeekView({
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
     getAppToday().startOf('isoWeek')
   );
+  const today = getAppToday();
   const startDate = useMemo(() => getChallengeStartDate(), []);
   const endDate = useMemo(() => getChallengeEndDate(), []);
   const weekStartKey = useMemo(() => getWeekStartKey(currentWeekStart), [currentWeekStart]);
+  const completionPractices = ['Sleep', 'Exercise', 'Stretch', 'Read', 'Water'];
 
   // Keep navigation within the challenge period
   useEffect(() => {
@@ -134,6 +136,39 @@ function WeekView({
               weekGoals={currentWeekGoals}
               onUpdateDay={onUpdateDay}
             />
+          );
+        })}
+      </div>
+      <div className="week-date-strip" role="list" aria-label="Weekly completion">
+        {[...Array(7)].map((_, i) => {
+          const date = currentWeekStart.clone().add(i, 'days');
+          const dateStr = date.format('YYYY-MM-DD');
+          const dayData = data[dateStr] || {};
+          const dayPractices = Array.isArray(dayData.practices) ? dayData.practices : [];
+          const nutritionSet = dayData.nutritionPoints !== undefined;
+          const allPracticesDone = completionPractices.every((name) => dayPractices.includes(name));
+          const isComplete = allPracticesDone && nutritionSet;
+          const isToday = date.isSame(today, 'day');
+          const inChallenge = date.isBetween(
+            startDate.clone().subtract(1, 'day'),
+            endDate.clone().add(1, 'day'),
+            'day'
+          );
+
+          return (
+            <a
+              key={`strip-${dateStr}`}
+              href={`#day-${dateStr}`}
+              className={`week-date-chip${isComplete ? ' complete' : ''}${isToday ? ' today' : ''}${!inChallenge ? ' disabled' : ''}`}
+              role="listitem"
+              aria-label={`${date.format('ddd MMM D')}${isComplete ? ' completed' : ''}`}
+            >
+              <span className="week-date-chip-day">{date.format('ddd')}</span>
+              <span className="week-date-chip-date">{date.format('MMM D')}</span>
+              <span className={`week-date-chip-check${isComplete ? ' visible' : ''}`} aria-hidden="true">
+                ✓
+              </span>
+            </a>
           );
         })}
       </div>

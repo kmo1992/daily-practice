@@ -27,8 +27,9 @@ function DayCard({ date, data, onUpdateDay, weekGoals }) {
     onUpdateDay(dateStr, newData);
   };
 
-  const pullupsValue = dayData.pullups !== undefined ? parseCount(dayData.pullups) : '';
-  const burpeesValue = dayData.burpeesTotalReps !== undefined ? parseCount(dayData.burpeesTotalReps) : '';
+  const pullupsValue = dayData.pullups !== undefined ? parseCount(dayData.pullups) : 0;
+  const burpeesValue =
+    dayData.burpeesTotalReps !== undefined ? parseCount(dayData.burpeesTotalReps) : 0;
 
   return (
     <div
