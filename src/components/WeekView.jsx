@@ -1,7 +1,6 @@
 // src/components/WeekView.jsx
 
 import React, { useEffect, useMemo, useState } from 'react';
-import DayCard from './DayCard';
 import NavigationButtons from './NavigationButtons';
 import WeeklyChart from './WeeklyChart';
 import EntireChallengeChart from './EntireChallengeChart';
@@ -24,6 +23,7 @@ function WeekView({
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
     getAppToday().startOf('isoWeek')
   );
+  const [selectedDate, setSelectedDate] = useState(() => getAppToday());
   const today = getAppToday();
   const startDate = useMemo(() => getChallengeStartDate(), []);
   const endDate = useMemo(() => getChallengeEndDate(), []);
@@ -41,6 +41,17 @@ function WeekView({
       setCurrentWeekStart(boundedEnd);
     }
   }, [currentWeekStart, startDate, endDate]);
+
+  // Keep selectedDate within the current week when week changes
+  useEffect(() => {
+    const weekEnd = currentWeekStart.clone().add(6, 'days');
+    if (selectedDate.isBefore(currentWeekStart, 'day') || selectedDate.isAfter(weekEnd, 'day')) {
+      // If selected date is outside the current week, move to the same day of week in the new week
+      const dayOfWeek = selectedDate.isoWeekday();
+      const newSelectedDate = currentWeekStart.clone().add(dayOfWeek - 1, 'days');
+      setSelectedDate(newSelectedDate);
+    }
+  }, [currentWeekStart, selectedDate]);
 
 
   const currentWeekGoals = weekGoals[weekStartKey] || {};
@@ -119,27 +130,11 @@ function WeekView({
 
   return (
     <div className="week-view">
-      <MorningFlowTabs data={data} weekGoals={weekGoals} onUpdateDay={onUpdateDay} />
       <NavigationButtons
         currentWeekStart={currentWeekStart}
         setCurrentWeekStart={setCurrentWeekStart}
       />
-      <div className="week-container">
-        {[...Array(7)].map((_, i) => {
-          const date = currentWeekStart.clone().add(i, 'days');
-          const dateStr = date.format('YYYY-MM-DD');
-          return (
-            <DayCard
-              key={dateStr}
-              date={date}
-              data={data}
-              weekGoals={currentWeekGoals}
-              onUpdateDay={onUpdateDay}
-            />
-          );
-        })}
-      </div>
-      <div className="week-date-strip" role="list" aria-label="Weekly completion">
+      <div className="week-date-strip sticky" role="list" aria-label="Weekly navigation">
         {[...Array(7)].map((_, i) => {
           const date = currentWeekStart.clone().add(i, 'days');
           const dateStr = date.format('YYYY-MM-DD');
@@ -149,6 +144,7 @@ function WeekView({
           const allPracticesDone = completionPractices.every((name) => dayPractices.includes(name));
           const isComplete = allPracticesDone && nutritionSet;
           const isToday = date.isSame(today, 'day');
+          const isSelected = date.isSame(selectedDate, 'day');
           const inChallenge = date.isBetween(
             startDate.clone().subtract(1, 'day'),
             endDate.clone().add(1, 'day'),
@@ -156,22 +152,30 @@ function WeekView({
           );
 
           return (
-            <a
+            <button
               key={`strip-${dateStr}`}
-              href={`#day-${dateStr}`}
-              className={`week-date-chip${isComplete ? ' complete' : ''}${isToday ? ' today' : ''}${!inChallenge ? ' disabled' : ''}`}
+              type="button"
+              className={`week-date-chip${isComplete ? ' complete' : ''}${isToday ? ' today' : ''}${isSelected ? ' selected' : ''}${!inChallenge ? ' disabled' : ''}`}
               role="listitem"
-              aria-label={`${date.format('ddd MMM D')}${isComplete ? ' completed' : ''}`}
+              aria-label={`${date.format('ddd MMM D')}${isComplete ? ' completed' : ''}${isSelected ? ' selected' : ''}`}
+              onClick={() => setSelectedDate(date)}
+              disabled={!inChallenge}
             >
               <span className="week-date-chip-day">{date.format('ddd')}</span>
-              <span className="week-date-chip-date">{date.format('MMM D')}</span>
+              <span className="week-date-chip-date">{date.format('D')}</span>
               <span className={`week-date-chip-check${isComplete ? ' visible' : ''}`} aria-hidden="true">
                 ✓
               </span>
-            </a>
+            </button>
           );
         })}
       </div>
+      <MorningFlowTabs
+        data={data}
+        weekGoals={weekGoals}
+        onUpdateDay={onUpdateDay}
+        selectedDate={selectedDate}
+      />
       <Modal
         isOpen={activeModal === 'nutrition'}
         kicker="Nutrition"

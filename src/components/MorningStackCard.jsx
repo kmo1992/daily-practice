@@ -16,12 +16,12 @@ import {
   parseCount,
 } from '../utils/scheduleUtils';
 
-function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
+function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selectedDate = null }) {
   const [showTimer, setShowTimer] = React.useState(false);
-  const today = getAppToday();
-  const weekStartKey = getWeekStartKey(today);
+  const displayDate = selectedDate || getAppToday();
+  const weekStartKey = getWeekStartKey(displayDate);
   const currentWeekGoals = weekGoals[weekStartKey] || {};
-  const dateStr = today.format('YYYY-MM-DD');
+  const dateStr = displayDate.format('YYYY-MM-DD');
   const dayData = data[dateStr] || {};
   const practices = dayData.practices || [];
   const sleepWellSet = typeof dayData.sleepWell === 'boolean';
@@ -92,7 +92,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
     );
   }
 
-  const dayOfWeek = today.isoWeekday();
+  const dayOfWeek = displayDate.isoWeekday();
   const schedule = getScheduleForDay(dayOfWeek);
 
   const burpeeReps = parseCount(dayData.burpeesTotalReps);
@@ -103,7 +103,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
 
   const isSunday = dayOfWeek === 7;
   const startDate = getChallengeStartDate();
-  const daysSinceStart = today.clone().startOf('day').diff(startDate.clone().startOf('day'), 'days');
+  const daysSinceStart = displayDate.clone().startOf('day').diff(startDate.clone().startOf('day'), 'days');
   const numSundays = Math.floor((daysSinceStart + startDate.isoWeekday() - 1) / 7);
   const workoutIndex = Math.max(0, daysSinceStart - numSundays);
   const livingRoomWorkout =
@@ -425,7 +425,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
           <p className="morning-stack-kicker">Pinned stack</p>
           <div className="morning-stack-title-row">
             <h2 className="morning-stack-title">Morning Stack</h2>
-            <span className="morning-stack-date">{today.format('ddd MMM D')}</span>
+            <span className="morning-stack-date">{displayDate.format('ddd MMM D')}</span>
           </div>
           <div className="morning-stack-identity-row">
             <span className="morning-stack-identity">{identityLabel}</span>
@@ -447,7 +447,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null }) {
         <span className="morning-stack-steps-title">
           Step {activeStepNumber} of {steps.length}
         </span>
-        <span className="morning-stack-steps-caption">Effort -> ease -> calm</span>
+        <span className="morning-stack-steps-caption">Effort → ease → calm</span>
       </div>
 
       <div className="morning-stack-steps">
