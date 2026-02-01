@@ -1,11 +1,11 @@
 // src/components/MorningStackCard.jsx
 
 import React from 'react';
-import { FaArrowUp, FaBookOpen, FaDumbbell, FaMoon, FaSun } from 'react-icons/fa';
+import { FaArrowUp, FaBookOpen, FaDumbbell, FaMoon, FaSun, FaStar } from 'react-icons/fa';
 import { GrYoga } from 'react-icons/gr';
 import BurpeeTimer from './BurpeeTimer';
 import Stepper from './Stepper';
-import { getAppToday, getChallengeStartDate } from '../utils/dateUtils';
+import { getAppToday, getChallengeStartDate, isFutureDate } from '../utils/dateUtils';
 import { getLivingRoomWorkout, getMobilityPractice } from '../utils/practiceUtils';
 import {
   getBurpeeOptions,
@@ -25,6 +25,8 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
   const dayData = data[dateStr] || {};
   const practices = dayData.practices || [];
   const sleepWellSet = typeof dayData.sleepWell === 'boolean';
+  const isFuture = isFutureDate(displayDate);
+  const isEditable = onUpdateDay && !isFuture;
   const [animateStack, setAnimateStack] = React.useState(false);
   const prevSleepWellSet = React.useRef(sleepWellSet);
 
@@ -73,7 +75,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
             <button
               className="primer-choice yes"
               type="button"
-              disabled={!onUpdateDay}
+              disabled={!isEditable}
               onClick={() => handleSleepChoice(true)}
             >
               Yes
@@ -81,7 +83,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
             <button
               className="primer-choice no"
               type="button"
-              disabled={!onUpdateDay}
+              disabled={!isEditable}
               onClick={() => handleSleepChoice(false)}
             >
               No
@@ -233,7 +235,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
         max={burpeeMax}
         step={burpeeStep}
         quickAdd={5}
-        disabled={!onUpdateDay}
+        disabled={!isEditable}
         ariaLabel="Burpee reps"
         onChange={handleBurpeeChange}
       />
@@ -249,7 +251,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
         max={pullupMax}
         step={1}
         quickAdd={5}
-        disabled={!onUpdateDay}
+        disabled={!isEditable}
         ariaLabel="Pull-up reps"
         onChange={handlePullupChange}
       />
@@ -325,6 +327,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           controls: workoutControls,
           links: workoutLinks,
           tone: 'heat',
+          priority: true,
         },
         {
           id: 'pullups',
@@ -345,6 +348,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           onToggle: handlePracticeToggle('Stretch'),
           links: mobilityLinks,
           tone: 'neutral',
+          priority: true,
         },
         {
           id: 'reward',
@@ -392,7 +396,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     } else if (index === firstIncomplete) {
       state = 'next';
     }
-    return { ...step, state, stepNumber: index + 1 };
+    return { ...step, state, stepNumber: index + 1, priority: step.priority || false };
   });
   const accentDoneIds = new Set(['mobility', 'reward', 'reading']);
 
@@ -458,11 +462,16 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
             key={step.id}
             className={`morning-step ${step.state}${accentDone ? ' accent-done' : ''}${
               step.tone ? ` tone-${step.tone}` : ''
-            }`}
+            }${step.priority ? ' priority' : ''}`}
           >
             <span className="morning-step-index">
               {String(step.stepNumber).padStart(2, '0')}
             </span>
+            {step.priority && (
+              <span className="morning-step-priority-badge" aria-label="Priority habit">
+                <FaStar />
+              </span>
+            )}
             {step.icon && <span className="morning-step-icon">{step.icon}</span>}
             <div className="morning-step-text">
               <span className="morning-step-label">{step.label}</span>
@@ -504,7 +513,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
             )}
             {step.toggleable ? (
               <label className="morning-step-toggle">
-                <input type="checkbox" checked={step.done} onChange={step.onToggle} />
+                <input type="checkbox" checked={step.done} onChange={step.onToggle} disabled={!isEditable} />
                 <span className="morning-toggle-track">
                   <span className="morning-toggle-thumb"></span>
                 </span>

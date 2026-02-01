@@ -198,7 +198,7 @@ function App() {
                     role="menuitem"
                     onClick={() => openModal('challenge-progress')}
                   >
-                    <span className="app-menu-item-label">Entire Challenge Progress</span>
+                    <span className="app-menu-item-label">Progress History</span>
                   </button>
                   <button
                     className="app-menu-item"

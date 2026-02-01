@@ -11,3 +11,17 @@ export const getMobilityPractice = (dayOfWeek) => {
 export const getLivingRoomWorkout = (index) => {
   return livingRoomWorkouts[index] || null;
 };
+
+// Calculate habit points (0-5) based on completion practices
+// The 5 core practices that count toward the daily 10-point goal
+export const COMPLETION_PRACTICES = ['Sleep', 'Exercise', 'Stretch', 'Read', 'Water'];
+
+export const calculateHabitPoints = (practices = []) => {
+  if (!Array.isArray(practices)) {
+    return 0;
+  }
+  const completedCount = COMPLETION_PRACTICES.filter(practice =>
+    practices.includes(practice)
+  ).length;
+  return completedCount; // Each practice = 1 point, max 5 points
+};

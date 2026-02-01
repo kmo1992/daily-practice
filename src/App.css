@@ -2130,3 +2130,372 @@ h1 {
 .chart-container canvas {
   max-width: 100%;
 }
+
+/* ========================================
+   Daily Scoreboard - 10 Point System
+   ======================================== */
+
+.daily-scoreboard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.daily-scoreboard.complete {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 12px 32px rgba(245, 87, 108, 0.35),
+              0 0 0 4px rgba(255, 215, 0, 0.3);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 12px 32px rgba(245, 87, 108, 0.35),
+                0 0 0 4px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 12px 32px rgba(245, 87, 108, 0.45),
+                0 0 0 6px rgba(255, 215, 0, 0.5);
+  }
+}
+
+.daily-scoreboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.daily-scoreboard-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daily-scoreboard-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+.daily-scoreboard-date {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.daily-scoreboard-today-badge {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.daily-scoreboard-total {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.daily-scoreboard-total-value {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  color: white;
+}
+
+.daily-scoreboard-total-max {
+  font-size: 1.5rem;
+  font-weight: 600;
+  opacity: 0.8;
+  color: white;
+}
+
+.daily-scoreboard-progress {
+  margin-bottom: 16px;
+}
+
+.daily-scoreboard-progress-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.daily-scoreboard-progress-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.daily-scoreboard-progress-fill.complete {
+  background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+}
+
+.daily-scoreboard-breakdown {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.daily-scoreboard-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.daily-scoreboard-item-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 1.2rem;
+}
+
+.daily-scoreboard-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.daily-scoreboard-item-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.daily-scoreboard-item-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.daily-scoreboard-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.daily-scoreboard-badge {
+  margin-top: 12px;
+  text-align: center;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.daily-scoreboard-badge-text {
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================
+   Priority Habit Indicators
+   ======================================== */
+
+.morning-step.priority {
+  position: relative;
+  border-left: 3px solid #FFD700;
+}
+
+.morning-step-priority-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border-radius: 50%;
+  color: white;
+  font-size: 0.7rem;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  animation: priority-pulse 2s ease-in-out infinite;
+}
+
+@keyframes priority-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+  }
+}
+
+/* ========================================
+   Enhanced Habit Stacking Visual Connection
+   ======================================== */
+
+.morning-stack-steps {
+  position: relative;
+}
+
+.morning-stack-steps::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  top: 40px;
+  bottom: 40px;
+  width: 2px;
+  background: linear-gradient(180deg, 
+    var(--heat) 0%,
+    var(--warm) 33%,
+    var(--neutral) 66%,
+    var(--cool) 100%
+  );
+  opacity: 0.2;
+  border-radius: 2px;
+}
+
+.morning-step {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   Expanded Clickable Areas
+   ======================================== */
+
+.morning-step {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.morning-step:not(.done):hover {
+  background: rgba(0, 0, 0, 0.02);
+  transform: translateX(4px);
+}
+
+.morning-step.priority:not(.done):hover {
+  background: rgba(255, 215, 0, 0.05);
+}
+
+/* Make entire card clickable for toggle items */
+.morning-step.next.toggleable {
+  padding: 16px;
+  border-radius: 12px;
+}
+
+/* ========================================
+   Future Date Styling
+   ======================================== */
+
+.week-date-chip.future {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.week-date-chip.future:hover {
+  transform: none;
+  box-shadow: 0 2px 6px rgba(31, 42, 68, 0.08);
+}
+
+.week-date-chip.future::after {
+  content: '🔒';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  opacity: 0.4;
+}
+
+/* Disable inputs for future dates */
+input:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ========================================
+   Mobile Responsive Enhancements
+   ======================================== */
+
+@media (max-width: 640px) {
+  .daily-scoreboard {
+    padding: 16px;
+  }
+
+  .daily-scoreboard-title {
+    font-size: 1.25rem;
+  }
+
+  .daily-scoreboard-total-value {
+    font-size: 2.5rem;
+  }
+
+  .daily-scoreboard-breakdown {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .daily-scoreboard-divider {
+    display: none;
+  }
+
+  .daily-scoreboard-item {
+    justify-content: space-between;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  .morning-step-priority-badge {
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    font-size: 0.6rem;
+  }
+
+  .morning-stack-steps::before {
+    left: 20px;
+  }
+}
+
+/* ========================================
+   Thumb-Friendly Touch Targets
+   ======================================== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Larger tap targets for mobile */
+  .morning-step-toggle {
+    min-height: 48px;
+  }
+
+  .nutrition-points-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .hydration-bottle-toggle {
+    min-height: 48px;
+  }
+
+  button,
+  .morning-step-link {
+    min-height: 44px;
+  }
+}
