@@ -30,6 +30,11 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
   const [animateStack, setAnimateStack] = React.useState(false);
   const prevSleepWellSet = React.useRef(sleepWellSet);
 
+  // Completion detection for green pulse animation
+  const [completedStepIds, setCompletedStepIds] = React.useState(new Set());
+  const prevStepsRef = React.useRef([]);
+  const stepRefs = React.useRef({});
+
   React.useEffect(() => {
     const wasSet = prevSleepWellSet.current;
     if (!wasSet && sleepWellSet) {
@@ -39,6 +44,45 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     }
     prevSleepWellSet.current = sleepWellSet;
   }, [sleepWellSet]);
+
+  // Detect newly completed habits for animation
+  React.useEffect(() => {
+    if (!sleepWellSet) return; // Skip if sleep gate not passed
+
+    const prevPractices = prevStepsRef.current;
+    const currentPractices = {
+      burpees: practices.includes('Burpees'),
+      pullups: practices.includes('Pullups'),
+      stretch: practices.includes('Stretch'),
+      read: practices.includes('Read'),
+      water: practices.includes('Water'),
+    };
+
+    // Initialize on first render
+    if (Object.keys(prevPractices).length === 0) {
+      prevStepsRef.current = currentPractices;
+      return;
+    }
+
+    // Find newly completed habits
+    const newlyCompleted = [];
+    if (currentPractices.burpees && !prevPractices.burpees) newlyCompleted.push('workout');
+    if (currentPractices.pullups && !prevPractices.pullups) newlyCompleted.push('pullups');
+    if (currentPractices.stretch && !prevPractices.stretch) newlyCompleted.push('mobility');
+    if (currentPractices.read && !prevPractices.read) newlyCompleted.push('reward');
+    if (currentPractices.water && !prevPractices.water) newlyCompleted.push('water');
+
+    if (newlyCompleted.length > 0) {
+      setCompletedStepIds(new Set(newlyCompleted));
+
+      // Clear animation after 1.2s
+      const timer = setTimeout(() => setCompletedStepIds(new Set()), 1200);
+      prevStepsRef.current = currentPractices;
+      return () => clearTimeout(timer);
+    }
+
+    prevStepsRef.current = currentPractices;
+  }, [sleepWellSet, practices]);
 
   const cardClassName = `morning-stack-card${animateStack ? ' morning-stack-reveal' : ''}`;
 
@@ -113,10 +157,8 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
       ? getLivingRoomWorkout(workoutIndex)
       : null;
   const mobilityPractice = !isSunday ? getMobilityPractice(dayOfWeek) : null;
-  const workoutDone = schedule.hasBurpees
-    ? practices.includes('Exercise') || burpeeReps > 0
-    : practices.includes('Exercise');
-  const pullupsDone = pullupsReps > 0;
+  const workoutDone = practices.includes('Burpees') || practices.includes('Exercise'); // Exercise for backward compatibility
+  const pullupsDone = practices.includes('Pullups');
   const mobilityDone = practices.includes('Stretch');
   const readingDone = practices.includes('Read');
   const outsideDone = practices.includes('Exercise') && practices.includes('Stretch');
@@ -130,8 +172,23 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
       ? 'Video workout'
       : 'Other exercise';
 
-  const workoutMetaText =
-    burpeeReps > 0 ? `${workoutMeta} - ${burpeeReps} reps` : workoutMeta;
+  // Calculate burpee goal for metadata display
+  const burpeeGoal =
+    schedule.hasBurpees && schedule.burpeeType === 'regular'
+      ? parseCount(currentWeekGoals.regularBurpeesGoalTotal)
+      : schedule.hasBurpees && schedule.burpeeType === 'navy'
+        ? parseCount(currentWeekGoals.navySealBurpeesGoalTotal)
+        : 0;
+
+  const workoutMetaText = schedule.hasBurpees
+    ? burpeeReps > 0
+      ? burpeeGoal > 0
+        ? `${workoutMeta} - ${burpeeReps}/${burpeeGoal} reps`
+        : `${workoutMeta} - ${burpeeReps} reps`
+      : burpeeGoal > 0
+        ? `${workoutMeta} - Goal: ${burpeeGoal} reps`
+        : workoutMeta
+    : workoutMeta;
 
   const updatePractices = (updater) => {
     if (!onUpdateDay) {
@@ -159,12 +216,27 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     }
     const value = parseCount(nextValue);
     const updatedPractices = new Set(practices);
-    const shouldMarkExercise = value > 0 && pullupsReps > 0;
-    if (shouldMarkExercise) {
-      updatedPractices.add('Exercise');
+
+    // Calculate burpee goal for this session
+    const burpeeGoal =
+      schedule.hasBurpees && schedule.burpeeType === 'regular'
+        ? parseCount(currentWeekGoals.regularBurpeesGoalTotal)
+        : schedule.hasBurpees && schedule.burpeeType === 'navy'
+          ? parseCount(currentWeekGoals.navySealBurpeesGoalTotal)
+          : 0;
+
+    // Auto-mark Burpees when goal is reached (or any reps if no goal set)
+    const burpeeGoalMet = burpeeGoal > 0 ? value >= burpeeGoal : value > 0;
+
+    if (burpeeGoalMet) {
+      updatedPractices.add('Burpees');
     } else {
-      updatedPractices.delete('Exercise');
+      updatedPractices.delete('Burpees');
     }
+
+    // Remove old 'Exercise' if it exists (for backward compatibility)
+    updatedPractices.delete('Exercise');
+
     onUpdateDay(dateStr, {
       burpeesTotalReps: value,
       burpeeType: schedule.burpeeType,
@@ -178,14 +250,22 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     }
     const value = parseCount(nextValue);
     const updatedPractices = new Set(practices);
-    if (schedule.hasBurpees) {
-      const shouldMarkExercise = value > 0 && burpeeReps > 0;
-      if (shouldMarkExercise) {
-        updatedPractices.add('Exercise');
-      } else {
-        updatedPractices.delete('Exercise');
-      }
+
+    // Get pullup goal from week goals
+    const pullupGoal = parseCount(currentWeekGoals.pullupsGoalPerSession);
+
+    // Auto-mark Pullups when goal is reached (or any reps if no goal set)
+    const pullupGoalMet = pullupGoal > 0 ? value >= pullupGoal : value > 0;
+
+    if (pullupGoalMet) {
+      updatedPractices.add('Pullups');
+    } else {
+      updatedPractices.delete('Pullups');
     }
+
+    // Remove old 'Exercise' if it exists (for backward compatibility)
+    updatedPractices.delete('Exercise');
+
     onUpdateDay(dateStr, {
       pullups: value,
       practices: Array.from(updatedPractices),
@@ -332,7 +412,14 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
         {
           id: 'pullups',
           label: 'Pull-ups',
-          meta: pullupsReps > 0 ? `${pullupsReps} reps` : 'Log reps',
+          meta:
+            pullupsReps > 0
+              ? parseCount(currentWeekGoals.pullupsGoalPerSession) > 0
+                ? `${pullupsReps}/${parseCount(currentWeekGoals.pullupsGoalPerSession)} reps`
+                : `${pullupsReps} reps`
+              : parseCount(currentWeekGoals.pullupsGoalPerSession) > 0
+                ? `Goal: ${parseCount(currentWeekGoals.pullupsGoalPerSession)} reps`
+                : 'Log reps',
           icon: <FaArrowUp />,
           done: pullupsDone,
           controls: pullupControls,
@@ -398,6 +485,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     }
     return { ...step, state, stepNumber: index + 1, priority: step.priority || false };
   });
+
   const accentDoneIds = new Set(['mobility', 'reward', 'reading']);
 
   const identityLabel = isSunday
@@ -457,12 +545,14 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
       <div className="morning-stack-steps">
         {stepsWithState.map((step) => {
           const accentDone = step.done && accentDoneIds.has(step.id);
+          const justCompleted = completedStepIds.has(step.id);
           return (
           <div
             key={step.id}
+            ref={(el) => (stepRefs.current[step.id] = el)}
             className={`morning-step ${step.state}${accentDone ? ' accent-done' : ''}${
               step.tone ? ` tone-${step.tone}` : ''
-            }${step.priority ? ' priority' : ''}`}
+            }${step.priority ? ' priority' : ''}${justCompleted ? ' just-completed' : ''}`}
           >
             <span className="morning-step-index">
               {String(step.stepNumber).padStart(2, '0')}
