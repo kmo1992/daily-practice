@@ -14,7 +14,9 @@ export const getLivingRoomWorkout = (index) => {
 
 // Calculate habit points (0-5) based on completion practices
 // The 5 core practices that count toward the daily 10-point goal
-export const COMPLETION_PRACTICES = ['Sleep', 'Exercise', 'Stretch', 'Read', 'Water'];
+// Sleep is tracked separately as an indicator (not counted in habit points)
+// Exercise is split into Burpees and Pullups for separate tracking
+export const COMPLETION_PRACTICES = ['Burpees', 'Pullups', 'Stretch', 'Read', 'Water'];
 
 export const calculateHabitPoints = (practices = []) => {
   if (!Array.isArray(practices)) {
