@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-function NutritionPanel({ nutritionPoints = 5, onNutritionChange = () => {} }) {
+function NutritionPanel({ nutritionPoints = 5, onNutritionChange = () => {}, disabled = false }) {
   const normalizedPoints = Number.isFinite(nutritionPoints)
     ? Math.max(0, Math.min(5, nutritionPoints))
     : 5;
@@ -25,7 +25,7 @@ function NutritionPanel({ nutritionPoints = 5, onNutritionChange = () => {} }) {
             type="button"
             aria-label="Lose a point"
             onClick={() => updatePoints(normalizedPoints - 1)}
-            disabled={normalizedPoints === 0}
+            disabled={disabled || normalizedPoints === 0}
           >
             −
           </button>
@@ -38,6 +38,7 @@ function NutritionPanel({ nutritionPoints = 5, onNutritionChange = () => {} }) {
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => updatePoints(value)}
+                disabled={disabled}
               >
                 {value}
               </button>
@@ -48,7 +49,7 @@ function NutritionPanel({ nutritionPoints = 5, onNutritionChange = () => {} }) {
             type="button"
             aria-label="Restore a point"
             onClick={() => updatePoints(normalizedPoints + 1)}
-            disabled={normalizedPoints === 5}
+            disabled={disabled || normalizedPoints === 5}
           >
             +
           </button>

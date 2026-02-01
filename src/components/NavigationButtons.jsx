@@ -2,11 +2,10 @@
 
 import React from 'react';
 import moment from 'moment';
-import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
+import { getChallengeStartDate } from '../utils/dateUtils';
 
 function NavigationButtons({ currentWeekStart, setCurrentWeekStart }) {
   const startDate = getChallengeStartDate();
-  const endDate = getChallengeEndDate();
 
   const prevWeek = () => {
     setCurrentWeekStart(currentWeekStart.clone().subtract(1, 'week'));
@@ -17,7 +16,8 @@ function NavigationButtons({ currentWeekStart, setCurrentWeekStart }) {
   };
 
   const isPrevDisabled = currentWeekStart.isSameOrBefore(startDate.clone().startOf('isoWeek'));
-  const isNextDisabled = currentWeekStart.isSameOrAfter(endDate.clone().startOf('isoWeek'));
+  // No upper limit - allow infinite forward navigation
+  const isNextDisabled = false;
 
   return (
     <div className="navigation-buttons">

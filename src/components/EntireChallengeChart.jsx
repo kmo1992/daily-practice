@@ -5,7 +5,7 @@ import { Bar } from 'react-chartjs-2'; // Changed from Line to Bar
 import 'chart.js/auto';
 import moment from 'moment';
 import { practices } from '../data/practices';
-import { getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
+import { getChallengeStartDate, getAppToday } from '../utils/dateUtils';
 
 function EntireChallengeChart({ data }) {
   const [aspectRatio, setAspectRatio] = useState(2); // Default aspect ratio
@@ -26,13 +26,23 @@ function EntireChallengeChart({ data }) {
   }, []);
 
   const startDate = getChallengeStartDate();
-  const endDate = getChallengeEndDate();
+  const today = getAppToday();
+  // Show data from start date to today (or last date with data)
+  const dataKeys = Object.keys(data).filter(key => {
+    const date = moment(key, 'YYYY-MM-DD');
+    return date.isValid() && date.isSameOrAfter(startDate, 'day');
+  }).sort();
+  const lastDataDate = dataKeys.length > 0
+    ? moment(dataKeys[dataKeys.length - 1], 'YYYY-MM-DD')
+    : today;
+  const endDate = moment.max(lastDataDate, today);
+
   const labels = [];
   const practiceDataPoints = [];
   const nutritionDataPoints = [];
 
   let currentDate = startDate.clone();
-  while (currentDate.isSameOrBefore(endDate)) {
+  while (currentDate.isSameOrBefore(endDate, 'day')) {
     const dateStr = currentDate.format('YYYY-MM-DD');
     labels.push(currentDate.format('MM/DD'));
     const dayData = data[dateStr] || {};
@@ -129,7 +139,7 @@ function EntireChallengeChart({ data }) {
 
   return (
     <div className="chart-container">
-      <h2>Entire Challenge Progress</h2>
+      <h2>Progress History</h2>
       <Bar data={chartData} options={options} />
     </div>
   );

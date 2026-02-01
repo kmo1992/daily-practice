@@ -8,7 +8,7 @@ import MorningFlowTabs from './MorningFlowTabs';
 import NutritionListPanel from './NutritionListPanel';
 import Modal from './Modal';
 import { FaAppleAlt, FaBullseye, FaChartBar, FaTrophy } from 'react-icons/fa';
-import { getAppToday, getChallengeStartDate, getChallengeEndDate } from '../utils/dateUtils';
+import { getAppToday, getChallengeStartDate, isFutureDate } from '../utils/dateUtils';
 import { getScheduleForDay, getWeekStartKey, parseCount } from '../utils/scheduleUtils';
 import WeeklyGoalsPanel from './WeeklyGoalsPanel';
 
@@ -26,21 +26,18 @@ function WeekView({
   const [selectedDate, setSelectedDate] = useState(() => getAppToday());
   const today = getAppToday();
   const startDate = useMemo(() => getChallengeStartDate(), []);
-  const endDate = useMemo(() => getChallengeEndDate(), []);
   const weekStartKey = useMemo(() => getWeekStartKey(currentWeekStart), [currentWeekStart]);
   const completionPractices = ['Sleep', 'Exercise', 'Stretch', 'Read', 'Water'];
 
-  // Keep navigation within the challenge period
+  // Keep navigation within reasonable bounds (start from tracking start date)
   useEffect(() => {
     const boundedStart = startDate.clone().startOf('isoWeek');
-    const boundedEnd = endDate.clone().startOf('isoWeek');
 
     if (currentWeekStart.isBefore(boundedStart)) {
       setCurrentWeekStart(boundedStart);
-    } else if (currentWeekStart.isAfter(boundedEnd)) {
-      setCurrentWeekStart(boundedEnd);
     }
-  }, [currentWeekStart, startDate, endDate]);
+    // No upper bound - allow infinite future navigation
+  }, [currentWeekStart, startDate]);
 
   // Keep selectedDate within the current week when week changes
   useEffect(() => {
@@ -145,21 +142,18 @@ function WeekView({
           const isComplete = allPracticesDone && nutritionSet;
           const isToday = date.isSame(today, 'day');
           const isSelected = date.isSame(selectedDate, 'day');
-          const inChallenge = date.isBetween(
-            startDate.clone().subtract(1, 'day'),
-            endDate.clone().add(1, 'day'),
-            'day'
-          );
+          const isFuture = isFutureDate(date);
+          const isBeforeStart = date.isBefore(startDate, 'day');
 
           return (
             <button
               key={`strip-${dateStr}`}
               type="button"
-              className={`week-date-chip${isComplete ? ' complete' : ''}${isToday ? ' today' : ''}${isSelected ? ' selected' : ''}${!inChallenge ? ' disabled' : ''}`}
+              className={`week-date-chip${isComplete ? ' complete' : ''}${isToday ? ' today' : ''}${isSelected ? ' selected' : ''}${isFuture ? ' future' : ''}${isBeforeStart ? ' disabled' : ''}`}
               role="listitem"
-              aria-label={`${date.format('ddd MMM D')}${isComplete ? ' completed' : ''}${isSelected ? ' selected' : ''}`}
+              aria-label={`${date.format('ddd MMM D')}${isComplete ? ' completed' : ''}${isSelected ? ' selected' : ''}${isFuture ? ' future date' : ''}`}
               onClick={() => setSelectedDate(date)}
-              disabled={!inChallenge}
+              disabled={isBeforeStart}
             >
               <span className="week-date-chip-day">{date.format('ddd')}</span>
               <span className="week-date-chip-date">{date.format('D')}</span>
@@ -209,7 +203,7 @@ function WeekView({
       </Modal>
       <Modal
         isOpen={activeModal === 'challenge-progress'}
-        title="Entire Challenge Progress"
+        title="Progress History"
         icon={<FaTrophy />}
         onClose={handleCloseModal}
       >

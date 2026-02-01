@@ -4,13 +4,17 @@ import React from 'react';
 import { GiWaterBottle } from 'react-icons/gi';
 import MorningStackCard from './MorningStackCard';
 import NutritionPanel from './NutritionPanel';
-import { getAppToday } from '../utils/dateUtils';
+import DailyScoreboard from './DailyScoreboard';
+import { getAppToday, isFutureDate } from '../utils/dateUtils';
+import { calculateHabitPoints } from '../utils/practiceUtils';
 
 function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, selectedDate = null }) {
   const displayDate = selectedDate || getAppToday();
   const dateStr = displayDate.format('YYYY-MM-DD');
   const dayData = data[dateStr] || {};
   const practices = dayData.practices || [];
+  const isFuture = isFutureDate(displayDate);
+  const isEditable = onUpdateDay && !isFuture;
 
   const sleepWellSet = typeof dayData.sleepWell === 'boolean';
   const nutritionSet = dayData.nutritionPoints !== undefined;
@@ -69,6 +73,8 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
   };
 
   const bottlesDoneCount = bottles.filter((bottle) => bottle.done).length;
+  const habitPoints = calculateHabitPoints(practices);
+  const isToday = displayDate.isSame(getAppToday(), 'day');
 
   const handleNutritionChange = (valueOrEvent) => {
     if (!onUpdateDay) {
@@ -86,6 +92,12 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
 
   return (
     <section className="morning-flow">
+      <DailyScoreboard
+        habitPoints={habitPoints}
+        nutritionPoints={nutritionPoints}
+        displayDate={displayDate}
+        isToday={isToday}
+      />
       <MorningStackCard
         data={data}
         weekGoals={weekGoals}
@@ -106,6 +118,7 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
             <NutritionPanel
               nutritionPoints={nutritionPoints}
               onNutritionChange={handleNutritionChange}
+              disabled={!isEditable}
             />
           </div>
           <div className="hydration-divider" role="presentation"></div>
@@ -128,6 +141,7 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
                   aria-pressed={bottle.done}
                   aria-label={`Bottle ${index + 1} ${bottle.done ? 'done' : 'not done'}`}
                   onClick={() => handleBottleToggle(index)}
+                  disabled={!isEditable}
                 >
                   <GiWaterBottle aria-hidden="true" />
                   <span className="hydration-bottle-label">Bottle {index + 1}</span>
