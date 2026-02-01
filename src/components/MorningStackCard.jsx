@@ -5,6 +5,8 @@ import { FaArrowUp, FaBookOpen, FaDumbbell, FaMoon, FaSun, FaStar } from 'react-
 import { GrYoga } from 'react-icons/gr';
 import BurpeeTimer from './BurpeeTimer';
 import Stepper from './Stepper';
+import StreakBadge from './StreakBadge';
+import { useStreaks } from '../hooks/useStreaks';
 import { getAppToday, getChallengeStartDate, isFutureDate } from '../utils/dateUtils';
 import { getLivingRoomWorkout, getMobilityPractice } from '../utils/practiceUtils';
 import {
@@ -34,6 +36,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
   const [completedStepIds, setCompletedStepIds] = React.useState(new Set());
   const prevStepsRef = React.useRef([]);
   const stepRefs = React.useRef({});
+
+  // Calculate streaks for all habits
+  const streaks = useStreaks(data, displayDate);
 
   React.useEffect(() => {
     const wasSet = prevSleepWellSet.current;
@@ -161,7 +166,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
   const pullupsDone = practices.includes('Pullups');
   const mobilityDone = practices.includes('Stretch');
   const readingDone = practices.includes('Read');
-  const outsideDone = practices.includes('Exercise') && practices.includes('Stretch');
+  const outsideDone = practices.includes('Outside');
   const coffeeDone = isSunday ? true : workoutDone && pullupsDone && mobilityDone;
 
   const workoutMeta = schedule.hasBurpees
@@ -217,18 +222,8 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     const value = parseCount(nextValue);
     const updatedPractices = new Set(practices);
 
-    // Calculate burpee goal for this session
-    const burpeeGoal =
-      schedule.hasBurpees && schedule.burpeeType === 'regular'
-        ? parseCount(currentWeekGoals.regularBurpeesGoalTotal)
-        : schedule.hasBurpees && schedule.burpeeType === 'navy'
-          ? parseCount(currentWeekGoals.navySealBurpeesGoalTotal)
-          : 0;
-
-    // Auto-mark Burpees when goal is reached (or any reps if no goal set)
-    const burpeeGoalMet = burpeeGoal > 0 ? value >= burpeeGoal : value > 0;
-
-    if (burpeeGoalMet) {
+    // Mark Burpees habit as complete if any reps were done (goals are separate from habits)
+    if (value > 0) {
       updatedPractices.add('Burpees');
     } else {
       updatedPractices.delete('Burpees');
@@ -251,13 +246,8 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     const value = parseCount(nextValue);
     const updatedPractices = new Set(practices);
 
-    // Get pullup goal from week goals
-    const pullupGoal = parseCount(currentWeekGoals.pullupsGoalPerSession);
-
-    // Auto-mark Pullups when goal is reached (or any reps if no goal set)
-    const pullupGoalMet = pullupGoal > 0 ? value >= pullupGoal : value > 0;
-
-    if (pullupGoalMet) {
+    // Mark Pullups habit as complete if any reps were done (goals are separate from habits)
+    if (value > 0) {
       updatedPractices.add('Pullups');
     } else {
       updatedPractices.delete('Pullups');
@@ -279,11 +269,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     const checked = event.target.checked;
     const updatedPractices = new Set(practices);
     if (checked) {
-      updatedPractices.add('Exercise');
-      updatedPractices.add('Stretch');
+      updatedPractices.add('Outside');
     } else {
-      updatedPractices.delete('Exercise');
-      updatedPractices.delete('Stretch');
+      updatedPractices.delete('Outside');
     }
     onUpdateDay(dateStr, { practices: Array.from(updatedPractices) });
   };
@@ -375,6 +363,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           icon: null,
           done: coffeeDone,
           tone: 'warm',
+          streak: 0,
         },
         {
           id: 'reading',
@@ -385,6 +374,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           toggleable: true,
           onToggle: handlePracticeToggle('Read'),
           tone: 'cool',
+          streak: streaks.read,
         },
         {
           id: 'outside',
@@ -395,6 +385,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           toggleable: true,
           onToggle: handleSundayOutsideToggle,
           tone: 'neutral',
+          streak: streaks.outside,
         },
       ]
     : [
@@ -408,6 +399,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           links: workoutLinks,
           tone: 'heat',
           priority: true,
+          streak: streaks.workout,
+          toggleable: !schedule.hasBurpees,
+          onToggle: !schedule.hasBurpees ? handlePracticeToggle('Exercise') : undefined,
         },
         {
           id: 'pullups',
@@ -424,6 +418,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           done: pullupsDone,
           controls: pullupControls,
           tone: 'warm',
+          streak: streaks.pullups,
         },
         {
           id: 'mobility',
@@ -436,6 +431,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           links: mobilityLinks,
           tone: 'neutral',
           priority: true,
+          streak: streaks.stretch,
         },
         {
           id: 'reward',
@@ -448,6 +444,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           toggleable: true,
           onToggle: handlePracticeToggle('Read'),
           tone: 'cool',
+          streak: streaks.read,
         },
       ];
 
@@ -565,7 +562,14 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
             {step.icon && <span className="morning-step-icon">{step.icon}</span>}
             <div className="morning-step-text">
               <span className="morning-step-label">{step.label}</span>
-              {step.meta && <span className="morning-step-meta">{step.meta}</span>}
+              {step.meta && (
+                <span className="morning-step-meta">
+                  {step.meta}
+                  {step.streak > 0 && (
+                    <> <StreakBadge count={step.streak} habitName={step.label} /></>
+                  )}
+                </span>
+              )}
               {step.links && step.links.length > 0 && (
                 <div className="morning-step-links">
                   {step.links.map((link) =>
