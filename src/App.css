@@ -1551,10 +1551,20 @@ h1 {
 .week-date-strip {
   display: flex;
   gap: 12px;
-  padding: 12px 4px 4px;
+  padding: 12px 4px;
   overflow-x: auto;
   margin-top: 8px;
   scrollbar-width: thin;
+}
+
+.week-date-strip.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: linear-gradient(to bottom, #f5f5f5 0%, #f5f5f5 85%, transparent 100%);
+  padding-top: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .week-date-strip::-webkit-scrollbar {
@@ -1572,7 +1582,7 @@ h1 {
   background: #fff;
   border-radius: 12px;
   padding: 10px 12px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border: 2px solid rgba(148, 163, 184, 0.35);
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
@@ -1580,22 +1590,42 @@ h1 {
   text-decoration: none;
   color: inherit;
   position: relative;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
+  cursor: pointer;
+  font-family: inherit;
 }
 
-.week-date-chip:hover {
+.week-date-chip:hover:not(.disabled) {
   transform: translateY(-2px);
   box-shadow: 0 12px 20px rgba(15, 23, 42, 0.12);
+  border-color: rgba(25, 118, 210, 0.45);
 }
 
 .week-date-chip.today {
-  border-color: rgba(34, 197, 94, 0.7);
-  box-shadow: 0 10px 18px rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 10px 18px rgba(34, 197, 94, 0.15);
+}
+
+.week-date-chip.selected {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  border-color: #1976d2;
+  box-shadow: 0 12px 24px rgba(25, 118, 210, 0.35);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.week-date-chip.selected .week-date-chip-day,
+.week-date-chip.selected .week-date-chip-date {
+  color: #fff;
+}
+
+.week-date-chip.selected:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 14px 28px rgba(25, 118, 210, 0.4);
 }
 
 .week-date-chip.disabled {
   opacity: 0.5;
-  pointer-events: none;
+  cursor: not-allowed;
 }
 
 .week-date-chip-day {
@@ -1628,12 +1658,17 @@ h1 {
   font-size: 0.75rem;
   opacity: 0;
   transform: scale(0.7);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .week-date-chip-check.visible {
   opacity: 1;
   transform: scale(1);
+}
+
+.week-date-chip.selected .week-date-chip-check {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 .week-date-chip.complete {

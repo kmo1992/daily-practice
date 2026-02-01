@@ -6,9 +6,9 @@ import MorningStackCard from './MorningStackCard';
 import NutritionPanel from './NutritionPanel';
 import { getAppToday } from '../utils/dateUtils';
 
-function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null }) {
-  const today = getAppToday();
-  const dateStr = today.format('YYYY-MM-DD');
+function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, selectedDate = null }) {
+  const displayDate = selectedDate || getAppToday();
+  const dateStr = displayDate.format('YYYY-MM-DD');
   const dayData = data[dateStr] || {};
   const practices = dayData.practices || [];
 
@@ -86,7 +86,12 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null }) {
 
   return (
     <section className="morning-flow">
-      <MorningStackCard data={data} weekGoals={weekGoals} onUpdateDay={onUpdateDay} />
+      <MorningStackCard
+        data={data}
+        weekGoals={weekGoals}
+        onUpdateDay={onUpdateDay}
+        selectedDate={displayDate}
+      />
 
       {sleepWellSet && (
         <div className={`hydration-card${revealHydration ? ' hydration-reveal' : ''}`}>
