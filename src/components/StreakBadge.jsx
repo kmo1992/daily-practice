@@ -17,7 +17,7 @@ function StreakBadge({ count, habitName }) {
   if (count === 0) return null;
 
   const milestone = getStreakMilestone(count);
-  const text = formatStreakText(count);
+  const text = formatStreakText(count, habitName);
   const milestoneClass = milestone > 0 ? `milestone-${milestone}` : '';
   const incrementClass = justIncremented ? 'just-incremented' : '';
 

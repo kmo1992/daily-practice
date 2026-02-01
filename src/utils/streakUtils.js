@@ -1,6 +1,7 @@
 import moment from 'moment';
 
 // Workout activities that count toward the workout streak (NOT pull-ups)
+// 'Burpees' = current burpee days, 'Exercise' = backward compatibility + non-burpee workout days
 const WORKOUT_ACTIVITIES = ['Burpees', 'Exercise'];
 
 /**
@@ -308,10 +309,16 @@ export const getStreakMilestone = (count) => {
 /**
  * Format streak text for display
  * @param {number} count - Streak count
- * @returns {string} Formatted text (e.g., "5 day streak")
+ * @param {string} habitName - Name of the habit (optional, used to determine unit)
+ * @returns {string} Formatted text (e.g., "5 day streak" or "3 week streak")
  */
-export const formatStreakText = (count) => {
+export const formatStreakText = (count, habitName = '') => {
   if (count === 0) return '';
-  if (count === 1) return '1 day streak';
-  return `${count} day streak`;
+
+  // "Go outside!" tracks consecutive weeks (Sundays), not days
+  const isWeeklyHabit = habitName === 'Go outside!';
+  const unit = isWeeklyHabit ? 'week' : 'day';
+
+  if (count === 1) return `1 ${unit} streak`;
+  return `${count} ${unit} streak`;
 };

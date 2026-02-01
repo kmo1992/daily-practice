@@ -36,6 +36,66 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  const migrateHabitsData = (dayData) => {
+    const practices = dayData.practices || [];
+    const newPractices = [];
+    let sleepQuality = dayData.sleepQuality;
+
+    // Convert old sleepWell boolean to sleepQuality
+    if (!sleepQuality && typeof dayData.sleepWell === 'boolean') {
+      sleepQuality = dayData.sleepWell ? 'good' : 'bad';
+    }
+
+    practices.forEach((practice) => {
+      if (practice === 'Exercise' || practice === 'Burpees') {
+        // Replace Exercise/Burpees with Workout
+        if (!newPractices.includes('Workout')) {
+          newPractices.push('Workout');
+        }
+      } else if (practice === 'Pullups') {
+        // Update Pullups to Pull-ups for consistency
+        if (!newPractices.includes('Pull-ups')) {
+          newPractices.push('Pull-ups');
+        }
+      } else if (practice === 'Sleep') {
+        // Convert Sleep checkbox to quality indicator
+        if (!sleepQuality) {
+          sleepQuality = 'good';
+        }
+      } else if (practice !== 'Nutrition') {
+        // Keep all other practices except Nutrition
+        newPractices.push(practice);
+      }
+    });
+
+    // If burpees were done, mark Workout as done
+    if ((dayData.burpeesTotalReps > 0 || dayData.burpeeType) && !newPractices.includes('Workout')) {
+      newPractices.push('Workout');
+    }
+
+    // If pullups were done, mark Pull-ups as done
+    if (dayData.pullups > 0 && !newPractices.includes('Pull-ups')) {
+      newPractices.push('Pull-ups');
+    }
+
+    const migratedData = {
+      ...dayData,
+      practices: newPractices,
+    };
+
+    // Add sleep quality if it was set
+    if (sleepQuality) {
+      migratedData.sleepQuality = sleepQuality;
+    }
+
+    // Remove old sleepWell field
+    if ('sleepWell' in migratedData) {
+      delete migratedData.sleepWell;
+    }
+
+    return migratedData;
+  };
+
   const loadUserData = async (firebaseUser) => {
     setLoadingData(true);
     try {
@@ -66,8 +126,27 @@ function App() {
         localStorage.removeItem('wholeLifeChallengeData');
       }
 
-      setData(firestoreData);
-      setWeekGoals(firestoreWeeks);
+      // One-time habits migration (Exercise→Workout, Sleep→indicator, remove Nutrition)
+      const migrationVersion = localStorage.getItem('habitsMigrationVersion');
+      if (migrationVersion !== 'v2' && Object.keys(firestoreData).length > 0) {
+        const batch = writeBatch(db);
+        const migratedData = {};
+
+        Object.entries(firestoreData).forEach(([dateStr, dayData]) => {
+          const migratedDay = migrateHabitsData(dayData);
+          const dayRef = doc(db, 'users', firebaseUser.uid, 'days', dateStr);
+          batch.set(dayRef, migratedDay);
+          migratedData[dateStr] = migratedDay;
+        });
+
+        await batch.commit();
+        localStorage.setItem('habitsMigrationVersion', 'v2');
+        setData(migratedData);
+        setWeekGoals(firestoreWeeks);
+      } else {
+        setData(firestoreData);
+        setWeekGoals(firestoreWeeks);
+      }
     } catch (err) {
       console.error('Failed to load data', err);
       setError('Unable to load your data right now. Please retry.');
@@ -140,12 +219,6 @@ function App() {
     setAppMenuOpen(false);
   };
 
-  const today = getAppToday();
-  const dateStr = today.format('YYYY-MM-DD');
-  const dayData = data[dateStr] || {};
-  const nutritionPoints =
-    dayData.nutritionPoints !== undefined ? dayData.nutritionPoints : 5;
-
   return (
     <div className="App">
       <div className="app-header">
@@ -168,14 +241,6 @@ function App() {
                   <div className="app-menu-user">
                     Signed in as {user.displayName || user.email || 'Google User'}
                   </div>
-                  <button
-                    className={`app-menu-item ${activeModal === 'nutrition' ? 'active' : ''}`}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => openModal('nutrition')}
-                  >
-                    <span className="app-menu-item-label">Nutrition List</span>
-                  </button>
                   <button
                     className={`app-menu-item ${activeModal === 'weekly-goals' ? 'active' : ''}`}
                     type="button"

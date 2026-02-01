@@ -12,8 +12,8 @@ import { GrYoga } from "react-icons/gr";
 
 // Updated icon map with new practices and icons
 const iconMap = {
-  Nutrition: <FaAppleAlt style={{ color: '#333' }} />,
-  Exercise: <FaDumbbell style={{ color: '#333' }} />,
+  Workout: <FaDumbbell style={{ color: '#333' }} />,
+  'Pull-ups': <FaDumbbell style={{ color: '#333' }} />,
   Stretch: <GrYoga style={{ color: '#333' }} />,
   Sleep: <FaBed style={{ color: '#333' }} />,
   Water: <FaTint style={{ color: '#333' }} />,
@@ -22,7 +22,7 @@ const iconMap = {
 
 function PracticeItem({ practice, dayData, handleUpdate }) {
   const isChecked = dayData.practices ? dayData.practices.includes(practice.name) : false;
-  const nutritionPoints = dayData.nutritionPoints !== undefined ? dayData.nutritionPoints : 'not-set';
+  const sleepQuality = dayData.sleepQuality !== undefined ? dayData.sleepQuality : 'not-set';
 
   const handleCheckboxChange = () => {
     const nextChecked = !isChecked;
@@ -49,10 +49,10 @@ function PracticeItem({ practice, dayData, handleUpdate }) {
   const handleSelectChange = (e) => {
     const value = e.target.value;
     if (value !== 'not-set') {
-      handleUpdate({ nutritionPoints: parseInt(value) });
+      handleUpdate({ sleepQuality: value });
     } else {
       const newData = { ...dayData };
-      delete newData.nutritionPoints;
+      delete newData.sleepQuality;
       handleUpdate(newData);
     }
   };
@@ -89,13 +89,11 @@ function PracticeItem({ practice, dayData, handleUpdate }) {
       <div className="practice">
         <label style={labelStyle} title={practice.name}>
           <span style={iconStyle}>{iconMap[practice.name]}</span>
-          <select value={nutritionPoints} onChange={handleSelectChange}>
+          <select value={sleepQuality} onChange={handleSelectChange}>
             <option value="not-set"></option>
-            {[5, 4, 3, 2, 1, 0].map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
+            <option value="good">Good</option>
+            <option value="OK">OK</option>
+            <option value="bad">Bad</option>
           </select>
         </label>
       </div>

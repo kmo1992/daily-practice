@@ -802,6 +802,7 @@ h1 {
 }
 
 .morning-stack-header {
+  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -813,6 +814,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
 }
 
 .morning-stack-kicker {
@@ -841,6 +843,18 @@ h1 {
   font-size: 0.85rem;
   color: #475569;
   font-weight: 600;
+}
+
+.morning-stack-sleep {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.1rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
 .morning-stack-identity-row {

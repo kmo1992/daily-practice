@@ -21,11 +21,11 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
   // Calculate streaks for all habits
   const streaks = useStreaks(data, displayDate);
 
-  const sleepWellSet = typeof dayData.sleepWell === 'boolean';
+  const sleepQualitySet = dayData.sleepQuality !== undefined;
   const nutritionSet = dayData.nutritionPoints !== undefined;
   const nutritionPoints = nutritionSet ? dayData.nutritionPoints : 5;
   const [revealHydration, setRevealHydration] = React.useState(false);
-  const prevSleepWellSet = React.useRef(sleepWellSet);
+  const prevSleepQualitySet = React.useRef(sleepQualitySet);
 
   React.useEffect(() => {
     if (!onUpdateDay || nutritionSet) {
@@ -35,14 +35,14 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
   }, [nutritionSet, dateStr, onUpdateDay]);
 
   React.useEffect(() => {
-    const wasSet = prevSleepWellSet.current;
-    if (!wasSet && sleepWellSet) {
+    const wasSet = prevSleepQualitySet.current;
+    if (!wasSet && sleepQualitySet) {
       setRevealHydration(true);
-    } else if (!sleepWellSet) {
+    } else if (!sleepQualitySet) {
       setRevealHydration(false);
     }
-    prevSleepWellSet.current = sleepWellSet;
-  }, [sleepWellSet]);
+    prevSleepQualitySet.current = sleepQualitySet;
+  }, [sleepQualitySet]);
 
   const storedBottles = Array.isArray(dayData.waterBottles) ? dayData.waterBottles : [];
   const bottles = [0, 1, 2].map((index) => {
@@ -110,7 +110,7 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
         selectedDate={displayDate}
       />
 
-      {sleepWellSet && (
+      {sleepQualitySet && (
         <div className={`hydration-card${revealHydration ? ' hydration-reveal' : ''}`}>
           <div className="hydration-nutrition">
             <div className="hydration-nutrition-header">

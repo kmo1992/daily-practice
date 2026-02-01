@@ -10,26 +10,19 @@ function NewDayPrimer({ data = {}, onUpdateDay = null }) {
   const dayData = data[dateStr] || {};
   const practices = dayData.practices || [];
 
-  const sleepWellSet = typeof dayData.sleepWell === 'boolean';
+  const sleepQualitySet = dayData.sleepQuality !== undefined;
   const nutritionSet = dayData.nutritionPoints !== undefined;
 
-  if (sleepWellSet && nutritionSet) {
+  if (sleepQualitySet && nutritionSet) {
     return null;
   }
 
-  const handleSleepChoice = (sleptWell) => {
+  const handleSleepChoice = (quality) => {
     if (!onUpdateDay) {
       return;
     }
-    const updatedPractices = new Set(practices);
-    if (sleptWell) {
-      updatedPractices.add('Sleep');
-    } else {
-      updatedPractices.delete('Sleep');
-    }
     onUpdateDay(dateStr, {
-      sleepWell: sleptWell,
-      practices: Array.from(updatedPractices),
+      sleepQuality: quality,
     });
   };
 
@@ -42,7 +35,7 @@ function NewDayPrimer({ data = {}, onUpdateDay = null }) {
 
   return (
     <section className="day-primer">
-      {!sleepWellSet && (
+      {!sleepQualitySet && (
         <div className="primer-card">
           <div className="primer-header">
             <span className="primer-icon night">
@@ -50,23 +43,30 @@ function NewDayPrimer({ data = {}, onUpdateDay = null }) {
             </span>
             <div>
               <p className="primer-kicker">Start the day</p>
-              <h2 className="primer-title">Did you sleep well last night?</h2>
+              <h2 className="primer-title">How did you sleep last night?</h2>
             </div>
           </div>
           <div className="primer-actions">
             <button
               className="primer-choice yes"
               type="button"
-              onClick={() => handleSleepChoice(true)}
+              onClick={() => handleSleepChoice('good')}
             >
-              Yes
+              Good
+            </button>
+            <button
+              className="primer-choice"
+              type="button"
+              onClick={() => handleSleepChoice('OK')}
+            >
+              OK
             </button>
             <button
               className="primer-choice no"
               type="button"
-              onClick={() => handleSleepChoice(false)}
+              onClick={() => handleSleepChoice('bad')}
             >
-              No
+              Bad
             </button>
           </div>
         </div>

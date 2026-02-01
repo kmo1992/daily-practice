@@ -1,7 +1,7 @@
 // src/components/MorningStackCard.jsx
 
 import React from 'react';
-import { FaArrowUp, FaBookOpen, FaDumbbell, FaMoon, FaSun, FaStar } from 'react-icons/fa';
+import { FaArrowUp, FaBed, FaBookOpen, FaDumbbell, FaMoon, FaSun, FaStar } from 'react-icons/fa';
 import { GrYoga } from 'react-icons/gr';
 import BurpeeTimer from './BurpeeTimer';
 import Stepper from './Stepper';
@@ -26,11 +26,11 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
   const dateStr = displayDate.format('YYYY-MM-DD');
   const dayData = data[dateStr] || {};
   const practices = dayData.practices || [];
-  const sleepWellSet = typeof dayData.sleepWell === 'boolean';
+  const sleepQualitySet = dayData.sleepQuality !== undefined;
   const isFuture = isFutureDate(displayDate);
   const isEditable = onUpdateDay && !isFuture;
   const [animateStack, setAnimateStack] = React.useState(false);
-  const prevSleepWellSet = React.useRef(sleepWellSet);
+  const prevSleepQualitySet = React.useRef(sleepQualitySet);
 
   // Completion detection for green pulse animation
   const [completedStepIds, setCompletedStepIds] = React.useState(new Set());
@@ -41,18 +41,18 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
   const streaks = useStreaks(data, displayDate);
 
   React.useEffect(() => {
-    const wasSet = prevSleepWellSet.current;
-    if (!wasSet && sleepWellSet) {
+    const wasSet = prevSleepQualitySet.current;
+    if (!wasSet && sleepQualitySet) {
       setAnimateStack(true);
-    } else if (!sleepWellSet) {
+    } else if (!sleepQualitySet) {
       setAnimateStack(false);
     }
-    prevSleepWellSet.current = sleepWellSet;
-  }, [sleepWellSet]);
+    prevSleepQualitySet.current = sleepQualitySet;
+  }, [sleepQualitySet]);
 
   // Detect newly completed habits for animation
   React.useEffect(() => {
-    if (!sleepWellSet) return; // Skip if sleep gate not passed
+    if (!sleepQualitySet) return; // Skip if sleep gate not passed
 
     const prevPractices = prevStepsRef.current;
     const currentPractices = {
@@ -87,27 +87,20 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     }
 
     prevStepsRef.current = currentPractices;
-  }, [sleepWellSet, practices]);
+  }, [sleepQualitySet, practices]);
 
   const cardClassName = `morning-stack-card${animateStack ? ' morning-stack-reveal' : ''}`;
 
-  const handleSleepChoice = (sleptWell) => {
+  const handleSleepChoice = (quality) => {
     if (!onUpdateDay) {
       return;
     }
-    const updatedPractices = new Set(practices);
-    if (sleptWell) {
-      updatedPractices.add('Sleep');
-    } else {
-      updatedPractices.delete('Sleep');
-    }
     onUpdateDay(dateStr, {
-      sleepWell: sleptWell,
-      practices: Array.from(updatedPractices),
+      sleepQuality: quality,
     });
   };
 
-  if (!sleepWellSet) {
+  if (!sleepQualitySet) {
     return (
       <section className={cardClassName}>
         <div className="morning-stack-gate">
@@ -117,7 +110,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
             </span>
             <div>
               <p className="primer-kicker">Start the day</p>
-              <h2 className="primer-title">Did you sleep well last night?</h2>
+              <h2 className="primer-title">How did you sleep last night?</h2>
             </div>
           </div>
           <div className="primer-actions">
@@ -125,17 +118,25 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
               className="primer-choice yes"
               type="button"
               disabled={!isEditable}
-              onClick={() => handleSleepChoice(true)}
+              onClick={() => handleSleepChoice('good')}
             >
-              Yes
+              Good
+            </button>
+            <button
+              className="primer-choice"
+              type="button"
+              disabled={!isEditable}
+              onClick={() => handleSleepChoice('OK')}
+            >
+              OK
             </button>
             <button
               className="primer-choice no"
               type="button"
               disabled={!isEditable}
-              onClick={() => handleSleepChoice(false)}
+              onClick={() => handleSleepChoice('bad')}
             >
-              No
+              Bad
             </button>
           </div>
         </div>
@@ -510,8 +511,13 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
         />
       )}
       <div className="morning-stack-header">
+        {dayData.sleepQuality && (
+          <span className="morning-stack-sleep">
+            <FaBed style={{ marginRight: '4px' }} />
+            {dayData.sleepQuality}
+          </span>
+        )}
         <div className="morning-stack-heading">
-          <p className="morning-stack-kicker">Pinned stack</p>
           <div className="morning-stack-title-row">
             <h2 className="morning-stack-title">Morning Stack</h2>
             <span className="morning-stack-date">{displayDate.format('ddd MMM D')}</span>
