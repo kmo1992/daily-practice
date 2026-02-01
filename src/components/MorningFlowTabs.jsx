@@ -5,8 +5,10 @@ import { GiWaterBottle } from 'react-icons/gi';
 import MorningStackCard from './MorningStackCard';
 import NutritionPanel from './NutritionPanel';
 import DailyScoreboard from './DailyScoreboard';
+import StreakBadge from './StreakBadge';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
 import { calculateHabitPoints } from '../utils/practiceUtils';
+import { useStreaks } from '../hooks/useStreaks';
 
 function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, selectedDate = null }) {
   const displayDate = selectedDate || getAppToday();
@@ -15,6 +17,9 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
   const practices = dayData.practices || [];
   const isFuture = isFutureDate(displayDate);
   const isEditable = onUpdateDay && !isFuture;
+
+  // Calculate streaks for all habits
+  const streaks = useStreaks(data, displayDate);
 
   const sleepWellSet = typeof dayData.sleepWell === 'boolean';
   const nutritionSet = dayData.nutritionPoints !== undefined;
@@ -125,7 +130,12 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
           <div className="hydration-header">
             <div>
               <p className="hydration-kicker">Hydration</p>
-              <h3 className="hydration-title">3 bottles</h3>
+              <h3 className="hydration-title">
+                3 bottles
+                {streaks.water > 0 && (
+                  <> <StreakBadge count={streaks.water} habitName="Water" /></>
+                )}
+              </h3>
             </div>
             <span className="hydration-status">{bottlesDoneCount}/3</span>
           </div>
