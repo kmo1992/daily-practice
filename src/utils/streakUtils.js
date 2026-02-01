@@ -97,10 +97,10 @@ export const calculateWorkoutStreak = (data, asOfDate) => {
       continue;
     }
 
-    // Check if ANY workout activity was completed
+    // Check if ANY workout activity was completed (practices array OR rep count for backward compatibility)
     const workoutCompleted = WORKOUT_ACTIVITIES.some(activity =>
       practices.includes(activity)
-    );
+    ) || (dayData.burpeesTotalReps !== undefined && dayData.burpeesTotalReps > 0);
 
     if (!workoutCompleted) {
       break; // Streak broken
@@ -154,8 +154,11 @@ export const calculatePullupsStreak = (data, asOfDate) => {
       continue;
     }
 
-    // Check if pull-ups were completed
-    if (!practices.includes('Pullups')) {
+    // Check if pull-ups were completed (practices array OR rep count for backward compatibility)
+    const pullupsCompleted = practices.includes('Pullups') ||
+      (dayData.pullups !== undefined && dayData.pullups > 0);
+
+    if (!pullupsCompleted) {
       break; // Streak broken
     }
 

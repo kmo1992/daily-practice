@@ -163,8 +163,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
       ? getLivingRoomWorkout(workoutIndex)
       : null;
   const mobilityPractice = !isSunday ? getMobilityPractice(dayOfWeek) : null;
-  const workoutDone = practices.includes('Burpees') || practices.includes('Exercise'); // Exercise for backward compatibility
-  const pullupsDone = practices.includes('Pullups');
+  // Check both practices array AND rep counts for backward compatibility with old data
+  const workoutDone = practices.includes('Burpees') || practices.includes('Exercise') || burpeeReps > 0;
+  const pullupsDone = practices.includes('Pullups') || pullupsReps > 0;
   const mobilityDone = practices.includes('Stretch');
   const readingDone = practices.includes('Read');
   const outsideDone = practices.includes('Outside');
@@ -475,11 +476,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           .join(', ')})`;
 
   const stepsWithState = steps.map((step, index) => {
-    let state = 'locked';
+    let state = 'next';
     if (step.done) {
       state = 'done';
-    } else if (index === firstIncomplete) {
-      state = 'next';
     }
     return { ...step, state, stepNumber: index + 1, priority: step.priority || false };
   });

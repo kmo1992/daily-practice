@@ -78,7 +78,7 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
   };
 
   const bottlesDoneCount = bottles.filter((bottle) => bottle.done).length;
-  const habitPoints = calculateHabitPoints(practices);
+  const habitPoints = calculateHabitPoints(practices, dayData);
   const isToday = displayDate.isSame(getAppToday(), 'day');
 
   const handleNutritionChange = (valueOrEvent) => {

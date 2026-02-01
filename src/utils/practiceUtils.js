@@ -12,17 +12,53 @@ export const getLivingRoomWorkout = (index) => {
   return livingRoomWorkouts[index] || null;
 };
 
-// Calculate habit points (0-5) based on completion practices
-// The 5 core practices that count toward the daily 10-point goal
+// Calculate habit points based on completion practices
+// Regular weekdays: Burpees/Exercise (1), Pullups (1), Stretch (1), Read (1), Water (1) = 5 points max
+// Sundays: Read (1), Outside (3) = 4 points max
 // Sleep is tracked separately as an indicator (not counted in habit points)
-export const COMPLETION_PRACTICES = ['Workout', 'Pull-ups', 'Stretch', 'Read', 'Water'];
 
-export const calculateHabitPoints = (practices = []) => {
+export const calculateHabitPoints = (practices = [], dayData = {}) => {
   if (!Array.isArray(practices)) {
     return 0;
   }
-  const completedCount = COMPLETION_PRACTICES.filter(practice =>
-    practices.includes(practice)
-  ).length;
-  return completedCount; // Each practice = 1 point, max 5 points
+
+  let points = 0;
+
+  // Sunday: Outside counts as 3 points (replaces workout + mobility + pullups)
+  if (practices.includes('Outside')) {
+    points += 3;
+  } else {
+    // Weekday workout activities (Burpees or Exercise) = 1 point
+    // Also check rep counts for backward compatibility
+    const hasWorkout = practices.includes('Burpees') || practices.includes('Exercise') ||
+      (dayData.burpeesTotalReps !== undefined && dayData.burpeesTotalReps > 0);
+    if (hasWorkout) {
+      points += 1;
+    }
+
+    // Pull-ups = 1 point
+    // Also check rep counts for backward compatibility
+    const hasPullups = practices.includes('Pullups') ||
+      (dayData.pullups !== undefined && dayData.pullups > 0);
+    if (hasPullups) {
+      points += 1;
+    }
+
+    // Stretch/Mobility = 1 point
+    if (practices.includes('Stretch')) {
+      points += 1;
+    }
+  }
+
+  // Read = 1 point (both weekdays and Sundays)
+  if (practices.includes('Read')) {
+    points += 1;
+  }
+
+  // Water = 1 point (weekdays only, not part of Sunday routine)
+  if (practices.includes('Water')) {
+    points += 1;
+  }
+
+  return points;
 };
