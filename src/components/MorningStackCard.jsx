@@ -298,33 +298,60 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
 
   const workoutControls = schedule.hasBurpees ? (
     <div className="morning-step-field">
-      <span>Reps</span>
-      <Stepper
-        value={burpeesValue}
-        min={0}
-        max={burpeeMax}
-        step={burpeeStep}
-        quickAdd={5}
-        disabled={!isEditable}
-        ariaLabel="Burpee reps"
-        onChange={handleBurpeeChange}
-      />
+      {/* Goal Reached Button - Primary Action */}
+      {goalReps > 0 && burpeesValue !== goalReps && (
+        <button
+          className="goal-reached-btn"
+          onClick={() => handleBurpeeChange(goalReps)}
+          disabled={!isEditable}
+        >
+          ✓ Goal Reached ({goalReps})
+        </button>
+      )}
+
+      {/* Stepper for fine-tuning */}
+      <div className="stepper-with-label">
+        <span>Reps</span>
+        <Stepper
+          value={burpeesValue}
+          min={0}
+          max={burpeeMax}
+          step={burpeeStep}
+          disabled={!isEditable}
+          ariaLabel="Burpee reps"
+          onChange={handleBurpeeChange}
+        />
+      </div>
     </div>
   ) : null;
 
   const pullupControls = (
     <div className="morning-step-field">
-      <span>Reps</span>
-      <Stepper
-        value={pullupsValue}
-        min={0}
-        max={pullupMax}
-        step={1}
-        quickAdd={5}
-        disabled={!isEditable}
-        ariaLabel="Pull-up reps"
-        onChange={handlePullupChange}
-      />
+      {/* Goal Reached Button - Primary Action */}
+      {parseCount(currentWeekGoals.pullupsGoalPerSession) > 0 &&
+       pullupsValue !== parseCount(currentWeekGoals.pullupsGoalPerSession) && (
+        <button
+          className="goal-reached-btn"
+          onClick={() => handlePullupChange(parseCount(currentWeekGoals.pullupsGoalPerSession))}
+          disabled={!isEditable}
+        >
+          ✓ Goal Reached ({parseCount(currentWeekGoals.pullupsGoalPerSession)})
+        </button>
+      )}
+
+      {/* Stepper for fine-tuning */}
+      <div className="stepper-with-label">
+        <span>Reps</span>
+        <Stepper
+          value={pullupsValue}
+          min={0}
+          max={pullupMax}
+          step={1}
+          disabled={!isEditable}
+          ariaLabel="Pull-up reps"
+          onChange={handlePullupChange}
+        />
+      </div>
     </div>
   );
 
