@@ -50,7 +50,7 @@ Test on both desktop and mobile to ensure the next action is impossible to miss.
 
 ---
 
-### Session 2: Add Time Estimates to Reduce "No Time" Excuse
+### Session 2: Add Time Estimates to Reduce "No Time" Excuse ✅ COMPLETE
 
 **Atomic Habits Law: Make it Easy (Two-Minute Rule)**
 
@@ -95,73 +95,153 @@ Implementation:
 
 ---
 
-### Session 3: Quick-Complete Buttons for Burpee/Pullup Reps
+### Session 3: One-Tap "Goal Reached" Button for Reps
 
 **Atomic Habits Law: Make it Easy (Reduce Friction)**
 
 ```
 I'm working on a habit tracking app at /Users/kevinoliver/Documents/GitHub/whole-life-challenge-tracker
 
-Replace the increment/decrement stepper with one-tap quick-complete buttons:
+Add a prominent "Goal Reached" button to instantly log goal completion:
 
 Current problem:
 - Stepper requires multiple taps to reach target reps (see src/components/Stepper.jsx)
 - After completing 20 burpees, user must tap increment 10+ times
 - Creates unnecessary friction when user is tired post-workout
+- Goal is already known from weekly goals, but logging it is tedious
 
-Solution - Quick-Select Buttons:
-1. Add quick-select buttons below the stepper
-2. Button values:
-   - For burpees: [10, 20, 30, Goal] (where Goal = weekly goal / sessions)
-   - For pullups: [5, 10, 15, Goal]
-3. Clicking a button instantly sets that value
-4. Keep existing stepper for fine-tuning
+Solution - "Goal Reached" Primary Action:
+1. Add a large, prominent "Goal Reached" button as the PRIMARY action
+2. Clicking it instantly sets reps to the goal value
+3. Keep the stepper for fine-tuning if they did more/less than goal
+4. Button should be visually distinct (larger, green, obvious)
+
+Why this is better:
+- Most common case: user hits their exact goal
+- One tap to log success (vs 10+ taps with stepper)
+- Goal-focused design reinforces achieving targets
+- Still allows adjustment via stepper if needed
 
 Implementation in MorningStackCard.jsx:
 ```jsx
-<div className="quick-reps-buttons">
-  <button onClick={() => handleBurpeeChange(10)}>10</button>
-  <button onClick={() => handleBurpeeChange(20)}>20</button>
-  <button onClick={() => handleBurpeeChange(30)}>30</button>
-  {goalReps > 0 && (
-    <button onClick={() => handleBurpeeChange(goalReps)}>
-      Goal ({goalReps})
-    </button>
-  )}
-</div>
+// Add goal-reached button ABOVE the stepper
+const workoutControls = schedule.hasBurpees ? (
+  <div className="morning-step-field">
+    {/* Goal Reached Button - Primary Action */}
+    {goalReps > 0 && burpeesValue !== goalReps && (
+      <button
+        className="goal-reached-btn"
+        onClick={() => handleBurpeeChange(goalReps)}
+        disabled={!isEditable}
+      >
+        ✓ Goal Reached ({goalReps})
+      </button>
+    )}
+
+    {/* Stepper for fine-tuning */}
+    <div className="stepper-with-label">
+      <span>Reps</span>
+      <Stepper
+        value={burpeesValue}
+        min={0}
+        max={burpeeMax}
+        step={burpeeStep}
+        quickAdd={5}
+        disabled={!isEditable}
+        ariaLabel="Burpee reps"
+        onChange={handleBurpeeChange}
+      />
+    </div>
+  </div>
+) : null;
+
+// Similar for pullups
+const pullupControls = (
+  <div className="morning-step-field">
+    {parseCount(currentWeekGoals.pullupsGoalPerSession) > 0 &&
+     pullupsValue !== parseCount(currentWeekGoals.pullupsGoalPerSession) && (
+      <button
+        className="goal-reached-btn"
+        onClick={() => handlePullupChange(parseCount(currentWeekGoals.pullupsGoalPerSession))}
+        disabled={!isEditable}
+      >
+        ✓ Goal Reached ({parseCount(currentWeekGoals.pullupsGoalPerSession)})
+      </button>
+    )}
+
+    <div className="stepper-with-label">
+      <span>Reps</span>
+      <Stepper
+        value={pullupsValue}
+        min={0}
+        max={pullupMax}
+        step={1}
+        quickAdd={5}
+        disabled={!isEditable}
+        ariaLabel="Pull-up reps"
+        onChange={handlePullupChange}
+      />
+    </div>
+  </div>
+);
 ```
 
 Styling in App.css:
 ```css
-.quick-reps-buttons {
+.goal-reached-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid #22c55e;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.25);
+  transition: all 0.12s ease;
+  margin-bottom: 8px;
+  width: 100%;
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
-  margin-top: 8px;
-  flex-wrap: wrap;
 }
 
-.quick-reps-buttons button {
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid #cbd5f5;
-  background: #fff;
-  color: #1976d2;
+.goal-reached-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+  transform: translateY(-1px);
+}
+
+.goal-reached-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.goal-reached-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stepper-with-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.75rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.12s ease;
-}
-
-.quick-reps-buttons button:hover {
-  background: #eef3ff;
-  border-color: #1976d2;
-  transform: translateY(-1px);
+  color: #475569;
 }
 ```
 
+Behavior:
+- Show "Goal Reached" button only when goal is set AND current value ≠ goal
+- Once clicked, button disappears (goal is reached)
+- User can still adjust via stepper if they did more/less
+- Button reappears if user changes value away from goal
+
 **Atomic Habits Principle:** "Reduce friction. Decrease the number of steps between you and your good habits."
 
-One tap is infinitely easier than 20 taps.
+One tap to log success. The goal is the hero action, not an afterthought.
 ```
 
 ---

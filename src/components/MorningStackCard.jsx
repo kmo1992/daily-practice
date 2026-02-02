@@ -371,6 +371,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           id: 'reading',
           label: 'Read',
           meta: rewardMeta,
+          timeEstimate: '⏱️ 15 min',
           icon: <FaBookOpen />,
           done: readingDone,
           toggleable: true,
@@ -382,6 +383,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           id: 'outside',
           label: 'Go outside!',
           meta: 'Workout + mobility',
+          timeEstimate: '⏱️ 20+ min',
           icon: <FaSun />,
           done: outsideDone,
           toggleable: true,
@@ -395,6 +397,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           id: 'workout',
           label: 'Workout',
           meta: workoutMetaText,
+          timeEstimate: schedule.hasBurpees ? '⏱️ 20 min' : '⏱️ 12 min',
           icon: <FaDumbbell />,
           done: workoutDone,
           controls: workoutControls,
@@ -416,6 +419,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
               : parseCount(currentWeekGoals.pullupsGoalPerSession) > 0
                 ? `Goal: ${parseCount(currentWeekGoals.pullupsGoalPerSession)} reps`
                 : 'Log reps',
+          timeEstimate: '⏱️ 2 min',
           icon: <FaArrowUp />,
           done: pullupsDone,
           controls: pullupControls,
@@ -426,6 +430,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           id: 'mobility',
           label: 'Mobility',
           meta: 'Flow + reset',
+          timeEstimate: '⏱️ 12 min',
           icon: <GrYoga />,
           done: mobilityDone,
           toggleable: true,
@@ -439,6 +444,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           id: 'reward',
           label: 'Read',
           meta: rewardMeta,
+          timeEstimate: '⏱️ 15 min',
           icon: (
             <FaBookOpen />
           ),
@@ -570,6 +576,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
               {step.meta && (
                 <span className="morning-step-meta">
                   {step.meta}
+                  {step.timeEstimate && (
+                    <span className="habit-time-estimate">{step.timeEstimate}</span>
+                  )}
                   {step.streak > 0 && (
                     <> <StreakBadge count={step.streak} habitName={step.label} /></>
                   )}
