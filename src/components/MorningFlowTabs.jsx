@@ -9,6 +9,7 @@ import StreakBadge from './StreakBadge';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
 import { calculateHabitPoints } from '../utils/practiceUtils';
 import { useStreaks } from '../hooks/useStreaks';
+import { useStreakWarnings } from '../hooks/useStreakWarnings';
 
 function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, selectedDate = null }) {
   const displayDate = selectedDate || getAppToday();
@@ -20,6 +21,9 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
 
   // Calculate streaks for all habits
   const streaks = useStreaks(data, displayDate);
+  const streakWarnings = useStreakWarnings(data, displayDate);
+  const waterWarning = streakWarnings.water;
+  const nutritionWarning = streakWarnings.nutrition;
 
   const sleepQualitySet = dayData.sleepQuality !== undefined;
   const nutritionSet = dayData.nutritionPoints !== undefined;
@@ -116,10 +120,33 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
             <div className="hydration-nutrition-header">
               <div>
                 <p className="hydration-kicker">Nutrition</p>
-                <h3 className="hydration-title">Daily points</h3>
+                <h3 className="hydration-title">
+                  Daily points
+                  {streaks.nutrition > 0 && (
+                    <> <StreakBadge count={streaks.nutrition} habitName="Nutrition" /></>
+                  )}
+                </h3>
               </div>
               <span className="hydration-status">{nutritionPoints} pts</span>
             </div>
+            {nutritionWarning && nutritionWarning.atRisk && nutritionPoints !== 5 && (
+              <div className="streak-warning" role="alert">
+                Don't break your {nutritionWarning.streakAtRisk}-day perfect nutrition streak! Keep it at 5/5 today.
+              </div>
+            )}
+            {nutritionWarning && nutritionWarning.recoveryMode && nutritionPoints !== 5 && (
+              <div className="recovery-mode-banner" role="alert">
+                You missed yesterday — that's okay! Score 5/5 today to stay on track.
+                <strong> "Never miss twice." </strong>
+                <span className="recovery-prev-best">Previous streak: {nutritionWarning.previousBest} days</span>
+              </div>
+            )}
+            {nutritionWarning && nutritionWarning.streakBroken && nutritionPoints !== 5 && (
+              <div className="streak-broken-notice" role="status">
+                Streak reset. Previous best: {nutritionWarning.previousBest} days.
+                <strong> Start a new one today!</strong>
+              </div>
+            )}
             <NutritionPanel
               nutritionPoints={nutritionPoints}
               onNutritionChange={handleNutritionChange}
@@ -139,6 +166,24 @@ function MorningFlowTabs({ data = {}, weekGoals = {}, onUpdateDay = null, select
             </div>
             <span className="hydration-status">{bottlesDoneCount}/3</span>
           </div>
+          {waterWarning && waterWarning.atRisk && bottlesDoneCount < 3 && (
+            <div className="streak-warning" role="alert">
+              Don't break your {waterWarning.streakAtRisk}-day Water streak! Finish all 3 bottles today.
+            </div>
+          )}
+          {waterWarning && waterWarning.recoveryMode && bottlesDoneCount < 3 && (
+            <div className="recovery-mode-banner" role="alert">
+              You missed yesterday — that's okay! Finish all 3 bottles to stay on track.
+              <strong> "Never miss twice." </strong>
+              <span className="recovery-prev-best">Previous streak: {waterWarning.previousBest} days</span>
+            </div>
+          )}
+          {waterWarning && waterWarning.streakBroken && bottlesDoneCount < 3 && (
+            <div className="streak-broken-notice" role="status">
+              Streak reset. Previous best: {waterWarning.previousBest} days.
+              <strong> Start a new one today!</strong>
+            </div>
+          )}
           <div className="hydration-bottles">
             {bottles.map((bottle, index) => (
               <div

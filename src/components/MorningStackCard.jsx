@@ -8,6 +8,7 @@ import BurpeeTimer from './BurpeeTimer';
 import Stepper from './Stepper';
 import StreakBadge from './StreakBadge';
 import { useStreaks } from '../hooks/useStreaks';
+import { useStreakWarnings } from '../hooks/useStreakWarnings';
 import { getAppToday, getChallengeStartDate, isFutureDate } from '../utils/dateUtils';
 import { getLivingRoomWorkout, getMobilityPractice } from '../utils/practiceUtils';
 import {
@@ -73,6 +74,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
 
   // Calculate streaks for all habits
   const streaks = useStreaks(data, displayDate);
+  const streakWarnings = useStreakWarnings(data, displayDate);
 
   React.useEffect(() => {
     const wasSet = prevSleepQualitySet.current;
@@ -445,6 +447,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           onToggle: handlePracticeToggle('Read'),
           tone: 'cool',
           streak: streaks.read,
+          warning: streakWarnings.read,
         },
         {
           id: 'outside',
@@ -457,6 +460,8 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           onToggle: handleSundayOutsideToggle,
           tone: 'neutral',
           streak: streaks.outside,
+          warning: streakWarnings.outside,
+          streakUnit: 'week',
         },
       ]
     : [
@@ -472,6 +477,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           tone: 'heat',
           priority: true,
           streak: streaks.workout,
+          warning: streakWarnings.workout,
           toggleable: !schedule.hasBurpees,
           onToggle: !schedule.hasBurpees ? handlePracticeToggle('Exercise') : undefined,
         },
@@ -492,6 +498,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           controls: pullupControls,
           tone: 'warm',
           streak: streaks.pullups,
+          warning: streakWarnings.pullups,
         },
         {
           id: 'mobility',
@@ -506,6 +513,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           tone: 'neutral',
           priority: true,
           streak: streaks.stretch,
+          warning: streakWarnings.stretch,
         },
         {
           id: 'reward',
@@ -520,6 +528,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           onToggle: handlePracticeToggle('Read'),
           tone: 'cool',
           streak: streaks.read,
+          warning: streakWarnings.read,
         },
       ];
 
@@ -654,6 +663,24 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
             {step.icon && <span className="morning-step-icon">{step.icon}</span>}
             <div className="morning-step-text">
               <span className="morning-step-label">{step.label}</span>
+              {step.warning && step.warning.atRisk && !step.done && (
+                <div className="streak-warning" role="alert">
+                  Don't break your {step.warning.streakAtRisk}-{step.streakUnit || 'day'} {step.label} streak! Complete it today to keep it alive.
+                </div>
+              )}
+              {step.warning && step.warning.recoveryMode && !step.done && (
+                <div className="recovery-mode-banner" role="alert">
+                  {step.streakUnit === 'week' ? 'You missed last week' : 'You missed yesterday'} — that's okay! Complete today to stay on track.
+                  <strong> "Never miss twice." </strong>
+                  <span className="recovery-prev-best">Previous streak: {step.warning.previousBest} {step.streakUnit || 'day'}s</span>
+                </div>
+              )}
+              {step.warning && step.warning.streakBroken && !step.done && (
+                <div className="streak-broken-notice" role="status">
+                  Streak reset. Previous best: {step.warning.previousBest} {step.streakUnit || 'day'}s.
+                  <strong> Start a new one today!</strong>
+                </div>
+              )}
               {step.meta && (
                 <span className="morning-step-meta">
                   {step.meta}
