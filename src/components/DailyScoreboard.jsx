@@ -20,36 +20,77 @@ function DailyScoreboard({
   useEffect(() => {
     const wasComplete = prevCompleteRef.current;
     if (isComplete && !wasComplete && isToday) {
-      // Subtle celebration animation
-      const duration = 2000;
-      const end = Date.now() + duration;
+      // Big celebration — initial burst from both sides
+      const colors = ['#FFD700', '#FFA500', '#FF6347', '#f093fb', '#22c55e', '#60a5fa'];
 
-      const colors = ['#FFD700', '#FFA500', '#FF6347'];
+      // Massive opening volley
+      confetti({
+        particleCount: 80,
+        angle: 60,
+        spread: 70,
+        origin: { x: 0, y: 0.6 },
+        colors,
+        gravity: 0.7,
+        scalar: 1.1,
+        ticks: 200,
+      });
+      confetti({
+        particleCount: 80,
+        angle: 120,
+        spread: 70,
+        origin: { x: 1, y: 0.6 },
+        colors,
+        gravity: 0.7,
+        scalar: 1.1,
+        ticks: 200,
+      });
+
+      // Sustained shower for 3.5 seconds
+      const duration = 3500;
+      const end = Date.now() + duration;
 
       (function frame() {
         confetti({
-          particleCount: 3,
+          particleCount: 6,
           angle: 60,
-          spread: 55,
-          origin: { x: 0, y: 0.6 },
-          colors: colors,
+          spread: 60,
+          origin: { x: 0, y: 0.55 },
+          colors,
           gravity: 0.8,
-          scalar: 0.8,
+          scalar: 0.9,
         });
         confetti({
-          particleCount: 3,
+          particleCount: 6,
           angle: 120,
-          spread: 55,
-          origin: { x: 1, y: 0.6 },
-          colors: colors,
+          spread: 60,
+          origin: { x: 1, y: 0.55 },
+          colors,
           gravity: 0.8,
-          scalar: 0.8,
+          scalar: 0.9,
         });
 
         if (Date.now() < end) {
           requestAnimationFrame(frame);
         }
       })();
+
+      // Second big burst halfway through
+      setTimeout(() => {
+        confetti({
+          particleCount: 60,
+          spread: 100,
+          origin: { x: 0.5, y: 0.4 },
+          colors,
+          gravity: 0.6,
+          scalar: 1.2,
+          ticks: 180,
+        });
+      }, 1200);
+
+      // Haptic feedback on mobile
+      if ('vibrate' in navigator) {
+        navigator.vibrate([30, 50, 30]);
+      }
     }
     prevCompleteRef.current = isComplete;
   }, [isComplete, isToday]);
