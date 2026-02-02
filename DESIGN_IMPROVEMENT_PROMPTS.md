@@ -66,9 +66,9 @@ Current state:
 
 Implementation:
 1. Add time estimate to morning-step-meta for each habit:
-   - Workout (burpees/pullups): "⏱️ 5-10 min"
-   - Mobility/Stretch: "⏱️ 5 min"
-   - Reading: "⏱️ 2-5 min"
+   - Workout (burpees/pullups): "⏱️ 20 min"
+   - Mobility/Stretch: "⏱️ 12 min"
+   - Reading: "⏱️ 15 min"
    - Water: "⏱️ 30 sec"
    - Outside (Sunday): "⏱️ 20+ min"
 
