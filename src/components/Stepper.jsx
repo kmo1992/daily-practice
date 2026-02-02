@@ -7,7 +7,7 @@ function Stepper({
   min = 0,
   max = 0,
   step = 1,
-  quickAdd = 5,
+  quickAdd = null,
   disabled = false,
   onChange = () => {},
   ariaLabel = 'Stepper',
@@ -54,14 +54,16 @@ function Stepper({
           +
         </button>
       </div>
-      <button
-        className="stepper-quick"
-        type="button"
-        onClick={() => handleChange(clampedValue + quickAdd)}
-        disabled={disabled || !canIncrement}
-      >
-        +{quickAdd}
-      </button>
+      {quickAdd && quickAdd > 0 && (
+        <button
+          className="stepper-quick"
+          type="button"
+          onClick={() => handleChange(clampedValue + quickAdd)}
+          disabled={disabled || !canIncrement}
+        >
+          +{quickAdd}
+        </button>
+      )}
     </div>
   );
 }

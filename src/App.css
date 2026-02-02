@@ -1346,6 +1346,50 @@ h1 {
   opacity: 0.65;
 }
 
+.goal-reached-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid #22c55e;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.25);
+  transition: all 0.12s ease;
+  margin-bottom: 8px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.goal-reached-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+  transform: translateY(-1px);
+}
+
+.goal-reached-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.goal-reached-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stepper-with-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
 .morning-step-text {
   display: flex;
   flex-direction: column;
