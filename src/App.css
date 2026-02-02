@@ -1063,13 +1063,13 @@ h1 {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 16px;
+  padding: 18px 20px;
   min-height: 120px;
   border-radius: 14px;
-  background: linear-gradient(90deg, var(--tone-soft, rgba(226, 232, 240, 0.35)) 0%, #fff 70%);
+  background: #fff;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
@@ -1077,11 +1077,11 @@ h1 {
   content: '';
   position: absolute;
   left: 0;
-  top: 8px;
-  bottom: 8px;
+  top: 0;
+  bottom: 0;
   width: 4px;
-  background: var(--tone, #cbd5f5);
-  border-radius: 999px;
+  background: #cbd5e1;
+  border-radius: 14px 0 0 14px;
 }
 
 .morning-step.tone-heat {
@@ -1109,31 +1109,35 @@ h1 {
 }
 
 .morning-step-index {
-  min-width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--tone-ink, #1f2a44);
-  background: var(--tone-soft, #e2e8f0);
+  display: none;
 }
 
 .morning-step.done {
-  border-color: rgba(34, 197, 94, 0.4);
-  box-shadow: 0 10px 18px rgba(34, 197, 94, 0.14);
+  opacity: 0.6;
+  border-color: #e2e8f0;
+}
+
+.morning-step.done::before {
+  background: #22c55e;
 }
 
 .morning-step.next {
-  border-color: rgba(14, 165, 233, 0.45);
-  box-shadow: 0 10px 18px rgba(14, 165, 233, 0.16);
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1), 0 8px 16px rgba(25, 118, 210, 0.12);
+}
+
+.morning-step.next::before {
+  background: #1976d2;
+}
+
+.morning-step.next .morning-step-label {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1976d2;
 }
 
 .morning-step.locked {
-  opacity: 0.65;
+  opacity: 0.45;
 }
 
 .morning-step-icon {
@@ -2403,20 +2407,7 @@ h1 {
 }
 
 .morning-stack-steps::before {
-  content: '';
-  position: absolute;
-  left: 30px;
-  top: 40px;
-  bottom: 40px;
-  width: 2px;
-  background: linear-gradient(180deg, 
-    var(--heat) 0%,
-    var(--warm) 33%,
-    var(--neutral) 66%,
-    var(--cool) 100%
-  );
-  opacity: 0.2;
-  border-radius: 2px;
+  display: none;
 }
 
 .morning-step {
@@ -2434,12 +2425,12 @@ h1 {
 }
 
 .morning-step:not(.done):hover {
-  background: rgba(0, 0, 0, 0.02);
-  transform: translateX(4px);
+  background: #fafbfc;
+  border-color: #e2e8f0;
 }
 
 .morning-step.priority:not(.done):hover {
-  background: rgba(255, 215, 0, 0.05);
+  background: #fffbf0;
 }
 
 /* Make entire card clickable for toggle items */
