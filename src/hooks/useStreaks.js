@@ -17,6 +17,7 @@ export const useStreaks = (data, selectedDate) => {
         read: 0,
         water: 0,
         outside: 0,
+        nutrition: 0,
       };
     }
 
