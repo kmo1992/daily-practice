@@ -3,6 +3,7 @@
 import React from 'react';
 import { FaArrowUp, FaBed, FaBookOpen, FaDumbbell, FaMoon, FaSun, FaStar } from 'react-icons/fa';
 import { GrYoga } from 'react-icons/gr';
+import confetti from 'canvas-confetti';
 import BurpeeTimer from './BurpeeTimer';
 import Stepper from './Stepper';
 import StreakBadge from './StreakBadge';
@@ -17,6 +18,39 @@ import {
   getScheduleForDay,
   parseCount,
 } from '../utils/scheduleUtils';
+
+/** Two-cannon confetti burst for individual habit completion */
+function celebrateSmallWin() {
+  // Left cannon
+  confetti({
+    particleCount: 25,
+    angle: 60,
+    spread: 50,
+    origin: { x: 0, y: 0.7 },
+    colors: ['#22c55e', '#16a34a', '#4ade80'],
+    gravity: 0.9,
+    scalar: 0.8,
+    ticks: 100,
+  });
+  // Right cannon
+  confetti({
+    particleCount: 25,
+    angle: 120,
+    spread: 50,
+    origin: { x: 1, y: 0.7 },
+    colors: ['#22c55e', '#16a34a', '#4ade80'],
+    gravity: 0.9,
+    scalar: 0.8,
+    ticks: 100,
+  });
+}
+
+/** Haptic vibration on supported mobile devices */
+function hapticSuccess() {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(50);
+  }
+}
 
 function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selectedDate = null }) {
   const [showTimer, setShowTimer] = React.useState(false);
@@ -61,6 +95,7 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
       stretch: practices.includes('Stretch'),
       read: practices.includes('Read'),
       water: practices.includes('Water'),
+      outside: practices.includes('Outside'),
     };
 
     // Initialize on first render
@@ -76,9 +111,14 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
     if (currentPractices.stretch && !prevPractices.stretch) newlyCompleted.push('mobility');
     if (currentPractices.read && !prevPractices.read) newlyCompleted.push('reward');
     if (currentPractices.water && !prevPractices.water) newlyCompleted.push('water');
+    if (currentPractices.outside && !prevPractices.outside) newlyCompleted.push('outside');
 
     if (newlyCompleted.length > 0) {
       setCompletedStepIds(new Set(newlyCompleted));
+
+      // Micro-celebration for each habit completion
+      celebrateSmallWin();
+      hapticSuccess();
 
       // Clear animation after 1.2s
       const timer = setTimeout(() => setCompletedStepIds(new Set()), 1200);
@@ -533,6 +573,17 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
         : 'Stack complete.'
       : `${completedSteps} of ${steps.length} complete`;
 
+  // Encouragement messages based on completion progress
+  const getEncouragementMessage = () => {
+    if (completedSteps === 0 || completedSteps === steps.length) return null;
+    const percent = Math.round((completedSteps / steps.length) * 100);
+    if (percent >= 80) return 'So close! Just one more!';
+    if (percent >= 50) return `You're ${percent}% there! Keep going!`;
+    if (completedSteps >= 1) return 'Great start!';
+    return null;
+  };
+  const encouragementMessage = getEncouragementMessage();
+
   return (
     <section className={cardClassName}>
       {schedule.hasBurpees && (
@@ -568,6 +619,9 @@ function MorningStackCard({ data = {}, weekGoals = {}, onUpdateDay = null, selec
           ></div>
         </div>
         <span className="morning-stack-progress-text">{progressLabel}</span>
+        {encouragementMessage && (
+          <span className="morning-stack-encouragement">{encouragementMessage}</span>
+        )}
       </div>
 
       <div className="morning-stack-steps-header">
