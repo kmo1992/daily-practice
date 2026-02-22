@@ -23,7 +23,7 @@ function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, dis
 
   return (
     <section className="section">
-      <h2 className="section-header">Morning Ritual</h2>
+      <h2 className="section-header">Morning Routine</h2>
 
       {/* Workout */}
       <HabitRow
