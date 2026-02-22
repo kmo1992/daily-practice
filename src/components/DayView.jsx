@@ -5,9 +5,9 @@ import StreakDisplay from './StreakDisplay';
 import DailyTargets from './DailyTargets';
 import MorningRitual from './MorningRitual';
 import EndOfDay from './EndOfDay';
-import WorkoutTimer from './WorkoutTimer';
+import BurpeeTimer from './BurpeeTimer';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
-import { getWorkoutForDay, getWeekStartKey, getVideoWorkoutIndex, getMobilityIndex } from '../utils/scheduleUtils';
+import { getWorkoutForDay, getWeekStartKey, getVideoWorkoutIndex, getMobilityIndex, getDailyTargets } from '../utils/scheduleUtils';
 import { calculateStreak } from '../utils/streakUtils';
 import { livingRoomWorkouts, mobilityPractices } from '../data/practicesData';
 
@@ -101,7 +101,14 @@ function DayView({ data, weekGoals, onUpdateDay }) {
         stretchLink={stretchLink}
       />
 
-      <WorkoutTimer isOpen={showTimer} onClose={() => setShowTimer(false)} />
+      <BurpeeTimer
+        isOpen={showTimer}
+        onClose={() => setShowTimer(false)}
+        totalReps={(() => {
+          const targets = getDailyTargets(isoWeekday, currentWeekGoals);
+          return targets?.burpees || targets?.navySeals || 0;
+        })()}
+      />
 
       <EndOfDay
         habits={habits}
