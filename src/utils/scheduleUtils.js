@@ -1,14 +1,13 @@
-import moment from 'moment';
-
 // Day-of-week workout rotation (moment isoWeekday: 1=Mon ... 7=Sun)
+// Tue(2) and Thu(4) are workout rest days (pull-ups still happen)
 export const WORKOUT_SCHEDULE = {
-  1: { type: 'Burpees', hasTimer: true, hasLink: false },
-  2: { type: 'Video workout', hasTimer: false, hasLink: true },
-  3: { type: 'Navy Seals', hasTimer: true, hasLink: false },
-  4: { type: 'Burpees', hasTimer: true, hasLink: false },
-  5: { type: 'Video workout', hasTimer: false, hasLink: true },
-  6: { type: 'Navy Seals', hasTimer: true, hasLink: false },
-  7: { type: 'Rest', hasTimer: false, hasLink: false },
+  1: { type: 'Burpees', hasTimer: true },
+  2: { type: 'Rest', hasTimer: false },
+  3: { type: 'Navy Seals', hasTimer: true },
+  4: { type: 'Rest', hasTimer: false },
+  5: { type: 'Burpees', hasTimer: true },
+  6: { type: 'Navy Seals', hasTimer: true },
+  7: { type: 'Rest', hasTimer: false },
 };
 
 export const getWorkoutForDay = (isoWeekday) =>
@@ -19,9 +18,15 @@ export const isSunday = (isoWeekday) => isoWeekday === 7;
 // Trackable habits differ by day type
 export const getTrackableHabits = (isoWeekday) => {
   if (isoWeekday === 7) {
-    return ['outside', 'readCoffee', 'eatAtTable', 'hydrate', 'journal'];
+    // Sunday: full rest
+    return ['outside', 'readCoffee', 'eatAtTable', 'hydrate'];
   }
-  return ['workout', 'pullups', 'stretch', 'readCoffee', 'eatAtTable', 'hydrate', 'journal'];
+  const workout = getWorkoutForDay(isoWeekday);
+  if (workout.type === 'Rest') {
+    // Tue/Thu: workout rest, but pull-ups and stretch still happen
+    return ['pullups', 'stretch', 'readCoffee', 'eatAtTable', 'hydrate'];
+  }
+  return ['workout', 'pullups', 'stretch', 'readCoffee', 'eatAtTable', 'hydrate'];
 };
 
 // ISO week start key for weekly goals lookup
@@ -30,7 +35,7 @@ export const getWeekStartKey = (date) =>
 
 // Calculate daily session targets from weekly goals
 export const getDailyTargets = (isoWeekday, weekGoals) => {
-  if (!weekGoals || isoWeekday === 7) return null;
+  if (!weekGoals || isoWeekday === 7) return null; // Sunday: full rest, no targets
 
   const workout = getWorkoutForDay(isoWeekday);
   const targets = {};
@@ -42,29 +47,10 @@ export const getDailyTargets = (isoWeekday, weekGoals) => {
     const total = weekGoals.navySealBurpeesGoalTotal || 0;
     if (total > 0) targets.navySeals = total;
   }
-  // Video days: no burpee/navy target, only pull-ups
-
   const pullups = weekGoals.pullupsGoalPerSession || 0;
   if (pullups > 0) targets.pullups = pullups;
 
   return Object.keys(targets).length > 0 ? targets : null;
-};
-
-// Calculate the video workout index (rotating through livingRoomWorkouts)
-export const getVideoWorkoutIndex = (date) => {
-  const challengeStart = moment('2026-01-05');
-  const daysSinceStart = date.diff(challengeStart, 'days');
-  if (daysSinceStart < 0) return 0;
-
-  // Count video workout days (Tue + Fri) from start to date
-  let videoIndex = 0;
-  const check = challengeStart.clone();
-  while (check.isSameOrBefore(date, 'day')) {
-    const dow = check.isoWeekday();
-    if (dow === 2 || dow === 5) videoIndex++;
-    check.add(1, 'days');
-  }
-  return Math.max(0, videoIndex - 1);
 };
 
 // Get mobility practice index for stretch link (Mon-Sat = 0-5)

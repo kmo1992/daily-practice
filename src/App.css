@@ -373,132 +373,6 @@ body {
   border-color: var(--leather);
 }
 
-/* ---- Journal Entry ---- */
-
-.journal {
-  margin-top: 4px;
-}
-
-.journal-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 4px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--rule-line);
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color var(--transition);
-}
-
-.journal-toggle:hover {
-  background-color: var(--parchment-dark);
-}
-
-.journal-toggle--disabled {
-  cursor: default;
-}
-
-.journal-toggle--disabled:hover {
-  background-color: transparent;
-}
-
-.journal-chevron {
-  color: var(--leather);
-  transition: transform var(--transition);
-  flex-shrink: 0;
-}
-
-.journal-chevron--expanded {
-  transform: rotate(90deg);
-}
-
-.journal-title {
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  color: var(--ink);
-  flex: 1;
-}
-
-.journal-title--has-text {
-  color: var(--done-green);
-}
-
-.journal-body {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.35s ease;
-}
-
-.journal-body--expanded {
-  max-height: 600px;
-}
-
-.journal-textarea {
-  width: 100%;
-  min-height: 160px;
-  padding: 12px 12px 12px 16px;
-  border: none;
-  background-color: transparent;
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 31px,
-    var(--rule-line) 31px,
-    var(--rule-line) 32px
-  );
-  background-position-y: -4px;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.95rem;
-  color: var(--ink);
-  line-height: 32px;
-  resize: vertical;
-  outline: none;
-}
-
-.journal-textarea::placeholder {
-  color: var(--rest-gray);
-}
-
-.journal-textarea:read-only {
-  resize: none;
-  opacity: 0.8;
-}
-
-.journal-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 4px;
-}
-
-.journal-word-count {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--rest-gray);
-}
-
-.journal-save-btn {
-  background: var(--ink);
-  color: var(--parchment);
-  border: none;
-  border-radius: 4px;
-  padding: 6px 16px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: opacity var(--transition);
-}
-
-.journal-save-btn:hover:not(:disabled) {
-  opacity: 0.85;
-}
-
-.journal-save-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
 /* ---- Modal ---- */
 
 .modal-overlay {
@@ -610,6 +484,125 @@ body {
 
 .targets-save-btn:hover {
   opacity: 0.85;
+}
+
+/* ---- Four Agreements ---- */
+
+.agreements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.agreement-item {
+  cursor: pointer;
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.agreement-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 4px;
+  gap: 8px;
+}
+
+.agreement-row:hover {
+  background: var(--parchment-dark);
+}
+
+.agreement-label {
+  flex: 1;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.agreement-chevron {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.25s ease;
+  color: var(--leather);
+  flex-shrink: 0;
+}
+
+.agreement-chevron--expanded {
+  transform: rotate(90deg);
+}
+
+.agreement-description {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+}
+
+.agreement-description--expanded {
+  max-height: 200px;
+}
+
+.agreement-description-text {
+  padding: 2px 16px 12px 4px;
+  font-family: var(--font-serif);
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--leather);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ---- Attributions ---- */
+
+.attributions {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule-line);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.attributions-heading {
+  font-family: var(--font-handwritten);
+  font-size: 1rem;
+  color: var(--rest-gray);
+  margin-bottom: 8px;
+}
+
+.attributions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attributions-item {
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.attributions-note {
+  color: var(--rest-gray);
+  font-style: italic;
+}
+
+.attributions-footer {
+  margin-top: 12px;
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--rest-gray);
+}
+
+.attributions-link {
+  color: var(--leather);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.attributions-link:hover {
+  color: var(--ink);
+  text-decoration: underline;
 }
 
 /* ---- Future Day ---- */

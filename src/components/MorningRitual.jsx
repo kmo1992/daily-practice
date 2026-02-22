@@ -2,27 +2,20 @@ import React from 'react';
 import HabitRow from './HabitRow';
 import { isSunday } from '../utils/scheduleUtils';
 
-function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, workoutLink, stretchLink }) {
+function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, stretchLink }) {
   const sunday = isSunday(isoWeekday);
+  const workoutRest = workoutSchedule.type === 'Rest';
 
   // Workout label varies by day
-  const workoutLabels = {
-    'Burpees': 'Burpees',
-    'Video workout': 'Video Workout',
-    'Navy Seals': 'Navy Seals',
-    'Rest': 'Workout',
-  };
-  const workoutLabel = workoutLabels[workoutSchedule.type] || 'Workout';
+  const workoutLabel = workoutRest ? 'Workout' : workoutSchedule.type;
 
   // Build action button for workout row
   let workoutAction = null;
-  if (!sunday && workoutSchedule.hasTimer) {
+  if (workoutSchedule.hasTimer) {
     workoutAction = { type: 'button', label: '20 min', onClick: onOpenTimer };
-  } else if (!sunday && workoutSchedule.hasLink && workoutLink) {
-    workoutAction = { type: 'link', label: 'Open video', href: workoutLink };
   }
 
-  // Stretch action button
+  // Stretch action button (active Mon-Sat)
   let stretchAction = null;
   if (!sunday && stretchLink) {
     stretchAction = { type: 'link', label: 'WLC stretch', href: stretchLink };
@@ -37,12 +30,12 @@ function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, dis
         label={workoutLabel}
         checked={!!habits.workout}
         onToggle={() => onToggleHabit('workout')}
-        disabled={disabled || sunday}
-        isRest={sunday}
+        disabled={disabled || workoutRest}
+        isRest={workoutRest}
         actionButton={workoutAction}
       />
 
-      {/* Pull-ups */}
+      {/* Pull-ups — active on all days except Sunday */}
       <HabitRow
         label="Pull-ups"
         checked={!!habits.pullups}
@@ -51,7 +44,7 @@ function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, dis
         isRest={sunday}
       />
 
-      {/* Stretch */}
+      {/* Stretch — active Mon-Sat */}
       <HabitRow
         label="Stretch"
         checked={!!habits.stretch}
