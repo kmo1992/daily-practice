@@ -35,7 +35,7 @@ function DayNavigation({ currentDate, onNavigate, isToday }) {
       <div className="day-nav-date">
         {dateDisplay}
         {isToday && <span className="day-nav-today-badge">Today</span>}
-        {!isToday && <span className="day-nav-past-badge">Read only</span>}
+        {!isToday && <span className="day-nav-past-badge">{currentDate.fromNow()}</span>}
       </div>
 
       <button className="day-nav-btn" type="button" onClick={handleNext} disabled={isToday} aria-label="Next day">

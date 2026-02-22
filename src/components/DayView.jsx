@@ -19,7 +19,7 @@ function DayView({ data, weekGoals, onUpdateDay }) {
   const isoWeekday = currentDate.isoWeekday();
   const isToday = currentDate.isSame(getAppToday(), 'day');
   const isFuture = isFutureDate(currentDate);
-  const isReadOnly = !isToday;
+  const isReadOnly = isFuture;
 
   const dayData = data[dateStr] || {};
   const habits = dayData.habits || {};
@@ -52,7 +52,7 @@ function DayView({ data, weekGoals, onUpdateDay }) {
   };
 
   const handleToggleHabit = (habitKey, forceValue) => {
-    if (isReadOnly) return;
+    if (isFuture) return;
     const currentValue = !!habits[habitKey];
     const newValue = forceValue !== undefined ? forceValue : !currentValue;
     if (newValue === currentValue) return;
@@ -65,7 +65,7 @@ function DayView({ data, weekGoals, onUpdateDay }) {
   };
 
   const handleSaveJournal = (text) => {
-    if (isReadOnly) return;
+    if (isFuture) return;
     const hasText = text.trim().length > 0;
     const updatedHabits = { ...habits, journal: hasText };
     onUpdateDay(dateStr, {

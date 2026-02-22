@@ -36,13 +36,11 @@ export const getDailyTargets = (isoWeekday, weekGoals) => {
   const targets = {};
 
   if (workout.type === 'Burpees') {
-    // Mon(1) + Thu(4) = 2 burpee sessions per week
-    const weeklyTotal = weekGoals.regularBurpeesGoalTotal || 0;
-    if (weeklyTotal > 0) targets.burpees = Math.round(weeklyTotal / 2);
+    const total = weekGoals.regularBurpeesGoalTotal || 0;
+    if (total > 0) targets.burpees = total;
   } else if (workout.type === 'Navy Seals') {
-    // Wed(3) + Sat(6) = 2 navy seal sessions per week
-    const weeklyTotal = weekGoals.navySealBurpeesGoalTotal || 0;
-    if (weeklyTotal > 0) targets.navySeals = Math.round(weeklyTotal / 2);
+    const total = weekGoals.navySealBurpeesGoalTotal || 0;
+    if (total > 0) targets.navySeals = total;
   }
   // Video days: no burpee/navy target, only pull-ups
 
