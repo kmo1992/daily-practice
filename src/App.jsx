@@ -1,13 +1,20 @@
-// src/App.jsx
-
 import React, { useEffect, useState } from 'react';
-import { FaBars } from 'react-icons/fa';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
-import { collection, doc, getDocs, setDoc, writeBatch } from 'firebase/firestore';
-import WeekView from './components/WeekView';
+import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from './firebase';
 import { getAppToday } from './utils/dateUtils';
+import { getWeekStartKey } from './utils/scheduleUtils';
+import DayView from './components/DayView';
+import WeeklyTargetsModal from './components/WeeklyTargetsModal';
 import './App.css';
+
+// Inline gear SVG icon
+const GearIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="10" cy="10" r="3" />
+    <path d="M10 1.5a1 1 0 0 1 1 1v1.17a6.5 6.5 0 0 1 2.18.9l.83-.83a1 1 0 0 1 1.41 1.41l-.83.83a6.5 6.5 0 0 1 .9 2.18H16.5a1 1 0 0 1 0 2h-1.17a6.5 6.5 0 0 1-.9 2.18l.83.83a1 1 0 0 1-1.41 1.41l-.83-.83a6.5 6.5 0 0 1-2.18.9V16.5a1 1 0 0 1-2 0v-1.17a6.5 6.5 0 0 1-2.18-.9l-.83.83a1 1 0 0 1-1.41-1.41l.83-.83a6.5 6.5 0 0 1-.9-2.18H3.5a1 1 0 0 1 0-2h1.17a6.5 6.5 0 0 1 .9-2.18l-.83-.83A1 1 0 0 1 6.16 4.24l.83.83a6.5 6.5 0 0 1 2.18-.9V2.5a1 1 0 0 1 1-1z" />
+  </svg>
+);
 
 function App() {
   const [user, setUser] = useState(null);
@@ -16,13 +23,12 @@ function App() {
   const [authReady, setAuthReady] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
-  const [appMenuOpen, setAppMenuOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-       setError('');
+      setError('');
       if (firebaseUser) {
         await loadUserData(firebaseUser);
       } else {
@@ -32,7 +38,6 @@ function App() {
       }
       setAuthReady(true);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -48,23 +53,9 @@ function App() {
       snapshot.forEach((docSnap) => {
         firestoreData[docSnap.id] = docSnap.data();
       });
-
       weeksSnapshot.forEach((docSnap) => {
         firestoreWeeks[docSnap.id] = docSnap.data();
       });
-
-      // One-time migration from localStorage if this is the first login
-      const localData = JSON.parse(localStorage.getItem('wholeLifeChallengeData')) || {};
-      if (snapshot.empty && Object.keys(localData).length > 0) {
-        const batch = writeBatch(db);
-        Object.entries(localData).forEach(([dateStr, dayData]) => {
-          const dayRef = doc(db, 'users', firebaseUser.uid, 'days', dateStr);
-          batch.set(dayRef, dayData, { merge: true });
-          firestoreData[dateStr] = dayData;
-        });
-        await batch.commit();
-        localStorage.removeItem('wholeLifeChallengeData');
-      }
 
       setData(firestoreData);
       setWeekGoals(firestoreWeeks);
@@ -89,7 +80,6 @@ function App() {
     } catch (err) {
       console.error('Save failed', err);
       setError('Could not save your change. Please retry.');
-      // Revert to previous state on failure
       setData((prev) => ({ ...prev, [dateStr]: data[dateStr] || {} }));
     }
   };
@@ -106,7 +96,7 @@ function App() {
       await setDoc(weekRef, mergedWeek, { merge: true });
     } catch (err) {
       console.error('Week save failed', err);
-      setError('Could not save your weekly goals. Please retry.');
+      setError('Could not save your weekly targets. Please retry.');
       setWeekGoals((prev) => ({ ...prev, [weekStartStr]: weekGoals[weekStartStr] || {} }));
     }
   };
@@ -125,8 +115,7 @@ function App() {
     setData({});
     setWeekGoals({});
     setError('');
-    setAppMenuOpen(false);
-    setActiveModal(null);
+    setSettingsOpen(false);
     try {
       await signOut(auth);
     } catch (err) {
@@ -135,98 +124,54 @@ function App() {
     }
   };
 
-  const openModal = (modalId) => {
-    setActiveModal(modalId);
-    setAppMenuOpen(false);
-  };
+  const weekStartKey = getWeekStartKey(getAppToday());
+  const currentWeekGoals = weekGoals[weekStartKey] || {};
 
   return (
-    <div className="App">
-      <div className="app-header">
-        <h1>Healthy Habits Tracker</h1>
-        <div className="auth-bar">
-          {user ? (
-            <div className="app-menu">
-              <button
-                className="app-menu-button"
-                type="button"
-                aria-haspopup="menu"
-                aria-expanded={appMenuOpen}
-                aria-label="Open menu"
-                onClick={() => setAppMenuOpen((prev) => !prev)}
-              >
-                <FaBars aria-hidden="true" />
+    <div className="app">
+      <header className="app-header">
+        <h1 className="app-title">Daily Practice</h1>
+        <div className="app-actions">
+          {user && (
+            <>
+              <button className="settings-btn" type="button" onClick={() => setSettingsOpen(true)} aria-label="Settings">
+                <GearIcon />
               </button>
-              {appMenuOpen && (
-                <div className="app-menu-list" role="menu">
-                  <div className="app-menu-user">
-                    Signed in as {user.displayName || user.email || 'Google User'}
-                  </div>
-                  <button
-                    className={`app-menu-item ${activeModal === 'weekly-goals' ? 'active' : ''}`}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => openModal('weekly-goals')}
-                  >
-                    <span className="app-menu-item-label">Weekly Workout Goals</span>
-                  </button>
-                  <button
-                    className={`app-menu-item ${activeModal === 'weekly-progress' ? 'active' : ''}`}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => openModal('weekly-progress')}
-                  >
-                    <span className="app-menu-item-label">Weekly Progress</span>
-                  </button>
-                  <button
-                    className={`app-menu-item ${activeModal === 'challenge-progress' ? 'active' : ''}`}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => openModal('challenge-progress')}
-                  >
-                    <span className="app-menu-item-label">Progress History</span>
-                  </button>
-                  <button
-                    className="app-menu-item"
-                    type="button"
-                    role="menuitem"
-                    onClick={handleSignOut}
-                  >
-                    Sign out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button className="google-button" onClick={handleSignIn}>
-              <span className="g-icon" aria-hidden="true"></span>
-              <span>Sign in with Google</span>
+              <button className="sign-out-btn" type="button" onClick={handleSignOut}>
+                Sign out
+              </button>
+            </>
+          )}
+          {!user && authReady && (
+            <button className="sign-in-btn" type="button" onClick={handleSignIn}>
+              Sign in with Google
             </button>
           )}
         </div>
-      </div>
+      </header>
 
-      {error && <p className="status-message error">{error}</p>}
-      {authReady && user && loadingData && (
-        <p className="status-message">Loading your data...</p>
-      )}
+      {error && <p className="error-message">{error}</p>}
+      {authReady && user && loadingData && <p className="loading">Loading...</p>}
+
       {authReady && user && !loadingData && (
-        <>
-          <WeekView
-            data={data}
-            weekGoals={weekGoals}
-            onUpdateDay={handleUpdateDay}
-            onUpdateWeek={handleUpdateWeek}
-            activeModal={activeModal}
-            onCloseModal={() => setActiveModal(null)}
-          />
-        </>
+        <DayView
+          data={data}
+          weekGoals={weekGoals}
+          onUpdateDay={handleUpdateDay}
+        />
       )}
+
       {authReady && !user && (
-        <>
-          <p>Sign in to start tracking your challenge and sync to Firestore.</p>
-        </>
+        <p className="sign-in-prompt">Sign in to start your daily practice.</p>
       )}
+
+      <WeeklyTargetsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        weekStartKey={weekStartKey}
+        weekGoals={currentWeekGoals}
+        onUpdateWeek={handleUpdateWeek}
+      />
     </div>
   );
 }
