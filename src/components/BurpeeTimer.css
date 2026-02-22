@@ -5,25 +5,18 @@
   width: 100vw;
   height: 100vh;
   background-color: #00BFFF;
-  /* Deep Sky Blue background like the image */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(5px);
   transition: background-color 0.5s ease;
-  /* Smooth transition */
 }
 
 .burpee-timer-overlay.finished {
   background-color: #FFFFFF;
-  /* White background on finish for better confetti contrast */
 }
 
-/* Default: Mobile Portrait (Vertical Column) */
-/* Default: Mobile Portrait (Vertical Column) */
-/* Default: Mobile Portrait (Vertical Column) */
-/* Default: Mobile Portrait (Vertical Column) */
 .burpee-timer-modal {
   width: 100%;
   height: 100%;
@@ -34,7 +27,6 @@
   justify-content: flex-start;
   align-items: center;
   padding: 4rem 2rem 2rem 2rem;
-  /* Revert default padding */
   box-sizing: border-box;
   color: #000;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -49,7 +41,6 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: -2px;
   margin-bottom: 1rem;
-  /* Reduced margin */
   text-align: center;
 }
 
@@ -59,11 +50,9 @@
   justify-content: space-between;
   width: 100%;
   max-width: 500px;
-  /* Constraint for portrait */
   margin-bottom: 2rem;
 }
 
-/* ... Stat Items ... */
 .stat-item {
   display: flex;
   flex-direction: column;
@@ -80,7 +69,6 @@
 
 .stat-value {
   font-size: 2rem;
-  /* Standard size for portrait */
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
@@ -92,7 +80,6 @@
   width: 100%;
   align-items: center;
   flex: 1;
-  /* Key change: fill remaining vertical space */
 }
 
 .rounds-container {
@@ -102,9 +89,7 @@
   width: 100%;
   margin-bottom: 2rem;
   flex: 1;
-  /* Key change: fill the middle space */
   justify-content: space-evenly;
-  /* Spread round info out */
 }
 
 .interval-info {
@@ -126,7 +111,6 @@
   font-weight: 500;
 }
 
-/* End of Timer Message */
 .end-timer-message {
   font-size: 3rem;
   font-weight: 500;
@@ -134,16 +118,12 @@
   color: #000;
   background-color: transparent;
   padding: 1rem 0;
-  /* Remove side padding to allow full width text-align */
   width: 100%;
   margin: 0 auto;
-  /* Safety centering */
 }
 
-/* End of Timer Button (Active State - Last Round) */
 .end-timer-btn {
   font-size: 2rem;
-  /* Match .interval-round size */
   font-weight: 500;
   text-align: center;
   color: #000;
@@ -151,11 +131,9 @@
   border: none;
   padding: 0.8rem 2rem;
   border-radius: 6px;
-  /* Slightly rounded */
   cursor: pointer;
   width: auto;
   min-width: 60%;
-  /* Ensure it's wide enough on mobile */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.1s, background-color 0.2s;
   display: flex;
@@ -181,16 +159,13 @@
   width: 100%;
   gap: 3rem;
   padding-bottom: 2rem;
-  /* Mobile padding */
   margin-top: auto;
-  /* Ensure it stays at bottom */
 }
 
 .controls-group {
   display: flex;
   gap: 1.5rem;
 }
-
 
 @media (min-width: 768px),
 (max-height: 600px) {
@@ -199,10 +174,8 @@
     justify-content: space-between;
     height: 100%;
     padding: 1rem 5vw;
-    /* Adjusted padding for sticky edges */
   }
 
-  /* 40% Height - Counter Row */
   .timer-display-huge {
     flex: 0 0 40%;
     font-size: 35vh;
@@ -214,31 +187,23 @@
     width: 100%;
   }
 
-  /* 30% Height - Interval Row */
   .stats-row {
     flex: 0 0 30%;
     margin: 0;
     align-items: center;
     max-width: none;
-    /* Full width */
     width: 100%;
     justify-content: space-between;
-    /* To edges */
   }
 
   .stat-value {
     font-size: 2.5rem;
-    /* Match Round Size */
   }
-
-  /* Specific override removed */
 
   .stat-label {
     font-size: 5vh;
   }
 
-  /* ... rest ... */
-  /* 30% Height - Bottom Row */
   .bottom-area {
     flex: 0 0 30%;
     flex-direction: row;
@@ -255,7 +220,6 @@
     margin: 0;
     gap: 4rem;
     order: 2;
-    /* Middle */
     flex: 1;
     justify-content: center;
   }
@@ -277,13 +241,11 @@
 
   .end-timer-btn {
     font-size: 2.5rem;
-    /* Match landscape Round size */
     padding: 0.5rem 2rem;
   }
 
   .controls-container {
     display: contents;
-    /* Allow split left/right */
   }
 
   .controls-group.left {
@@ -329,9 +291,6 @@
   fill: #000;
 }
 
-
-/* Existing Landscape logic replaced by combined logic above */
-
 .close-btn {
   position: absolute;
   top: 20px;
@@ -343,5 +302,4 @@
   color: #666;
   z-index: 2;
   padding: 10px;
-  /* larger touch target */
 }
