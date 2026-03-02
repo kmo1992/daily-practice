@@ -30,7 +30,7 @@ function Attributions() {
           I love the simplicity of{' '}
           <Link href="https://busydadtraining.com/">Busy Dad Training</Link>. Watch his
           videos for proper Burpee and Navy Seal form. Pair them with pull-ups—start with a
-          band and work your way up to 10.
+          band and work your way up to 10. Then, graduate to a lighter band or none at all.
         </p>
 
         <p className="attributions-entry">
