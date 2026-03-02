@@ -612,18 +612,18 @@ body {
 .attributions-entries {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .attributions-entry {
   font-family: var(--font-serif);
-  font-size: 0.8rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.7;
   color: var(--ink-light);
 }
 
 .attributions-footer {
-  margin-top: 16px;
+  margin-top: 24px;
   font-family: var(--font-serif);
   font-size: 0.75rem;
   font-style: italic;
