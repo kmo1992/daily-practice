@@ -53,6 +53,7 @@ function HydrationRow({ bottles, onSetBottles, disabled }) {
 
   const checkboxClasses = [
     'habit-checkbox',
+    'hydration-checkbox',
     allFilled && 'habit-checkbox--checked',
   ].filter(Boolean).join(' ');
 

@@ -388,6 +388,10 @@ body {
   opacity: 0.5;
 }
 
+.hydration-checkbox {
+  border-style: dashed;
+}
+
 .hydration-bottles {
   display: flex;
   gap: 8px;
