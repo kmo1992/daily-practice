@@ -45,8 +45,8 @@ function Attributions() {
             <Link href="https://www.amazon.com/Four-Agreements-Practical-Personal-Freedom/dp/1878424319">
               The Four Agreements
             </Link>{' '}
-            — an easy read with essential advice for moving through the day with less guilt
-            and self-blame.
+            — the philosophy behind the daily reminders above. An essential read for living
+            with less guilt and self-blame.
           </p>
         </div>
       </div>
