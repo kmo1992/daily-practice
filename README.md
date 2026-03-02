@@ -1,178 +1,121 @@
 
-# Healthy Habits Tracker
+# Daily Practice
 
-A React app that tracks your progress building healthy habits. Log daily practices, track nutrition points, and view weekly and full challenge charts.
+A personal health and habit tracker built with React. Track daily practices, set weekly goals, and build streaks over time.
 
 ## Features
 
-- **Daily Tracking**: Log practices such as Nutrition, Exercise, Mobility, Sleep, Water, Well-being, and Reflection.
-- **Weekly Navigation**: Move between weeks to review and update your progress.
-- **Mobility Practices and Workouts**: See assigned mobility practices and workouts by date.
-- **Data Persistence**: Progress saves to browser `localStorage`.
-- **Progress Visualization**: Interactive charts for weekly and full challenge periods.
+- **Daily Tracking**: Binary habits (workout, stretch, pull-ups, reading) and numeric tallies (hydration, eat-at-table).
+- **Weekly Goals**: Set targets for burpees, navy seals, and pull-ups each week.
+- **Streak Tracking**: See consecutive days of completed practices.
+- **Workout Timer**: 20-minute interval timer with audio cues for burpees and navy seals.
+- **Mobility Links**: Rotating WLC stretch videos (Mon–Sat).
+- **Sunday Reflection**: Weekly planning section to set next week's targets.
+- **Progressive Web App**: Works offline, installable, auto-updates.
+- **Firebase Auth & Firestore**: Google sign-in with per-user cloud data.
 
-## Technologies Used
+## Technologies
 
-- **React**: For building the user interface.
-- **Vite**: As the build tool and development server.
-- **Chart.js** and **react-chartjs-2**: For rendering interactive charts.
-- **Moment.js**: For date manipulation.
-- **React Icons**: For displaying icons.
-- **CSS**: For styling the application.
+- **React 18** with Vite
+- **Firebase** (Auth + Firestore)
+- **Moment.js** for date handling
+- **vite-plugin-pwa** for offline support
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Node.js** (version 12 or higher)
-- **npm** (comes with Node.js)
+- Node.js (v16+)
+- A Firebase project with Firestore and Google Auth enabled
 
 ### Installation
 
-1. **Clone the Repository**
+```bash
+git clone https://github.com/kmo1992/daily-practice.git
+cd daily-practice
+npm install
+```
 
-   ```bash
-   git clone https://github.com/kmo1992/whole-life-challenge-tracker.git
-   cd whole-life-challenge-tracker
-   ```
+Copy `.env.example` to `.env.local` and fill in your Firebase config values.
 
-2. **Install Dependencies**
-
-   ```bash
-   npm install
-   ```
-
-### Running the Application
-
-Start the development server:
+### Development
 
 ```bash
 npm run dev
 ```
 
-Open your browser and navigate to `http://localhost:5173` to view the application.
+Open `http://localhost:5173`.
 
-### Debug Date Override (Local Dev Only)
+#### Debug Date Override (Dev Only)
 
-When running locally, you can override "today" to test different scenarios. This is disabled in production builds.
+Override "today" for testing:
 
 - Query param: `http://localhost:5173/?debugDate=2026-01-12`
-- Local storage: `localStorage.setItem('wlct-debug-date', '2026-01-12')` and refresh
-- Clear: remove the query param or run `localStorage.removeItem('wlct-debug-date')`
+- Local storage: `localStorage.setItem('wlct-debug-date', '2026-01-12')`
 
-### Building for Production
-
-To create a production build:
+### Production Build
 
 ```bash
 npm run build
-```
-
-The build output will be in the `dist/` directory.
-
-### Previewing the Production Build
-
-To preview the production build locally:
-
-```bash
-npm run preview
+npm run preview   # preview locally
 ```
 
 ## Deploying to Firebase Hosting
 
-1. Create a Firebase project (free tier is fine) and a web app to obtain the values for `.env.local` (see `.env.example`).
-2. Update `.firebaserc` with your Firebase project ID if it differs from `whole-life-challenge-tracker`.
-3. Install the Firebase CLI locally if you want to deploy manually:
+1. Create a Firebase project and web app. Copy config values into `.env.local` (see `.env.example`).
+2. Update `.firebaserc` with your project ID if needed.
+3. Deploy manually:
    ```bash
    npm install -g firebase-tools
    firebase login
    firebase deploy --only hosting
    ```
-4. The site is built from `dist` (Vite output) and served as a single-page app with rewrites handled in `firebase.json`.
 
-Deployed URLs (Firebase free hosting):
+## CI/CD (GitHub Actions)
 
-- https://whole-life-challenge-tracker.web.app
-- https://whole-life-challenge-tracker.firebaseapp.com
+The workflow at `.github/workflows/firebase-hosting.yml` builds and deploys on pushes to `main` and tags.
 
-## CI/CD (GitHub Actions -> Firebase Hosting)
-
-A workflow is provided at `.github/workflows/firebase-hosting.yml` that:
-
-- Runs on pushes to `main` and any tag (e.g., `v1.0.0`).
-- Installs dependencies with `npm ci`, builds the Vite app, and deploys to Firebase Hosting on the `live` channel.
-
-Before the workflow can deploy, add these GitHub Actions secrets (Settings -> Secrets and variables -> Actions):
-
-- `FIREBASE_SERVICE_ACCOUNT`: JSON for a Firebase service account with the **Firebase Hosting Admin** role (copy the full JSON).
-- `FIREBASE_PROJECT_ID`: Firebase project ID (must match `.firebaserc`).
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
-- `VITE_FIREBASE_MEASUREMENT_ID` (optional if you are not using Analytics)
-
-The `VITE_FIREBASE_*` values must match your Firebase web app config; they are injected at build time for production deployments.
-
-If you prefer token-based auth instead of a service account, you can set `FIREBASE_TOKEN` (from `firebase login:ci`) and swap the deploy step accordingly.
-
----
+Required GitHub Actions secrets:
+- `FIREBASE_SERVICE_ACCOUNT` — service account JSON with Firebase Hosting Admin role
+- `FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_*` — all Firebase config values from `.env.example`
 
 ## Project Structure
 
 ```
-├── src
-│   ├── components
-│   │   ├── App.jsx
-│   │   ├── WeekView.jsx
-│   │   ├── DayCard.jsx
-│   │   ├── PracticeItem.jsx
-│   │   ├── MobilitySection.jsx
-│   │   ├── NavigationButtons.jsx
-│   │   ├── IconKey.jsx
-│   │   ├── WeeklyChart.jsx
-│   │   └── EntireChallengeChart.jsx
-│   ├── data
-│   │   ├── practices.js
-│   │   └── practicesData.js
-│   ├── utils
-│   │   ├── dateUtils.js
-│   │   └── practiceUtils.js
-│   ├── App.css
-│   └── main.jsx
-├── public
-│   └── index.html
-├── .gitignore
-├── package.json
-├── README.md
-└── vite.config.js
+src/
+├── main.jsx                  # Entry point, PWA registration
+├── App.jsx                   # Root component, auth, data loading
+├── App.css                   # Global styles
+├── firebase.js               # Firebase initialization
+├── components/
+│   ├── DayView.jsx           # Main day orchestrator
+│   ├── DayNavigation.jsx     # Date picker with prev/next
+│   ├── StreakDisplay.jsx      # Streak counter
+│   ├── DailyTargets.jsx       # Daily targets from weekly goals
+│   ├── MorningRitual.jsx      # Morning routine section
+│   ├── EndOfDay.jsx           # Daily habits section
+│   ├── HabitRow.jsx           # Reusable checkbox row
+│   ├── HydrationRow.jsx       # 3-bottle water tracker
+│   ├── EatAtTableRow.jsx      # 3-plate meal tracker
+│   ├── BurpeeTimer.jsx        # Interval workout timer
+│   ├── FourAgreements.jsx     # Expandable philosophy section
+│   ├── SundayReflection.jsx   # Sunday planning section
+│   ├── WeeklyTargetsModal.jsx # Weekly goals form
+│   ├── Modal.jsx              # Generic modal
+│   └── Attributions.jsx       # Footer credits
+├── data/
+│   └── practicesData.js       # Mobility video links
+└── utils/
+    ├── dateUtils.js           # Date helpers, debug override
+    ├── scheduleUtils.js       # Workout schedule, goal resolution
+    └── streakUtils.js         # Streak calculation
 ```
 
----
+## Author
 
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
----
+Kevin Oliver — [kmo1992](https://github.com/kmo1992)
 
 ## License
 
-This project is licensed under the MIT License.
-
----
-
-## Contact
-
-- **Author**: Kevin Oliver
-- **Email**: kmo1992@gmail.com
-- **GitHub**: [kmo1992](https://github.com/kmo1992)
-
----
-
-## Acknowledgments
-
-- Inspired by the Whole Life Challenge.
-- Thanks to all the open-source projects that made this possible.
+MIT
