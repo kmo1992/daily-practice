@@ -3,7 +3,7 @@ import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from './firebase';
 import { getAppToday } from './utils/dateUtils';
-import { getWeekStartKey } from './utils/scheduleUtils';
+import { getWeekStartKey, resolveWeekGoals } from './utils/scheduleUtils';
 import DayView from './components/DayView';
 import WeeklyTargetsModal from './components/WeeklyTargetsModal';
 import './App.css';
@@ -124,8 +124,13 @@ function App() {
     }
   };
 
-  const weekStartKey = getWeekStartKey(getAppToday());
-  const currentWeekGoals = weekGoals[weekStartKey] || {};
+  const today = getAppToday();
+  const isSunday = today.isoWeekday() === 7;
+  // On Sunday, settings target the upcoming week (Monday's key)
+  const settingsWeekStartKey = isSunday
+    ? getWeekStartKey(today.clone().add(1, 'day'))
+    : getWeekStartKey(today);
+  const settingsWeekGoals = resolveWeekGoals(weekGoals, settingsWeekStartKey);
 
   return (
     <div className="app">
@@ -158,6 +163,7 @@ function App() {
           data={data}
           weekGoals={weekGoals}
           onUpdateDay={handleUpdateDay}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
       )}
 
@@ -168,9 +174,10 @@ function App() {
       <WeeklyTargetsModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        weekStartKey={weekStartKey}
-        weekGoals={currentWeekGoals}
+        weekStartKey={settingsWeekStartKey}
+        weekGoals={settingsWeekGoals}
         onUpdateWeek={handleUpdateWeek}
+        title={isSunday ? "Next Week's Targets" : 'Weekly Targets'}
       />
     </div>
   );

@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 // Day-of-week workout rotation (moment isoWeekday: 1=Mon ... 7=Sun)
 // Tue(2) and Thu(4) are workout rest days (pull-ups still happen)
 export const WORKOUT_SCHEDULE = {
@@ -51,6 +53,35 @@ export const getDailyTargets = (isoWeekday, weekGoals) => {
   if (pullups > 0) targets.pullups = pullups;
 
   return Object.keys(targets).length > 0 ? targets : null;
+};
+
+// Coach baseline for new users with no prior targets
+export const COACH_BASELINE = {
+  regularBurpeesGoalTotal: 30,
+  navySealBurpeesGoalTotal: 10,
+  pullupsGoalPerSession: 3,
+};
+
+// Resolve effective goals for a given week:
+// 1. Explicit targets for this week → use them
+// 2. Look back up to 4 weeks for carry-over → use most recent
+// 3. Fall back to coach baseline
+export const resolveWeekGoals = (weekGoals, weekStartKey) => {
+  if (!weekGoals) return { ...COACH_BASELINE };
+
+  const current = weekGoals[weekStartKey];
+  if (current && Object.keys(current).length > 0) return current;
+
+  // Look back up to 4 prior weeks
+  let d = moment(weekStartKey);
+  for (let i = 0; i < 4; i++) {
+    d = d.clone().subtract(7, 'days');
+    const key = d.format('YYYY-MM-DD');
+    const prev = weekGoals[key];
+    if (prev && Object.keys(prev).length > 0) return prev;
+  }
+
+  return { ...COACH_BASELINE };
 };
 
 // Get mobility practice index for stretch link (Mon-Sat = 0-5)

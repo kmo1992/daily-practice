@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 
-function WeeklyTargetsModal({ isOpen, onClose, weekStartKey, weekGoals, onUpdateWeek }) {
+function WeeklyTargetsModal({ isOpen, onClose, weekStartKey, weekGoals, onUpdateWeek, title = 'Weekly Targets' }) {
   const [burpees, setBurpees] = useState('');
   const [navySeals, setNavySeals] = useState('');
   const [pullups, setPullups] = useState('');
@@ -26,7 +26,7 @@ function WeeklyTargetsModal({ isOpen, onClose, weekStartKey, weekGoals, onUpdate
   };
 
   return (
-    <Modal isOpen={isOpen} title="Weekly Targets" onClose={onClose}>
+    <Modal isOpen={isOpen} title={title} onClose={onClose}>
       <div className="targets-form">
         <div className="targets-field">
           <label className="targets-label">Weekly burpees total</label>

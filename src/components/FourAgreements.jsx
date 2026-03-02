@@ -33,10 +33,11 @@ const AGREEMENTS = [
   },
 ];
 
-function FourAgreements() {
+function FourAgreements({ collapsed }) {
   const [expandedKey, setExpandedKey] = useState(null);
 
   const toggleExpand = (key) => {
+    if (collapsed) return;
     setExpandedKey((prev) => (prev === key ? null : key));
   };
 
@@ -46,24 +47,28 @@ function FourAgreements() {
 
       <ul className="agreements-list">
         {AGREEMENTS.map((agreement) => {
-          const isExpanded = expandedKey === agreement.key;
+          const isExpanded = !collapsed && expandedKey === agreement.key;
           return (
             <li
               key={agreement.key}
-              className="agreement-item"
+              className={`agreement-item${collapsed ? ' agreement-item--collapsed' : ''}`}
               onClick={() => toggleExpand(agreement.key)}
-              role="button"
-              tabIndex={0}
+              role={collapsed ? undefined : 'button'}
+              tabIndex={collapsed ? undefined : 0}
             >
               <div className="agreement-row">
                 <span className="agreement-label">{agreement.label}</span>
-                <span className={`agreement-chevron${isExpanded ? ' agreement-chevron--expanded' : ''}`}>
-                  <ChevronIcon />
-                </span>
+                {!collapsed && (
+                  <span className={`agreement-chevron${isExpanded ? ' agreement-chevron--expanded' : ''}`}>
+                    <ChevronIcon />
+                  </span>
+                )}
               </div>
-              <div className={`agreement-description${isExpanded ? ' agreement-description--expanded' : ''}`}>
-                <p className="agreement-description-text">{agreement.description}</p>
-              </div>
+              {!collapsed && (
+                <div className={`agreement-description${isExpanded ? ' agreement-description--expanded' : ''}`}>
+                  <p className="agreement-description-text">{agreement.description}</p>
+                </div>
+              )}
             </li>
           );
         })}

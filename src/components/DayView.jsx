@@ -7,12 +7,13 @@ import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
 import Attributions from './Attributions';
 import BurpeeTimer from './BurpeeTimer';
+import SundayReflection from './SundayReflection';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
-import { getWorkoutForDay, getWeekStartKey, getMobilityIndex, getDailyTargets } from '../utils/scheduleUtils';
+import { getWorkoutForDay, getWeekStartKey, getMobilityIndex, getDailyTargets, resolveWeekGoals } from '../utils/scheduleUtils';
 import { calculateStreak } from '../utils/streakUtils';
 import { mobilityPractices } from '../data/practicesData';
 
-function DayView({ data, weekGoals, onUpdateDay }) {
+function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
   const [currentDate, setCurrentDate] = useState(() => getAppToday());
   const [showTimer, setShowTimer] = useState(false);
 
@@ -27,7 +28,7 @@ function DayView({ data, weekGoals, onUpdateDay }) {
 
   const workoutSchedule = getWorkoutForDay(isoWeekday);
   const weekStartKey = getWeekStartKey(currentDate);
-  const currentWeekGoals = weekGoals[weekStartKey] || {};
+  const currentWeekGoals = resolveWeekGoals(weekGoals, weekStartKey);
 
   const streak = useMemo(() => calculateStreak(data, currentDate), [data, currentDate]);
 
@@ -108,6 +109,18 @@ function DayView({ data, weekGoals, onUpdateDay }) {
         })()}
       />
 
+      {isoWeekday === 7 && (() => {
+        const nextWeekKey = getWeekStartKey(currentDate.clone().add(1, 'day'));
+        const nextWeekExplicit = weekGoals[nextWeekKey];
+        const hasTargetsSet = !!(nextWeekExplicit && Object.keys(nextWeekExplicit).length > 0);
+        return (
+          <SundayReflection
+            onOpenSettings={onOpenSettings}
+            hasTargetsSet={hasTargetsSet}
+          />
+        );
+      })()}
+
       <EndOfDay
         habits={habits}
         onSetEatAtTable={handleSetEatAtTable}
@@ -115,7 +128,7 @@ function DayView({ data, weekGoals, onUpdateDay }) {
         disabled={isReadOnly}
       />
 
-      <FourAgreements />
+      <FourAgreements collapsed={isoWeekday === 7} />
 
       <Attributions />
     </div>

@@ -416,6 +416,61 @@ body {
   color: var(--done-green);
 }
 
+/* ---- Sunday Reflection ---- */
+
+.sunday-reflection {
+  text-align: center;
+  padding: 28px 20px;
+  margin: 24px 0;
+  border: 1px dashed var(--rule-line);
+  border-radius: 8px;
+}
+
+.sunday-reflection-title {
+  font-family: var(--font-handwritten);
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.sunday-reflection-btn {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  padding: 10px 24px;
+  border: 2px solid var(--leather);
+  border-radius: 6px;
+  background: none;
+  color: var(--leather);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.sunday-reflection-btn:hover {
+  background: var(--leather);
+  color: var(--parchment);
+}
+
+.sunday-reflection-btn--done {
+  background: rgba(61, 107, 30, 0.1);
+  border-color: var(--done-green);
+  color: var(--done-green);
+  opacity: 0.6;
+}
+
+.sunday-reflection-btn--done:hover {
+  background: rgba(61, 107, 30, 0.1);
+  color: var(--done-green);
+}
+
+.sunday-reflection-caption {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--rest-gray);
+  margin-top: 12px;
+}
+
 /* ---- Modal ---- */
 
 .modal-overlay {
@@ -540,6 +595,11 @@ body {
 .agreement-item {
   cursor: pointer;
   border-bottom: 1px solid var(--rule-line);
+}
+
+.agreement-item--collapsed {
+  cursor: default;
+  opacity: 0.7;
 }
 
 .agreement-row {
