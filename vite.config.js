@@ -8,19 +8,19 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['HealthHabitsIcon.jpg'],
+      includeAssets: ['icon-512.png'],
       manifest: {
-        name: 'Healthy Habits Tracker',
-        short_name: 'Habits',
+        name: 'Daily Practice',
+        short_name: 'Practice',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#1f2937',
+        background_color: '#f5e6c8',
+        theme_color: '#e8d5a8',
         icons: [
           {
-            src: 'HealthHabitsIcon.jpg',
+            src: 'icon-512.png',
             sizes: '512x512',
-            type: 'image/jpeg',
+            type: 'image/png',
           },
         ],
       },
