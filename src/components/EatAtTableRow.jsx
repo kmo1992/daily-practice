@@ -6,15 +6,17 @@ const CheckIcon = () => (
   </svg>
 );
 
-const UtensilIcon = () => (
+const UtensilIcon = ({ filled }) => (
   <svg width="20" height="24" viewBox="0 0 24 24" fill="none"
     stroke="currentColor" strokeWidth="1.5"
     strokeLinecap="round" strokeLinejoin="round">
-    {/* Fork: tines + handle */}
-    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-    <line x1="7" y1="2" x2="7" y2="22" />
-    {/* Knife: blade + handle */}
-    <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3" />
+    {/* Fork: closed shape for fill + handle */}
+    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2H3Z"
+      fill={filled ? 'currentColor' : 'none'} />
+    <line x1="7" y1="11" x2="7" y2="22" />
+    {/* Knife: closed blade + handle */}
+    <path d="M16 7a5 5 0 0 1 5-5v13h-3a2 2 0 0 1-2-2V7Z"
+      fill={filled ? 'currentColor' : 'none'} />
     <line x1="18" y1="15" x2="18" y2="22" />
   </svg>
 );
@@ -64,7 +66,7 @@ function EatAtTableRow({ plates, onSetPlates, disabled }) {
             type="button"
             aria-label={`Meal ${i + 1} of 3`}
           >
-            <UtensilIcon />
+            <UtensilIcon filled={i < plates} />
           </button>
         ))}
       </div>
