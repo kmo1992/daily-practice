@@ -605,8 +605,8 @@ body {
 .attributions-heading {
   font-family: var(--font-handwritten);
   font-size: 1rem;
-  color: var(--rest-gray);
-  margin-bottom: 12px;
+  color: var(--leather);
+  margin-bottom: 14px;
 }
 
 .attributions-entries {
@@ -620,6 +620,12 @@ body {
   font-size: 0.75rem;
   line-height: 1.7;
   color: var(--ink-light);
+}
+
+.attributions-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .attributions-footer {
