@@ -7,19 +7,20 @@ const CheckIcon = () => (
 );
 
 const UtensilIcon = ({ filled }) => (
-  <svg width="18" height="24" viewBox="0 0 18 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Fork */}
-    <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill={filled ? 'currentColor' : 'none'}>
-      <line x1="2" y1="2" x2="2" y2="9" />
-      <line x1="5" y1="2" x2="5" y2="9" />
-      <line x1="8" y1="2" x2="8" y2="9" />
-      <path d="M2 9 Q2 13 5 13 Q8 13 8 9" />
-      <line x1="5" y1="13" x2="5" y2="22" />
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Fork: bottom-left to top-right */}
+    <g stroke="currentColor" strokeWidth={filled ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="19" x2="9" y2="13" />
+      <line x1="9" y1="13" x2="7" y2="6" />
+      <line x1="9" y1="13" x2="11" y2="8" />
+      <line x1="9" y1="13" x2="14" y2="10" />
     </g>
-    {/* Knife */}
-    <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill={filled ? 'currentColor' : 'none'}>
-      <path d="M14 2 L14 13 Q14 15 13 15 L13 22" />
-      <path d="M14 2 Q17 6 14 13" />
+    {/* Knife: top-left to bottom-right */}
+    <g stroke="currentColor" strokeWidth={filled ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" y1="19" x2="12" y2="12" />
+      <line x1="12" y1="12" x2="5" y2="3" />
+      <line x1="5" y1="3" x2="9" y2="3" />
+      <line x1="9" y1="3" x2="12" y2="12" />
     </g>
   </svg>
 );
