@@ -6,38 +6,31 @@ const CheckIcon = () => (
   </svg>
 );
 
-const BottleIcon = ({ filled }) => (
-  <svg width="20" height="28" viewBox="0 0 20 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Cap */}
-    <rect x="6" y="0" width="8" height="4" rx="1"
+const PlateIcon = ({ filled }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Plate rim */}
+    <ellipse cx="12" cy="13" rx="10" ry="7"
       stroke="currentColor" strokeWidth="1.5"
       fill={filled ? 'currentColor' : 'none'}
     />
-    {/* Neck */}
-    <rect x="7" y="4" width="6" height="3"
-      stroke="currentColor" strokeWidth="1.5"
-      fill={filled ? 'currentColor' : 'none'}
-    />
-    {/* Body */}
-    <rect x="3" y="7" width="14" height="19" rx="2"
-      stroke="currentColor" strokeWidth="1.5"
+    {/* Inner plate */}
+    <ellipse cx="12" cy="12" rx="6" ry="4"
+      stroke="currentColor" strokeWidth="1"
       fill={filled ? 'currentColor' : 'none'}
     />
   </svg>
 );
 
-function HydrationRow({ bottles, onSetBottles, disabled }) {
-  const allFilled = bottles >= 3;
+function EatAtTableRow({ plates, onSetPlates, disabled }) {
+  const allFilled = plates >= 3;
 
-  const handleBottleClick = (index) => {
+  const handlePlateClick = (index) => {
     if (disabled) return;
-    const bottleNum = index + 1;
-    // Tap filled bottle at the current count → unfill it (go back one)
-    // Tap any other bottle → fill up to that bottle
-    if (bottleNum === bottles) {
-      onSetBottles(bottles - 1);
+    const plateNum = index + 1;
+    if (plateNum === plates) {
+      onSetPlates(plates - 1);
     } else {
-      onSetBottles(bottleNum);
+      onSetPlates(plateNum);
     }
   };
 
@@ -62,18 +55,18 @@ function HydrationRow({ bottles, onSetBottles, disabled }) {
       <div className={checkboxClasses}>
         {allFilled && <CheckIcon />}
       </div>
-      <span className={labelClasses}>Hydrate</span>
+      <span className={labelClasses}>Eat at table</span>
       <div className="tally-items">
         {[0, 1, 2].map((i) => (
           <button
             key={i}
-            className={`tally-item ${i < bottles ? 'tally-item--filled' : ''}`}
-            onClick={() => handleBottleClick(i)}
+            className={`tally-item ${i < plates ? 'tally-item--filled' : ''}`}
+            onClick={() => handlePlateClick(i)}
             disabled={disabled}
             type="button"
-            aria-label={`Bottle ${i + 1} of 3`}
+            aria-label={`Meal ${i + 1} of 3`}
           >
-            <BottleIcon filled={i < bottles} />
+            <PlateIcon filled={i < plates} />
           </button>
         ))}
       </div>
@@ -81,4 +74,4 @@ function HydrationRow({ bottles, onSetBottles, disabled }) {
   );
 }
 
-export default HydrationRow;
+export default EatAtTableRow;

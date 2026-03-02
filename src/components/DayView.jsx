@@ -56,6 +56,15 @@ function DayView({ data, weekGoals, onUpdateDay }) {
     });
   };
 
+  const handleSetEatAtTable = (count) => {
+    if (isFuture) return;
+    const updatedHabits = { ...habits, eatAtTable: count };
+    onUpdateDay(dateStr, {
+      habits: updatedHabits,
+      workoutType: workoutSchedule.type,
+    });
+  };
+
   const handleSetHydration = (count) => {
     if (isFuture) return;
     const updatedHabits = { ...habits, hydrate: count };
@@ -101,7 +110,7 @@ function DayView({ data, weekGoals, onUpdateDay }) {
 
       <EndOfDay
         habits={habits}
-        onToggleHabit={handleToggleHabit}
+        onSetEatAtTable={handleSetEatAtTable}
         onSetHydration={handleSetHydration}
         disabled={isReadOnly}
       />

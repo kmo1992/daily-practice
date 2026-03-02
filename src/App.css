@@ -373,9 +373,9 @@ body {
   border-color: var(--leather);
 }
 
-/* ---- Hydration Row ---- */
+/* ---- Tally Row (shared by Hydration, Eat at Table) ---- */
 
-.hydration-row {
+.tally-row {
   display: flex;
   align-items: center;
   padding: 10px 4px;
@@ -384,21 +384,21 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.hydration-row--disabled {
+.tally-row--disabled {
   opacity: 0.5;
 }
 
-.hydration-checkbox {
+.tally-checkbox {
   border-style: dashed;
 }
 
-.hydration-bottles {
+.tally-items {
   display: flex;
   gap: 8px;
   margin-left: auto;
 }
 
-.hydration-bottle {
+.tally-item {
   background: none;
   border: none;
   padding: 2px;
@@ -408,11 +408,11 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.hydration-bottle:disabled {
+.tally-item:disabled {
   cursor: default;
 }
 
-.hydration-bottle--filled {
+.tally-item--filled {
   color: var(--done-green);
 }
 
