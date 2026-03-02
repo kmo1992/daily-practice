@@ -11,15 +11,15 @@ function EndOfDay({ habits, onSetEatAtTable, onSetHydration, disabled }) {
     <section className="section">
       <h2 className="section-header">Daily Habits</h2>
 
-      <EatAtTableRow
-        plates={plates}
-        onSetPlates={onSetEatAtTable}
-        disabled={disabled}
-      />
-
       <HydrationRow
         bottles={bottles}
         onSetBottles={onSetHydration}
+        disabled={disabled}
+      />
+
+      <EatAtTableRow
+        plates={plates}
+        onSetPlates={onSetEatAtTable}
         disabled={disabled}
       />
     </section>
