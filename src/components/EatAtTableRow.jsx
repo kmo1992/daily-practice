@@ -7,21 +7,15 @@ const CheckIcon = () => (
 );
 
 const UtensilIcon = ({ filled }) => (
-  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Fork: bottom-left to top-right */}
-    <g stroke="currentColor" strokeWidth={filled ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="3" y1="19" x2="9" y2="13" />
-      <line x1="9" y1="13" x2="7" y2="6" />
-      <line x1="9" y1="13" x2="11" y2="8" />
-      <line x1="9" y1="13" x2="14" y2="10" />
-    </g>
-    {/* Knife: top-left to bottom-right */}
-    <g stroke="currentColor" strokeWidth={filled ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="19" y1="19" x2="12" y2="12" />
-      <line x1="12" y1="12" x2="5" y2="3" />
-      <line x1="5" y1="3" x2="9" y2="3" />
-      <line x1="9" y1="3" x2="12" y2="12" />
-    </g>
+  <svg width="20" height="24" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth={filled ? 2.5 : 1.5}
+    strokeLinecap="round" strokeLinejoin="round">
+    {/* Fork: tines + handle */}
+    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+    <line x1="7" y1="2" x2="7" y2="22" />
+    {/* Knife: blade + handle */}
+    <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3" />
+    <line x1="18" y1="15" x2="18" y2="22" />
   </svg>
 );
 
