@@ -606,31 +606,24 @@ body {
   font-family: var(--font-handwritten);
   font-size: 1rem;
   color: var(--rest-gray);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.attributions-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.attributions-entries {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
 }
 
-.attributions-item {
+.attributions-entry {
   font-family: var(--font-serif);
   font-size: 0.8rem;
-  line-height: 1.5;
-}
-
-.attributions-note {
-  color: var(--rest-gray);
-  font-style: italic;
+  line-height: 1.6;
+  color: var(--ink-light);
 }
 
 .attributions-footer {
-  margin-top: 12px;
+  margin-top: 16px;
   font-family: var(--font-serif);
   font-size: 0.75rem;
   font-style: italic;
