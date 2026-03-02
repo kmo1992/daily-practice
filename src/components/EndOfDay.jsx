@@ -1,7 +1,11 @@
 import React from 'react';
 import HabitRow from './HabitRow';
+import HydrationRow from './HydrationRow';
 
-function EndOfDay({ habits, onToggleHabit, disabled }) {
+function EndOfDay({ habits, onToggleHabit, onSetHydration, disabled }) {
+  // Normalize hydrate: legacy boolean true → 3, false/undefined → 0
+  const bottles = habits.hydrate === true ? 3 : (Number(habits.hydrate) || 0);
+
   return (
     <section className="section">
       <h2 className="section-header">Daily Habits</h2>
@@ -13,10 +17,9 @@ function EndOfDay({ habits, onToggleHabit, disabled }) {
         disabled={disabled}
       />
 
-      <HabitRow
-        label="Hydrate"
-        checked={!!habits.hydrate}
-        onToggle={() => onToggleHabit('hydrate')}
+      <HydrationRow
+        bottles={bottles}
+        onSetBottles={onSetHydration}
         disabled={disabled}
       />
     </section>
