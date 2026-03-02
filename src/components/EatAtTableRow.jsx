@@ -8,16 +8,18 @@ const CheckIcon = () => (
 
 const UtensilIcon = ({ filled }) => (
   <svg width="20" height="24" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="1.5"
-    strokeLinecap="round" strokeLinejoin="round">
-    {/* Fork: closed shape for fill + handle */}
-    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2H3Z"
-      fill={filled ? 'currentColor' : 'none'} />
-    <line x1="7" y1="11" x2="7" y2="22" />
-    {/* Knife: closed blade + handle */}
-    <path d="M16 7a5 5 0 0 1 5-5v13h-3a2 2 0 0 1-2-2V7Z"
-      fill={filled ? 'currentColor' : 'none'} />
-    <line x1="18" y1="15" x2="18" y2="22" />
+    stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    {/* Fork: bold stroke only, no fill */}
+    <g strokeWidth={filled ? 2.5 : 1.5}>
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+      <line x1="7" y1="2" x2="7" y2="22" />
+    </g>
+    {/* Knife: solid fill when active */}
+    <g strokeWidth="1.5">
+      <path d="M16 7a5 5 0 0 1 5-5v13h-3a2 2 0 0 1-2-2V7Z"
+        fill={filled ? 'currentColor' : 'none'} />
+      <line x1="18" y1="15" x2="18" y2="22" />
+    </g>
   </svg>
 );
 
