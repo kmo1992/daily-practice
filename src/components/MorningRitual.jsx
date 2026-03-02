@@ -25,15 +25,17 @@ function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, dis
     <section className="section">
       <h2 className="section-header">Morning Routine</h2>
 
-      {/* Workout */}
-      <HabitRow
-        label={workoutLabel}
-        checked={!!habits.workout}
-        onToggle={() => onToggleHabit('workout')}
-        disabled={disabled || workoutRest}
-        isRest={workoutRest}
-        actionButton={workoutAction}
-      />
+      {/* Workout — hidden on Sunday */}
+      {!sunday && (
+        <HabitRow
+          label={workoutLabel}
+          checked={!!habits.workout}
+          onToggle={() => onToggleHabit('workout')}
+          disabled={disabled || workoutRest}
+          isRest={workoutRest}
+          actionButton={workoutAction}
+        />
+      )}
 
       {/* Pull-ups — active on all days except Sunday */}
       <HabitRow

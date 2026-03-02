@@ -373,6 +373,104 @@ body {
   border-color: var(--leather);
 }
 
+/* ---- Tally Row (shared by Hydration, Eat at Table) ---- */
+
+.tally-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--rule-line);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tally-row--disabled {
+  opacity: 0.5;
+}
+
+.tally-checkbox {
+  border-style: dashed;
+}
+
+.tally-items {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.tally-item {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--leather);
+  transition: color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tally-item:disabled {
+  cursor: default;
+}
+
+.tally-item--filled {
+  color: var(--done-green);
+}
+
+/* ---- Sunday Reflection ---- */
+
+.sunday-reflection {
+  text-align: center;
+  padding: 28px 20px;
+  margin: 24px 0;
+  border: 1px dashed var(--rule-line);
+  border-radius: 8px;
+}
+
+.sunday-reflection-title {
+  font-family: var(--font-handwritten);
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.sunday-reflection-btn {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  padding: 10px 24px;
+  border: 2px solid var(--leather);
+  border-radius: 6px;
+  background: none;
+  color: var(--leather);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.sunday-reflection-btn:hover {
+  background: var(--leather);
+  color: var(--parchment);
+}
+
+.sunday-reflection-btn--done {
+  background: rgba(61, 107, 30, 0.1);
+  border-color: var(--done-green);
+  color: var(--done-green);
+  opacity: 0.6;
+}
+
+.sunday-reflection-btn--done:hover {
+  background: rgba(61, 107, 30, 0.1);
+  color: var(--done-green);
+}
+
+.sunday-reflection-caption {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--rest-gray);
+  margin-top: 12px;
+}
+
 /* ---- Modal ---- */
 
 .modal-overlay {
@@ -499,6 +597,11 @@ body {
   border-bottom: 1px solid var(--rule-line);
 }
 
+.agreement-item--collapsed {
+  cursor: default;
+  opacity: 0.7;
+}
+
 .agreement-row {
   display: flex;
   align-items: center;
@@ -562,32 +665,31 @@ body {
 .attributions-heading {
   font-family: var(--font-handwritten);
   font-size: 1rem;
-  color: var(--rest-gray);
-  margin-bottom: 8px;
+  color: var(--leather);
+  margin-bottom: 14px;
 }
 
-.attributions-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.attributions-entries {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 14px;
 }
 
-.attributions-item {
+.attributions-entry {
   font-family: var(--font-serif);
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: var(--ink-light);
 }
 
-.attributions-note {
-  color: var(--rest-gray);
-  font-style: italic;
+.attributions-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .attributions-footer {
-  margin-top: 12px;
+  margin-top: 24px;
   font-family: var(--font-serif);
   font-size: 0.75rem;
   font-style: italic;

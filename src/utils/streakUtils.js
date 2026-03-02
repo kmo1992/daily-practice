@@ -7,7 +7,13 @@ import { getTrackableHabits } from './scheduleUtils';
 export const isDayComplete = (dayData, isoWeekday) => {
   if (!dayData || !dayData.habits) return false;
   const trackable = getTrackableHabits(isoWeekday);
-  return trackable.every((habit) => dayData.habits[habit] === true);
+  // Tally habits store numeric counts; legacy boolean true is also valid
+  const tallyHabits = ['hydrate', 'eatAtTable'];
+  return trackable.every((habit) => {
+    const val = dayData.habits[habit];
+    if (tallyHabits.includes(habit)) return val === true || val >= 3;
+    return val === true;
+  });
 };
 
 /**
