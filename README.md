@@ -12,12 +12,13 @@ A personal health and habit tracker built with React. Track daily practices, set
 - **Mobility Links**: Rotating WLC stretch videos (Mon–Sat).
 - **Sunday Reflection**: Weekly planning section to set next week's targets.
 - **Progressive Web App**: Works offline, installable, auto-updates.
-- **Firebase Auth & Firestore**: Google sign-in with per-user cloud data.
+- **Firebase Auth & Firestore**: Google sign-in (via Google Identity Services) with per-user cloud data.
 
 ## Technologies
 
 - **React 18** with Vite
 - **Firebase** (Auth + Firestore)
+- **Google Identity Services** for OAuth sign-in
 - **Moment.js** for date handling
 - **vite-plugin-pwa** for offline support
 
@@ -25,8 +26,26 @@ A personal health and habit tracker built with React. Track daily practices, set
 
 ### Prerequisites
 
-- Node.js (v16+)
+- Node.js (v18+)
 - A Firebase project with Firestore and Google Auth enabled
+- A Google OAuth 2.0 Client ID (for Google Identity Services sign-in)
+
+### Firebase Setup
+
+1. Go to the [Firebase Console](https://console.firebase.google.com/) and create a new project (or use an existing one).
+2. **Enable Firestore**: In the Firebase Console, go to **Build → Firestore Database** and click "Create database".
+3. **Enable Google Auth**: Go to **Build → Authentication → Sign-in method**, then enable **Google** as a sign-in provider.
+4. **Register a web app**: Go to **Project Settings** (gear icon) → **General** → scroll to "Your apps" → click the web icon (`</>`) to add a web app. After registering, you'll see a `firebaseConfig` object — these are the values you need for your `.env.local`.
+
+### Google OAuth Client ID
+
+The app uses Google Identity Services (GIS) for sign-in, which requires a separate OAuth Client ID:
+
+1. Go to the [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) (make sure you're in the same GCP project linked to your Firebase project).
+2. Click **Create Credentials → OAuth client ID**.
+3. Set the application type to **Web application**.
+4. Under **Authorized JavaScript origins**, add your domains (e.g. `http://localhost:5173` for local dev, plus your production URL).
+5. Copy the generated **Client ID** — this is your `VITE_GOOGLE_CLIENT_ID`.
 
 ### Installation
 
@@ -36,7 +55,18 @@ cd daily-practice
 npm install
 ```
 
-Copy `.env.example` to `.env.local` and fill in your Firebase config values.
+Copy `.env.example` to `.env.local` and fill in the values:
+
+| Variable | Where to find it |
+|---|---|
+| `VITE_FIREBASE_API_KEY` | Firebase Console → Project Settings → Your apps → `apiKey` |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Same location → `authDomain` |
+| `VITE_FIREBASE_PROJECT_ID` | Same location → `projectId` |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Same location → `storageBucket` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Same location → `messagingSenderId` |
+| `VITE_FIREBASE_APP_ID` | Same location → `appId` |
+| `VITE_FIREBASE_MEASUREMENT_ID` | Same location → `measurementId` |
+| `VITE_GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials → OAuth 2.0 Client ID |
 
 ### Development
 
@@ -79,6 +109,7 @@ Required GitHub Actions secrets:
 - `FIREBASE_SERVICE_ACCOUNT` — service account JSON with Firebase Hosting Admin role
 - `FIREBASE_PROJECT_ID`
 - `VITE_FIREBASE_*` — all Firebase config values from `.env.example`
+- `VITE_GOOGLE_CLIENT_ID` — Google OAuth 2.0 Client ID
 
 ## Project Structure
 
