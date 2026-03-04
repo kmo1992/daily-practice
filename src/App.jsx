@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { onAuthStateChanged, signOut, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
-import { auth, googleProvider, db } from './firebase';
+import { auth, GOOGLE_CLIENT_ID, db } from './firebase';
 import { getAppToday } from './utils/dateUtils';
 import { getWeekStartKey, resolveWeekGoals } from './utils/scheduleUtils';
 import DayView from './components/DayView';
@@ -24,6 +24,19 @@ function App() {
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const gisButtonRef = useRef(null);
+  const gisInitializedRef = useRef(false);
+
+  const handleGisCredentialResponse = useCallback(async (response) => {
+    setError('');
+    try {
+      const credential = GoogleAuthProvider.credential(response.credential);
+      await signInWithCredential(auth, credential);
+    } catch (err) {
+      console.error('GIS sign-in failed', err);
+      setError('Sign-in failed. Please try again.');
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -40,6 +53,45 @@ function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user || !authReady) return;
+    if (gisInitializedRef.current) return;
+
+    const initializeGis = () => {
+      if (!window.google?.accounts?.id) return false;
+      if (!gisButtonRef.current) return false;
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGisCredentialResponse,
+        auto_select: false,
+        itp_support: true,
+      });
+
+      window.google.accounts.id.renderButton(gisButtonRef.current, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        width: 250,
+      });
+
+      gisInitializedRef.current = true;
+      return true;
+    };
+
+    if (initializeGis()) return;
+
+    const interval = setInterval(() => {
+      if (initializeGis()) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [user, authReady, handleGisCredentialResponse]);
 
   const loadUserData = async (firebaseUser) => {
     setLoadingData(true);
@@ -101,22 +153,16 @@ function App() {
     }
   };
 
-  const handleSignIn = async () => {
-    setError('');
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      console.error('Sign-in failed', err);
-      setError('Sign-in was interrupted. Please try again.');
-    }
-  };
-
   const handleSignOut = async () => {
     setData({});
     setWeekGoals({});
     setError('');
     setSettingsOpen(false);
+    gisInitializedRef.current = false;
     try {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.disableAutoSelect();
+      }
       await signOut(auth);
     } catch (err) {
       console.error('Sign-out failed', err);
@@ -147,11 +193,6 @@ function App() {
               </button>
             </>
           )}
-          {!user && authReady && (
-            <button className="sign-in-btn" type="button" onClick={handleSignIn}>
-              Sign in with Google
-            </button>
-          )}
         </div>
       </header>
 
@@ -168,7 +209,10 @@ function App() {
       )}
 
       {authReady && !user && (
-        <p className="sign-in-prompt">Sign in to start your daily practice.</p>
+        <div className="sign-in-container">
+          <p className="sign-in-prompt">Sign in to start your daily practice.</p>
+          <div ref={gisButtonRef} />
+        </div>
       )}
 
       <WeeklyTargetsModal

@@ -103,27 +103,18 @@ body {
   color: var(--ink);
 }
 
-.sign-in-btn {
-  background: var(--ink);
-  color: var(--parchment);
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  font-family: var(--font-serif);
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: opacity var(--transition);
-}
-
-.sign-in-btn:hover {
-  opacity: 0.85;
+.sign-in-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: 60px;
 }
 
 .sign-in-prompt {
   text-align: center;
   color: var(--ink-light);
   font-style: italic;
-  margin-top: 60px;
 }
 
 .error-message {
