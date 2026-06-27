@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import DayNavigation from './DayNavigation';
 import StreakDisplay from './StreakDisplay';
 import MorningTargets from './MorningTargets';

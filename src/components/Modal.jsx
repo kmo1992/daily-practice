@@ -1,7 +1,5 @@
 // src/components/Modal.jsx
 
-import React from 'react';
-
 function Modal({ isOpen, title, kicker, icon, onClose, children }) {
   if (!isOpen) {
     return null;

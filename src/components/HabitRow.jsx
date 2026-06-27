@@ -1,4 +1,3 @@
-import React from 'react';
 
 // Inline SVG icons
 const CheckIcon = () => (

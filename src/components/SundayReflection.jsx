@@ -1,4 +1,3 @@
-import React from 'react';
 
 function SundayReflection({ onOpenSettings, hasTargetsSet, targets }) {
   const parts = [];

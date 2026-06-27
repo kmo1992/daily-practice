@@ -1,4 +1,3 @@
-import React from 'react';
 import HabitRow from './HabitRow';
 import { isSunday } from '../utils/scheduleUtils';
 

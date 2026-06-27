@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from './Modal';
 
 function WeeklyTargetsModal({ isOpen, onClose, weekStartKey, weekGoals, onUpdateWeek, title = 'Weekly Targets' }) {

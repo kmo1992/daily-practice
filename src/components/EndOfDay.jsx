@@ -1,4 +1,3 @@
-import React from 'react';
 import EatAtTableRow from './EatAtTableRow';
 import HydrationRow from './HydrationRow';
 

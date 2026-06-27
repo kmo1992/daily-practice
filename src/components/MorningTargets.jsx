@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getDailyTargets } from '../utils/scheduleUtils';
 
 // Exercises that can appear in a day's numbers, in display order
@@ -64,7 +64,7 @@ function MorningTargets({ isoWeekday, weekGoals, dayData, isToday, disabled, onA
 
   return (
     <section className="morning-targets">
-      <h2 className="section-header morning-targets-header">Today's Numbers</h2>
+      <h2 className="section-header morning-targets-header">Today&apos;s Numbers</h2>
       <div className="targets-accept-grid">
         {activeFields.map((f) => (
           <div className="targets-accept-field" key={f.key}>
@@ -83,7 +83,7 @@ function MorningTargets({ isoWeekday, weekGoals, dayData, isToday, disabled, onA
         ))}
       </div>
       <button type="button" className="targets-accept-btn" onClick={handleAccept}>
-        Accept today's numbers
+        Accept today&apos;s numbers
       </button>
     </section>
   );
