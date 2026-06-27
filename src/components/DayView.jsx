@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import DayNavigation from './DayNavigation';
 import StreakDisplay from './StreakDisplay';
-import DailyTargets from './DailyTargets';
+import MorningTargets from './MorningTargets';
 import MorningRitual from './MorningRitual';
 import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
@@ -66,6 +66,15 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
+  const handleAcceptTargets = (acceptedTargets) => {
+    if (isFuture) return;
+    onUpdateDay(dateStr, {
+      acceptedTargets,
+      targetsAcceptedAt: new Date().toISOString(),
+      workoutType: workoutSchedule.type,
+    });
+  };
+
   const handleSetHydration = (count) => {
     if (isFuture) return;
     const updatedHabits = { ...habits, hydrate: count };
@@ -88,7 +97,14 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     <div>
       <DayNavigation currentDate={currentDate} onNavigate={handleNavigate} isToday={isToday} />
       <StreakDisplay streak={streak} />
-      <DailyTargets isoWeekday={isoWeekday} weekGoals={currentWeekGoals} />
+      <MorningTargets
+        isoWeekday={isoWeekday}
+        weekGoals={currentWeekGoals}
+        dayData={dayData}
+        isToday={isToday}
+        disabled={isReadOnly}
+        onAccept={handleAcceptTargets}
+      />
 
       <MorningRitual
         habits={habits}

@@ -234,6 +234,103 @@ body {
   letter-spacing: 0.02em;
 }
 
+.daily-targets--accepted {
+  color: var(--ink-light);
+}
+
+.daily-targets-check {
+  color: var(--done-green);
+  margin-right: 4px;
+}
+
+.daily-targets-edit {
+  background: none;
+  border: none;
+  color: var(--rest-gray);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* ---- Morning Targets (accept card) ---- */
+
+.morning-targets {
+  margin-bottom: 24px;
+}
+
+.morning-targets-header {
+  text-align: center;
+  border-bottom: none;
+  margin-bottom: 14px;
+}
+
+.targets-accept-grid {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin-bottom: 18px;
+}
+
+.targets-accept-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.targets-accept-input {
+  width: 78px;
+  text-align: center;
+  background: var(--parchment-dark);
+  border: 1px solid var(--rule-line);
+  border-radius: 6px;
+  padding: 10px 4px;
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--transition);
+  -moz-appearance: textfield;
+}
+
+.targets-accept-input::-webkit-outer-spin-button,
+.targets-accept-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.targets-accept-input:focus {
+  border-color: var(--leather);
+}
+
+.targets-accept-label {
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+}
+
+.targets-accept-btn {
+  display: block;
+  width: 100%;
+  background: var(--ink);
+  color: var(--parchment);
+  border: none;
+  border-radius: 4px;
+  padding: 11px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.targets-accept-btn:hover {
+  opacity: 0.85;
+}
+
 /* ---- Section Headers ---- */
 
 .section {
