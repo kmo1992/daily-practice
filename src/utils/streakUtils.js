@@ -1,5 +1,5 @@
-import moment from 'moment';
 import { getTrackableHabits } from './scheduleUtils';
+import { getAppToday } from './dateUtils';
 
 /**
  * Check if ALL trackable habits for a given day are completed.
@@ -21,7 +21,7 @@ export const isDayComplete = (dayData, isoWeekday) => {
  * where ALL trackable habits were completed.
  */
 export const calculateStreak = (data, asOfDate) => {
-  const today = moment().startOf('day');
+  const today = getAppToday().startOf('day');
   if (asOfDate.isAfter(today, 'day')) return 0;
 
   let streak = 0;
