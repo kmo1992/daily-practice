@@ -290,16 +290,3 @@
 .icon-btn.play svg {
   fill: #000;
 }
-
-.close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 2.5rem;
-  cursor: pointer;
-  color: #666;
-  z-index: 2;
-  padding: 10px;
-}
