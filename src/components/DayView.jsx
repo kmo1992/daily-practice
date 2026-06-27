@@ -131,10 +131,12 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         const nextWeekKey = getWeekStartKey(currentDate.clone().add(1, 'day'));
         const nextWeekExplicit = weekGoals[nextWeekKey];
         const hasTargetsSet = !!(nextWeekExplicit && Object.keys(nextWeekExplicit).length > 0);
+        const nextWeekGoals = resolveWeekGoals(weekGoals, nextWeekKey);
         return (
           <SundayReflection
             onOpenSettings={onOpenSettings}
             hasTargetsSet={hasTargetsSet}
+            targets={nextWeekGoals}
           />
         );
       })()}

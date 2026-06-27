@@ -522,6 +522,14 @@ body {
   margin-bottom: 16px;
 }
 
+.sunday-reflection-summary {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+}
+
 .sunday-reflection-btn {
   font-family: var(--font-serif);
   font-size: 0.95rem;
