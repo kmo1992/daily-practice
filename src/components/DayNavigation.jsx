@@ -1,4 +1,3 @@
-import React from 'react';
 
 // Inline arrow SVGs
 const LeftArrow = () => (

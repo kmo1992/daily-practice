@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import DayNavigation from './DayNavigation';
 import StreakDisplay from './StreakDisplay';
-import DailyTargets from './DailyTargets';
+import MorningTargets from './MorningTargets';
 import MorningRitual from './MorningRitual';
 import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
@@ -66,6 +66,15 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
+  const handleAcceptTargets = (acceptedTargets) => {
+    if (isFuture) return;
+    onUpdateDay(dateStr, {
+      acceptedTargets,
+      targetsAcceptedAt: new Date().toISOString(),
+      workoutType: workoutSchedule.type,
+    });
+  };
+
   const handleSetHydration = (count) => {
     if (isFuture) return;
     const updatedHabits = { ...habits, hydrate: count };
@@ -88,7 +97,14 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     <div>
       <DayNavigation currentDate={currentDate} onNavigate={handleNavigate} isToday={isToday} />
       <StreakDisplay streak={streak} />
-      <DailyTargets isoWeekday={isoWeekday} weekGoals={currentWeekGoals} />
+      <MorningTargets
+        isoWeekday={isoWeekday}
+        weekGoals={currentWeekGoals}
+        dayData={dayData}
+        isToday={isToday}
+        disabled={isReadOnly}
+        onAccept={handleAcceptTargets}
+      />
 
       <MorningRitual
         habits={habits}
@@ -104,7 +120,9 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         isOpen={showTimer}
         onClose={() => setShowTimer(false)}
         totalReps={(() => {
-          const targets = getDailyTargets(isoWeekday, currentWeekGoals);
+          // Prefer the numbers you accepted for the day; fall back to the schedule
+          const accepted = dayData.acceptedTargets;
+          const targets = accepted || getDailyTargets(isoWeekday, currentWeekGoals);
           return targets?.burpees || targets?.navySeals || 0;
         })()}
       />
@@ -113,10 +131,12 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         const nextWeekKey = getWeekStartKey(currentDate.clone().add(1, 'day'));
         const nextWeekExplicit = weekGoals[nextWeekKey];
         const hasTargetsSet = !!(nextWeekExplicit && Object.keys(nextWeekExplicit).length > 0);
+        const nextWeekGoals = resolveWeekGoals(weekGoals, nextWeekKey);
         return (
           <SundayReflection
             onOpenSettings={onOpenSettings}
             hasTargetsSet={hasTargetsSet}
+            targets={nextWeekGoals}
           />
         );
       })()}

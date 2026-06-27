@@ -1,4 +1,3 @@
-import React from 'react';
 
 const Link = ({ href, children }) => (
   <a className="attributions-link" href={href} target="_blank" rel="noopener noreferrer">
