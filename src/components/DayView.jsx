@@ -120,7 +120,9 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         isOpen={showTimer}
         onClose={() => setShowTimer(false)}
         totalReps={(() => {
-          const targets = getDailyTargets(isoWeekday, currentWeekGoals);
+          // Prefer the numbers you accepted for the day; fall back to the schedule
+          const accepted = dayData.acceptedTargets;
+          const targets = accepted || getDailyTargets(isoWeekday, currentWeekGoals);
           return targets?.burpees || targets?.navySeals || 0;
         })()}
       />
