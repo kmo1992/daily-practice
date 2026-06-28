@@ -461,6 +461,54 @@ body {
   border-color: var(--leather);
 }
 
+/* ---- Pull-ups rep stepper ---- */
+
+.pullups-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pullups-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-line);
+  background: var(--parchment-dark);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--transition), opacity var(--transition);
+}
+
+.pullups-step:hover:not(:disabled) {
+  border-color: var(--leather);
+}
+
+.pullups-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pullups-count {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--ink);
+  min-width: 42px;
+  text-align: center;
+}
+
+.pullups-target {
+  color: var(--rest-gray);
+  font-size: 0.8rem;
+}
+
 /* ---- Tally Row (shared by Hydration, Eat at Table) ---- */
 
 .tally-row {
