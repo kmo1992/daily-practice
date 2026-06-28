@@ -1,19 +1,25 @@
 import { getTrackableHabits } from './scheduleUtils';
 import { getAppToday } from './dateUtils';
 
+// Tally habits store numeric counts; legacy boolean true is also valid.
+const TALLY_HABITS = ['hydrate', 'eatAtTable'];
+
+/**
+ * Whether a single habit is satisfied for a day's habits object.
+ */
+export const isHabitSatisfied = (habits, habit) => {
+  const val = habits?.[habit];
+  if (TALLY_HABITS.includes(habit)) return val === true || val >= 3;
+  return val === true;
+};
+
 /**
  * Check if ALL trackable habits for a given day are completed.
  */
 export const isDayComplete = (dayData, isoWeekday) => {
   if (!dayData || !dayData.habits) return false;
   const trackable = getTrackableHabits(isoWeekday);
-  // Tally habits store numeric counts; legacy boolean true is also valid
-  const tallyHabits = ['hydrate', 'eatAtTable'];
-  return trackable.every((habit) => {
-    const val = dayData.habits[habit];
-    if (tallyHabits.includes(habit)) return val === true || val >= 3;
-    return val === true;
-  });
+  return trackable.every((habit) => isHabitSatisfied(dayData.habits, habit));
 };
 
 /**
