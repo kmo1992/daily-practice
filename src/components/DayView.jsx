@@ -84,6 +84,24 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
+  const handleSetPullups = (count) => {
+    if (isFuture) return;
+    // Keep the boolean in sync so streak/completion logic still works
+    const updatedHabits = { ...habits, pullups: count > 0, pullupsCount: count };
+    onUpdateDay(dateStr, {
+      habits: updatedHabits,
+      workoutType: workoutSchedule.type,
+    });
+  };
+
+  // Today's pull-up target: the accepted number if set, else the schedule's
+  const pullupsTarget = (() => {
+    const accepted = dayData.acceptedTargets;
+    if (accepted && accepted.pullups != null) return accepted.pullups;
+    const targets = getDailyTargets(isoWeekday, currentWeekGoals);
+    return targets?.pullups || 0;
+  })();
+
   if (isFuture) {
     return (
       <div>
@@ -114,6 +132,9 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         disabled={isReadOnly}
         onOpenTimer={() => setShowTimer(true)}
         stretchLink={stretchLink}
+        pullupsCount={Number(habits.pullupsCount) || (habits.pullups ? pullupsTarget : 0)}
+        pullupsTarget={pullupsTarget}
+        onSetPullups={handleSetPullups}
       />
 
       <BurpeeTimer

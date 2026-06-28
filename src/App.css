@@ -461,6 +461,54 @@ body {
   border-color: var(--leather);
 }
 
+/* ---- Pull-ups rep stepper ---- */
+
+.pullups-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pullups-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-line);
+  background: var(--parchment-dark);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--transition), opacity var(--transition);
+}
+
+.pullups-step:hover:not(:disabled) {
+  border-color: var(--leather);
+}
+
+.pullups-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pullups-count {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--ink);
+  min-width: 42px;
+  text-align: center;
+}
+
+.pullups-target {
+  color: var(--rest-gray);
+  font-size: 0.8rem;
+}
+
 /* ---- Tally Row (shared by Hydration, Eat at Table) ---- */
 
 .tally-row {
@@ -810,4 +858,159 @@ body {
   color: var(--rest-gray);
   font-style: italic;
   margin-top: 40px;
+}
+
+/* ---- Trends View ---- */
+
+.trends-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.trends-back {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--leather);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.trends-title {
+  font-family: var(--font-handwritten);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0;
+}
+
+.trends-header-spacer {
+  width: 48px;
+}
+
+.trends-stats {
+  display: flex;
+  justify-content: space-around;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.trends-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  padding: 14px 6px;
+  border: 1px solid var(--rule-line);
+  border-radius: 8px;
+  background: var(--parchment-dark);
+}
+
+.trends-stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  color: var(--done-green);
+  line-height: 1.1;
+}
+
+.trends-stat-label {
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  color: var(--ink-light);
+  margin-top: 4px;
+  text-align: center;
+}
+
+.trends-section {
+  margin-bottom: 28px;
+}
+
+.trends-section-title {
+  font-family: var(--font-handwritten);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+
+.trends-empty {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--rest-gray);
+}
+
+/* Consistency heatmap */
+.heatmap {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.heat-week {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heat-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.heat-cell--none {
+  background: var(--parchment-dark);
+  border: 1px solid var(--rule-line);
+}
+
+.heat-cell--partial {
+  background: #9fb98a;
+}
+
+.heat-cell--full {
+  background: var(--done-green);
+}
+
+.heat-cell--future {
+  background: transparent;
+}
+
+.heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--rest-gray);
+}
+
+.heat-legend .heat-cell {
+  margin-left: 8px;
+}
+
+.heat-legend .heat-cell:first-child {
+  margin-left: 0;
+}
+
+/* Pull-up progression chart */
+.pullup-chart {
+  width: 100%;
+  max-width: 320px;
+}
+
+.pullup-bar {
+  fill: var(--leather);
+}
+
+.pullup-bar-label {
+  fill: var(--ink-light);
+  font-family: var(--font-mono);
+  font-size: 9px;
 }

@@ -5,6 +5,7 @@ import { auth, GOOGLE_CLIENT_ID, db } from './firebase';
 import { getAppToday } from './utils/dateUtils';
 import { getWeekStartKey, resolveWeekGoals } from './utils/scheduleUtils';
 import DayView from './components/DayView';
+import TrendsView from './components/TrendsView';
 import WeeklyTargetsModal from './components/WeeklyTargetsModal';
 import './App.css';
 
@@ -16,6 +17,16 @@ const GearIcon = () => (
   </svg>
 );
 
+// Inline bar-chart SVG icon for the trends toggle
+const ChartIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="17" x2="17" y2="17" />
+    <rect x="4" y="9" width="3" height="6" />
+    <rect x="8.5" y="5" width="3" height="10" />
+    <rect x="13" y="11" width="3" height="4" />
+  </svg>
+);
+
 function App() {
   const [user, setUser] = useState(null);
   const [data, setData] = useState({});
@@ -24,6 +35,7 @@ function App() {
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [view, setView] = useState('day');
   const gisButtonRef = useRef(null);
   const gisInitializedRef = useRef(false);
 
@@ -158,6 +170,7 @@ function App() {
     setWeekGoals({});
     setError('');
     setSettingsOpen(false);
+    setView('day');
     gisInitializedRef.current = false;
     try {
       if (window.google?.accounts?.id) {
@@ -185,6 +198,14 @@ function App() {
         <div className="app-actions">
           {user && (
             <>
+              <button
+                className="settings-btn"
+                type="button"
+                onClick={() => setView(view === 'trends' ? 'day' : 'trends')}
+                aria-label={view === 'trends' ? 'Back to today' : 'Trends'}
+              >
+                <ChartIcon />
+              </button>
               <button className="settings-btn" type="button" onClick={() => setSettingsOpen(true)} aria-label="Settings">
                 <GearIcon />
               </button>
@@ -199,13 +220,17 @@ function App() {
       {error && <p className="error-message">{error}</p>}
       {authReady && user && loadingData && <p className="loading">Loading...</p>}
 
-      {authReady && user && !loadingData && (
+      {authReady && user && !loadingData && view === 'day' && (
         <DayView
           data={data}
           weekGoals={weekGoals}
           onUpdateDay={handleUpdateDay}
           onOpenSettings={() => setSettingsOpen(true)}
         />
+      )}
+
+      {authReady && user && !loadingData && view === 'trends' && (
+        <TrendsView data={data} onBack={() => setView('day')} />
       )}
 
       {authReady && !user && (

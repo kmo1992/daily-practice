@@ -1,7 +1,8 @@
 import HabitRow from './HabitRow';
+import PullupsRow from './PullupsRow';
 import { isSunday } from '../utils/scheduleUtils';
 
-function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, stretchLink }) {
+function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, stretchLink, pullupsCount, pullupsTarget, onSetPullups }) {
   const sunday = isSunday(isoWeekday);
   const workoutRest = workoutSchedule.type === 'Rest';
 
@@ -36,14 +37,23 @@ function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, dis
         />
       )}
 
-      {/* Pull-ups — active on all days except Sunday */}
-      <HabitRow
-        label="Pull-ups"
-        checked={!!habits.pullups}
-        onToggle={() => onToggleHabit('pullups')}
-        disabled={disabled || sunday}
-        isRest={sunday}
-      />
+      {/* Pull-ups — log actual reps on Mon-Sat; full rest on Sunday */}
+      {sunday ? (
+        <HabitRow
+          label="Pull-ups"
+          checked={!!habits.pullups}
+          onToggle={() => onToggleHabit('pullups')}
+          disabled
+          isRest
+        />
+      ) : (
+        <PullupsRow
+          count={pullupsCount}
+          target={pullupsTarget}
+          disabled={disabled}
+          onSetCount={onSetPullups}
+        />
+      )}
 
       {/* Stretch — active Mon-Sat */}
       <HabitRow
