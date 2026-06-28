@@ -1,10 +1,9 @@
 name: CI
 
+# Runs on pull requests. Pushes to main are covered by the Deploy workflow,
+# which runs the same lint/test/build before deploying.
 on:
   pull_request:
-  push:
-    branches:
-      - main
 
 jobs:
   test:
