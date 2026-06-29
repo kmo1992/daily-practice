@@ -8,6 +8,7 @@ import FourAgreements from './FourAgreements';
 import Attributions from './Attributions';
 import BurpeeTimer from './BurpeeTimer';
 import SundayReflection from './SundayReflection';
+import TomorrowPreview from './TomorrowPreview';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
 import { getWorkoutForDay, getWeekStartKey, getMobilityIndex, getDailyTargets, resolveWeekGoals } from '../utils/scheduleUtils';
 import { calculateStreak } from '../utils/streakUtils';
@@ -170,6 +171,10 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
       />
 
       <FourAgreements collapsed={isoWeekday === 7} />
+
+      {isToday && (
+        <TomorrowPreview date={currentDate.clone().add(1, 'day')} weekGoals={weekGoals} />
+      )}
 
       <Attributions />
     </div>
