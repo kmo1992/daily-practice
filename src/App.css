@@ -860,6 +860,78 @@ body {
   margin-top: 40px;
 }
 
+/* ---- Tomorrow Preview ---- */
+
+.tomorrow {
+  margin-top: 28px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--rule-line);
+}
+
+.tomorrow-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 2px;
+  color: var(--rest-gray);
+}
+
+.tomorrow-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.tomorrow-chevron {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform var(--transition);
+}
+
+.tomorrow-chevron--open {
+  transform: rotate(-90deg);
+}
+
+.tomorrow-body {
+  padding: 4px 2px 2px;
+}
+
+.tomorrow-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--ink-light);
+  padding: 4px 0;
+}
+
+.tomorrow-key {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--rest-gray);
+  min-width: 68px;
+  flex-shrink: 0;
+}
+
+.tomorrow-value {
+  color: var(--ink);
+}
+
+.tomorrow-link {
+  color: var(--leather);
+  text-decoration: underline;
+}
+
 /* ---- Trends View ---- */
 
 .trends-header {
