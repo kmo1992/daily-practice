@@ -1,16 +1,29 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import useFormGrading from '../hooks/useFormGrading';
-import { summarizeGrades } from '../utils/formGrading';
+import useRepCamera from '../hooks/useRepCamera';
 import './BurpeeTimer.css';
 
 // Audio Context helper
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
-const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', onSaveFormSession }) => {
+// Chime voicings: [frequency, peak gain, decay seconds] per partial.
+// Warm mallet strike for reps; a brighter voicing marks milestones.
+const CHIME_WARM = [
+  [330, 0.32, 2.4],
+  [332, 0.12, 2.4],
+  [660, 0.12, 1.6],
+  [990, 0.04, 1.0],
+];
+const CHIME_BRIGHT = [
+  [415.3, 0.3, 2.0],
+  [417, 0.1, 2.0],
+  [830.6, 0.12, 1.4],
+  [1245.9, 0.05, 0.9],
+];
+
+const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', onSaveRepSession }) => {
   const BASE_TARGET_TIME = 20 * 60;
-  const rawDuration = totalReps > 0 ? BASE_TARGET_TIME / totalReps : 0;
-  const repDuration = Math.round(rawDuration);
+  const repDuration = totalReps > 0 ? Math.round(BASE_TARGET_TIME / totalReps) : 0;
   const TOTAL_TIME = repDuration * totalReps;
 
   const [timerState, setTimerState] = useState({
@@ -23,26 +36,9 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
 
   const { isActive, timeLeft, repTimeLeft, currentRep } = timerState;
   const [isLocked, setIsLocked] = useState(false);
+  const [sessionSaved, setSessionSaved] = useState(false);
 
-  // 'classic' shows counts and clocks; 'flow' is a numbers-free breathing pulse
-  const [mode, setMode] = useState(() => {
-    try {
-      return window.localStorage.getItem('burpee-timer-mode') === 'flow' ? 'flow' : 'classic';
-    } catch {
-      return 'classic';
-    }
-  });
-
-  const selectMode = (m) => {
-    setMode(m);
-    try {
-      window.localStorage.setItem('burpee-timer-mode', m);
-    } catch {
-      // localStorage unavailable — mode just won't persist
-    }
-  };
-
-  // Camera-based form grading, integrated with the timer session
+  // Camera: rep counting + session recording, on-device
   const [cameraOn, setCameraOn] = useState(() => {
     try {
       return window.localStorage.getItem('burpee-timer-camera') === 'on';
@@ -50,15 +46,10 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
       return false;
     }
   });
-  const [formSaved, setFormSaved] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const grading = useFormGrading({
-    videoRef,
-    canvasRef,
-    workoutType,
-    enabled: isOpen && cameraOn,
-  });
+  const camera = useRepCamera({ videoRef, canvasRef, enabled: isOpen && cameraOn });
+  const { stop: stopCamera, discardVideo } = camera;
 
   const toggleCamera = () => {
     const next = !cameraOn;
@@ -66,26 +57,13 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
     try {
       window.localStorage.setItem('burpee-timer-camera', next ? 'on' : 'off');
     } catch {
-      // localStorage unavailable — preference just won't persist
+      // preference just won't persist
     }
   };
-
-  // Kick off a graded session alongside the timer (fresh starts only —
-  // resuming from pause keeps the running session)
-  const startGradingIfOn = () => {
-    if (cameraOn) {
-      grading.start();
-      setFormSaved(false);
-    }
-  };
-
-  // Stable reference for the timer-loop effect
-  const { stop: stopGrading } = grading;
 
   const audioCtxRef = useRef(null);
   const startTimeRef = useRef(0);
   const prevRepRef = useRef(1);
-  const warnedRef = useRef(false);
 
   const initAudio = () => {
     try {
@@ -95,75 +73,69 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
       if (audioCtxRef.current.state === 'suspended') {
         audioCtxRef.current.resume();
       }
+      // Declare ourselves a playback session (like a music app) so chimes
+      // survive the iOS silent switch where the API is available.
+      if (navigator.audioSession) {
+        navigator.audioSession.type = 'playback';
+      }
     } catch (e) {
       console.warn('AudioContext initialization failed', e);
     }
   };
 
-  // Warm mallet-style chime: soft attack, layered harmonics with a slight
-  // detune for warmth, long natural decay. Marks the start of each rep.
-  const playChime = useCallback(() => {
-    try {
-      if (!audioCtxRef.current) return;
-      const ctx = audioCtxRef.current;
-      const now = ctx.currentTime;
-      // [frequency, peak gain, decay seconds]
-      [
-        [330, 0.32, 2.4],
-        [332, 0.12, 2.4],
-        [660, 0.12, 1.6],
-        [990, 0.04, 1.0],
-      ].forEach(([freq, peak, dur]) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(peak, now + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + dur);
-      });
-    } catch (e) {
-      console.error('Error playing chime', e);
-    }
-  }, []);
-
-  // Single gentle heads-up tone (classic mode only) — replaces the old
-  // harsh 800Hz triple beep.
-  const playWarning = useCallback(() => {
-    try {
-      if (!audioCtxRef.current) return;
-      const ctx = audioCtxRef.current;
-      const now = ctx.currentTime;
+  // Fire one layered strike at an optional offset from now
+  const strike = useCallback((partials, delay = 0) => {
+    const ctx = audioCtxRef.current;
+    if (!ctx) return;
+    const at = ctx.currentTime + delay;
+    partials.forEach(([freq, peak, dur]) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, now);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+      osc.frequency.setValueAtTime(freq, at);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(peak, at + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.6);
-    } catch (e) {
-      console.error('Error playing warning', e);
-    }
+      osc.start(at);
+      osc.stop(at + dur);
+    });
   }, []);
 
-  const finishTimer = () => {
-    setTimerState(prev => ({ ...prev, isActive: false, timeLeft: 0 }));
-    grading.stop();
-    playChime();
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-  };
+  // 'rep': warm strike. 'half': two-note halfway marker. 'final': brighter
+  // strike for the last three reps. 'done': a descending phrase that cannot
+  // be mistaken for a "go" cue — no more accidental 51st burpee.
+  const playChime = useCallback((variant = 'rep') => {
+    try {
+      if (!audioCtxRef.current) return;
+      if (variant === 'half') {
+        strike(CHIME_WARM);
+        strike(CHIME_BRIGHT, 0.3);
+      } else if (variant === 'final') {
+        strike(CHIME_BRIGHT);
+      } else if (variant === 'done') {
+        strike([[523.25, 0.28, 1.1], [1046.5, 0.07, 0.7]]);
+        strike([[415.3, 0.28, 1.1], [830.6, 0.07, 0.7]], 0.35);
+        strike([[330, 0.32, 2.6], [660, 0.1, 1.6]], 0.7);
+      } else {
+        strike(CHIME_WARM);
+      }
+    } catch (e) {
+      console.error('Error playing chime', e);
+    }
+  }, [strike]);
 
   // Main Timer Loop
   useEffect(() => {
     let animationFrameId;
+
+    const halfwayRep = Math.floor(totalReps / 2) + 1;
+    const variantForRep = (rep) => {
+      if (rep >= totalReps - 2) return 'final';
+      if (rep === halfwayRep) return 'half';
+      return 'rep';
+    };
 
     const tick = (timestamp) => {
       if (!startTimeRef.current) {
@@ -194,26 +166,19 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
 
       if (newCalculatedRep > prevRepRef.current) {
         if (newCalculatedRep <= totalReps) {
-          playChime();
+          playChime(variantForRep(newCalculatedRep));
           // Haptic backup for when music drowns the chime (no-op on iOS)
           if (navigator.vibrate) navigator.vibrate(60);
         }
         prevRepRef.current = newCalculatedRep;
-        warnedRef.current = false;
-      }
-
-      // Heads-up tone only in classic mode — flow mode stays anticipation-free
-      if (mode === 'classic' && repDuration > 15 && newRepTimeLeft <= 10 && newRepTimeLeft > 0 && !warnedRef.current) {
-        playWarning();
-        warnedRef.current = true;
       }
 
       if (newTimeLeft > 0) {
         animationFrameId = requestAnimationFrame(tick);
       } else {
         setTimerState(prev => ({ ...prev, isActive: false }));
-        stopGrading();
-        playChime();
+        stopCamera();
+        playChime('done');
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       }
     };
@@ -228,7 +193,12 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isActive, totalReps, repDuration, mode, playChime, playWarning, stopGrading]);
+  }, [isActive, totalReps, repDuration, playChime, stopCamera]);
+
+  const startSession = () => {
+    setSessionSaved(false);
+    if (cameraOn) camera.start();
+  };
 
   const toggleTimer = () => {
     if (totalReps <= 0) return;
@@ -244,9 +214,8 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
       });
       startTimeRef.current = 0;
       prevRepRef.current = 1;
-      warnedRef.current = false;
-      startGradingIfOn();
-      playChime();
+      startSession();
+      playChime('rep');
       return;
     }
 
@@ -254,8 +223,8 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
       initAudio();
       setTimerState(prev => ({ ...prev, isActive: true }));
       if (timerState.timeLeft === TOTAL_TIME) {
-        startGradingIfOn();
-        playChime();
+        startSession();
+        playChime('rep');
         prevRepRef.current = timerState.currentRep;
       }
     } else {
@@ -263,7 +232,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
     }
   };
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     setTimerState({
       isActive: false,
       timeLeft: TOTAL_TIME,
@@ -273,21 +242,10 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
     });
     startTimeRef.current = 0;
     prevRepRef.current = 1;
-    warnedRef.current = false;
-    stopGrading();
-  };
-
-  const saveGrades = () => {
-    if (!onSaveFormSession || grading.reps.length === 0) return;
-    const { total, counts } = summarizeGrades(grading.reps);
-    onSaveFormSession({
-      workoutType,
-      grades: grading.reps.map((r) => r.grade),
-      counts,
-      total,
-    });
-    setFormSaved(true);
-  };
+    setSessionSaved(false);
+    stopCamera();
+    discardVideo();
+  }, [TOTAL_TIME, repDuration, stopCamera, discardVideo]);
 
   useEffect(() => {
     if (!isActive) {
@@ -309,26 +267,16 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
 
   useEffect(() => {
     if (!isOpen) resetTimer();
-  }, [isOpen]);
+  }, [isOpen, resetTimer]);
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const formatTimeCeil = (seconds) => {
-    const mins = Math.floor(Math.ceil(seconds) / 60);
-    const secs = Math.ceil(seconds) % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const formatRepTime = (seconds) => {
-    const s = Math.ceil(seconds);
-    return `00:${s.toString().padStart(2, '0')}`;
-  };
-
-  const elapsedTime = TOTAL_TIME - timeLeft;
+  // A natural finish with the camera on records the detected count for the day
+  useEffect(() => {
+    if (!isOpen || !cameraOn || sessionSaved) return;
+    if (timeLeft <= 0 && camera.count > 0 && onSaveRepSession) {
+      onSaveRepSession({ workoutType, detected: camera.count, target: totalReps });
+      setSessionSaved(true);
+    }
+  }, [isOpen, cameraOn, sessionSaved, timeLeft, camera.count, onSaveRepSession, workoutType, totalReps]);
 
   const IconPlay = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -351,209 +299,123 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
 
   if (!isOpen) return null;
 
-  const isFlow = mode === 'flow';
   const finished = timeLeft <= 0;
   const preStart = !isActive && !finished && timeLeft === TOTAL_TIME;
 
   // Bell-strike pulse: blooms instantly at each chime, then decays through
-  // the interval — the jump IS the "new burpee" signal, readable at a
-  // glance even with music on.
+  // the interval — the jump IS the "new burpee" signal.
   const repProgress = repDuration > 0 ? 1 - (repTimeLeft / repDuration) : 0;
-  const decay = Math.pow(repProgress, 0.7);
-  const pulseScale = 1.05 - 0.45 * decay;
-
-  const lastGrade = grading.reps.length > 0 ? grading.reps[grading.reps.length - 1].grade : null;
-
-  // End-of-session report card (both modes) when grading ran
-  const gradeSummary = cameraOn && grading.reps.length > 0 && (
-    <div className="grade-summary">
-      <div className="grade-summary-chips">
-        {grading.reps.map((r, i) => (
-          <span
-            key={i}
-            className={`grade-chip grade-${r.grade}`}
-            title={
-              Object.entries(r.checkpoints)
-                .filter(([, ok]) => !ok)
-                .map(([k]) => k)
-                .join(', ') || 'clean'
-            }
-          >
-            {r.grade}
-          </span>
-        ))}
-      </div>
-      {(() => {
-        const { total, counts } = summarizeGrades(grading.reps);
-        return (
-          <p className="grade-summary-line">
-            {total} graded · A×{counts.A} · B×{counts.B} · C×{counts.C}
-          </p>
-        );
-      })()}
-      {onSaveFormSession && (
-        <button className="save-grades-btn" type="button" onClick={saveGrades} disabled={formSaved}>
-          {formSaved ? 'Saved ✓' : 'Save grades'}
-        </button>
-      )}
-    </div>
-  );
-
-  const controls = (
-    <div className="controls-container">
-      <div className="controls-group left">
-        <button className="icon-btn close" onClick={onClose} disabled={isLocked} aria-label="Close">
-          <IconClose />
-        </button>
-        <button className="icon-btn lock" onClick={() => setIsLocked(!isLocked)} aria-label={isLocked ? "Unlock" : "Lock"}>
-          {isLocked ? <IconLock /> : <IconUnlock />}
-        </button>
-      </div>
-
-      <div className="controls-group right">
-        <button className="icon-btn reset" onClick={resetTimer} disabled={isLocked} aria-label="Reset">
-          <IconReset />
-        </button>
-        <button className="icon-btn play" onClick={toggleTimer} disabled={isLocked} aria-label={isActive ? "Pause" : "Start"}>
-          {isActive ? <IconPause /> : <IconPlay />}
-        </button>
-      </div>
-    </div>
-  );
+  const pulseScale = 1.05 - 0.45 * Math.pow(repProgress, 0.7);
 
   const overlay = (
-    <div className={`burpee-timer-overlay${isFlow ? ' flow' : ''}${finished ? ' finished' : ''}`}>
+    <div className={`burpee-timer-overlay${finished ? ' finished' : ''}`}>
       <div className="burpee-timer-modal">
         {preStart && (
-          <>
-            <div className="mode-toggle" role="group" aria-label="Timer mode">
-              <button
-                className={`mode-btn${!isFlow ? ' mode-btn--active' : ''}`}
-                type="button"
-                onClick={() => selectMode('classic')}
-              >
-                Classic
-              </button>
-              <button
-                className={`mode-btn${isFlow ? ' mode-btn--active' : ''}`}
-                type="button"
-                onClick={() => selectMode('flow')}
-              >
-                Flow
-              </button>
-            </div>
+          <div className="prestart-controls">
             <button
               className={`camera-toggle${cameraOn ? ' camera-toggle--on' : ''}`}
               type="button"
               onClick={toggleCamera}
               aria-pressed={cameraOn}
             >
-              {cameraOn ? '◉ Form grading on' : '○ Form grading off'}
+              {cameraOn ? '◉ Camera on' : '○ Camera off'}
             </button>
-          </>
+            {cameraOn && camera.devices.length > 1 && (
+              <select
+                className="camera-picker"
+                value={camera.deviceId}
+                onChange={(e) => camera.selectDevice(e.target.value)}
+                aria-label="Camera"
+              >
+                {camera.devices.map((d, i) => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    {d.label || `Camera ${i + 1}`}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         )}
 
-        {/* Camera picture-in-picture — stays mounted while grading is on */}
+        {/* Camera tile stays mounted while the camera is on so the stream
+            and recorder survive across start/finish/reset */}
         {cameraOn && (
           <div className={`timer-pip${finished ? ' timer-pip--dim' : ''}`}>
             <video ref={videoRef} playsInline muted />
             <canvas ref={canvasRef} />
-            {grading.status === 'loading' && <span className="pip-status">Loading…</span>}
-            {grading.status === 'error' && (
-              <span className="pip-status pip-status--error">{grading.error}</span>
-            )}
-            {!isFlow && !finished && lastGrade && (
-              <span className={`pip-grade grade-${lastGrade}`}>{lastGrade}</span>
+            {camera.status === 'loading' && <span className="pip-status">Loading…</span>}
+            {camera.status === 'error' && (
+              <span className="pip-status pip-status--error">{camera.error}</span>
             )}
           </div>
         )}
 
-        {isFlow ? (
-          <div className="bottom-area flow-bottom">
-            <div className="flow-area">
-              {finished ? (
-                <>
-                  <div className="end-timer-message">Well done.</div>
-                  {gradeSummary}
-                </>
-              ) : (
-                <>
-                  <div className="flow-pulse-wrap">
-                    {/* keyed on the rep so the ripple restarts at every strike */}
-                    {!preStart && isActive && (
-                      <span key={currentRep} className="flow-ripple" />
-                    )}
-                    <div
-                      className={`flow-pulse${preStart ? ' flow-pulse--idle' : ''}`}
-                      style={preStart ? undefined : { transform: `scale(${pulseScale.toFixed(3)})` }}
-                    />
-                  </div>
-                  {preStart && (
-                    <p className="flow-hint">One burpee per strike — move when it blooms.</p>
-                  )}
-                </>
+        <div className="flow-area">
+          {finished ? (
+            <>
+              <div className="end-timer-message">Well done.</div>
+              {cameraOn && camera.count > 0 && (
+                <p className="count-report">
+                  Camera counted {camera.count} of {totalReps}
+                  {sessionSaved ? ' · saved' : ''}
+                </p>
               )}
-            </div>
-            {controls}
-          </div>
-        ) : (
-          <>
-            <div className="timer-display-huge">
-              {formatRepTime(repTimeLeft)}
-            </div>
-
-            <div className="stats-row">
-              <div className="stat-item">
-                <span className="stat-label">ELAPSED</span>
-                <span className="stat-value">{formatTime(elapsedTime)}</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">INTERVAL</span>
-                <span className="stat-value">{currentRep}/{totalReps}</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">REMAINING</span>
-                <span className="stat-value">{formatTimeCeil(timeLeft)}</span>
-              </div>
-            </div>
-
-            <div className="bottom-area">
-              <div className="rounds-container">
-                {finished ? (
-                  <>
-                    <div className="end-timer-message">
-                      Congratulations!
-                    </div>
-                    {gradeSummary}
-                  </>
-                ) : (
-                  <>
-                    <div className="interval-info current">
-                      <span className="interval-label mobile-only">CURRENT</span>
-                      <span className="interval-round">Round {currentRep}</span>
-                      <span className="interval-time mobile-only">{formatRepTime(repTimeLeft)}</span>
-                    </div>
-
-                    <div className="interval-info next">
-                      {currentRep < totalReps ? (
-                        <>
-                          <span className="interval-label mobile-only">NEXT</span>
-                          <span className="interval-round">Round {currentRep + 1}</span>
-                          <span className="interval-time mobile-only">{formatRepTime(repDuration)}</span>
-                        </>
-                      ) : (
-                        <button className="end-timer-btn" onClick={finishTimer}>
-                          Done
-                        </button>
-                      )}
-                    </div>
-                  </>
+              {cameraOn && camera.videoUrl && (
+                <div className="video-review">
+                  <video src={camera.videoUrl} controls playsInline />
+                  <div className="video-review-actions">
+                    <a
+                      className="review-btn"
+                      href={camera.videoUrl}
+                      download={`${workoutType.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.${camera.videoExt}`}
+                    >
+                      Save video
+                    </a>
+                    <button className="review-btn review-btn--ghost" type="button" onClick={discardVideo}>
+                      Discard
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="flow-pulse-wrap">
+                {/* keyed on the rep so the ripple restarts at every strike */}
+                {!preStart && isActive && (
+                  <span key={currentRep} className="flow-ripple" />
                 )}
+                <div
+                  className={`flow-pulse${preStart ? ' flow-pulse--idle' : ''}`}
+                  style={preStart ? undefined : { transform: `scale(${pulseScale.toFixed(3)})` }}
+                />
               </div>
-              {controls}
-            </div>
-          </>
-        )}
+              {preStart && (
+                <p className="flow-hint">One burpee per strike — move when it blooms.</p>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="controls-container">
+          <div className="controls-group">
+            <button className="icon-btn close" onClick={onClose} disabled={isLocked} aria-label="Close">
+              <IconClose />
+            </button>
+            <button className="icon-btn lock" onClick={() => setIsLocked(!isLocked)} aria-label={isLocked ? "Unlock" : "Lock"}>
+              {isLocked ? <IconLock /> : <IconUnlock />}
+            </button>
+          </div>
+
+          <div className="controls-group">
+            <button className="icon-btn reset" onClick={resetTimer} disabled={isLocked} aria-label="Reset">
+              <IconReset />
+            </button>
+            <button className="icon-btn play" onClick={toggleTimer} disabled={isLocked} aria-label={isActive ? "Pause" : "Start"}>
+              {isActive ? <IconPause /> : <IconPlay />}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

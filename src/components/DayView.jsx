@@ -95,10 +95,10 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
-  const handleSaveFormSession = (session) => {
+  const handleSaveRepSession = (session) => {
     if (isFuture) return;
     onUpdateDay(dateStr, {
-      formSession: { ...session, gradedAt: new Date().toISOString() },
+      repSession: { ...session, recordedAt: new Date().toISOString() },
       workoutType: workoutSchedule.type,
     });
   };
@@ -156,7 +156,7 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
           return targets?.burpees || targets?.navySeals || 0;
         })()}
         workoutType={workoutSchedule.type}
-        onSaveFormSession={handleSaveFormSession}
+        onSaveRepSession={handleSaveRepSession}
       />
 
       {isoWeekday === 7 && (() => {
