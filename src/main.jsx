@@ -9,15 +9,20 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
-const updateSW = registerSW({
+// registerType is 'autoUpdate': a new service worker activates immediately
+// (skipWaiting + clientsClaim) and the page reloads itself. The browser only
+// looks for a new worker on navigation, though — and iOS resumes installed
+// PWAs from a saved state with no navigation — so we trigger the check
+// ourselves whenever the app is opened or foregrounded (plus hourly, for
+// sessions left open).
+registerSW({
   immediate: true,
-  onNeedRefresh() {
-    if (window.confirm('New version available. Reload now?')) {
-      updateSW(true)
-    }
+  onRegisteredSW(swUrl, registration) {
+    if (!registration) return
+    const checkForUpdate = () => registration.update().catch(() => {})
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') checkForUpdate()
+    })
+    window.setInterval(checkForUpdate, 60 * 60 * 1000)
   },
 })
-
-window.setInterval(() => {
-  updateSW()
-}, 60 * 60 * 1000)
