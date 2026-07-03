@@ -22,6 +22,24 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
   const { isActive, timeLeft, repTimeLeft, currentRep } = timerState;
   const [isLocked, setIsLocked] = useState(false);
 
+  // 'classic' shows counts and clocks; 'flow' is a numbers-free breathing pulse
+  const [mode, setMode] = useState(() => {
+    try {
+      return window.localStorage.getItem('burpee-timer-mode') === 'flow' ? 'flow' : 'classic';
+    } catch {
+      return 'classic';
+    }
+  });
+
+  const selectMode = (m) => {
+    setMode(m);
+    try {
+      window.localStorage.setItem('burpee-timer-mode', m);
+    } catch {
+      // localStorage unavailable — mode just won't persist
+    }
+  };
+
   const audioCtxRef = useRef(null);
   const startTimeRef = useRef(0);
   const prevRepRef = useRef(1);
@@ -40,44 +58,55 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
     }
   };
 
-  const playBell = useCallback(() => {
+  // Warm mallet-style chime: soft attack, layered harmonics with a slight
+  // detune for warmth, long natural decay. Marks the start of each rep.
+  const playChime = useCallback(() => {
     try {
       if (!audioCtxRef.current) return;
       const ctx = audioCtxRef.current;
-      [400, 560].forEach((freq, i) => {
+      const now = ctx.currentTime;
+      // [frequency, peak gain, decay seconds]
+      [
+        [330, 0.32, 2.4],
+        [332, 0.12, 2.4],
+        [660, 0.12, 1.6],
+        [990, 0.04, 1.0],
+      ].forEach(([freq, peak, dur]) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(peak, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + (i * 0.05));
-        osc.stop(ctx.currentTime + 1.5 + (i * 0.05));
+        osc.start(now);
+        osc.stop(now + dur);
       });
     } catch (e) {
-      console.error('Error playing bell', e);
+      console.error('Error playing chime', e);
     }
   }, []);
 
+  // Single gentle heads-up tone (classic mode only) — replaces the old
+  // harsh 800Hz triple beep.
   const playWarning = useCallback(() => {
     try {
       if (!audioCtxRef.current) return;
       const ctx = audioCtxRef.current;
       const now = ctx.currentTime;
-      [0, 0.25, 0.5].forEach(offset => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now + offset);
-        gain.gain.setValueAtTime(0.5, now + offset);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.1);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + offset);
-        osc.stop(now + offset + 0.1);
-      });
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.6);
     } catch (e) {
       console.error('Error playing warning', e);
     }
@@ -85,6 +114,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
 
   const finishTimer = () => {
     setTimerState(prev => ({ ...prev, isActive: false, timeLeft: 0 }));
+    playChime();
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   };
 
@@ -120,12 +150,13 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       }));
 
       if (newCalculatedRep > prevRepRef.current) {
-        if (newCalculatedRep <= totalReps) playBell();
+        if (newCalculatedRep <= totalReps) playChime();
         prevRepRef.current = newCalculatedRep;
         warnedRef.current = false;
       }
 
-      if (repDuration > 15 && newRepTimeLeft <= 10 && newRepTimeLeft > 0 && !warnedRef.current) {
+      // Heads-up tone only in classic mode — flow mode stays anticipation-free
+      if (mode === 'classic' && repDuration > 15 && newRepTimeLeft <= 10 && newRepTimeLeft > 0 && !warnedRef.current) {
         playWarning();
         warnedRef.current = true;
       }
@@ -134,6 +165,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
         animationFrameId = requestAnimationFrame(tick);
       } else {
         setTimerState(prev => ({ ...prev, isActive: false }));
+        playChime();
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       }
     };
@@ -148,7 +180,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isActive, totalReps, repDuration, playBell, playWarning]);
+  }, [isActive, totalReps, repDuration, mode, playChime, playWarning]);
 
   const toggleTimer = () => {
     if (totalReps <= 0) return;
@@ -165,7 +197,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       startTimeRef.current = 0;
       prevRepRef.current = 1;
       warnedRef.current = false;
-      playBell();
+      playChime();
       return;
     }
 
@@ -173,7 +205,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       initAudio();
       setTimerState(prev => ({ ...prev, isActive: true }));
       if (timerState.timeLeft === TOTAL_TIME) {
-        playBell();
+        playChime();
         prevRepRef.current = timerState.currentRep;
       }
     } else {
@@ -256,79 +288,133 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
 
   if (!isOpen) return null;
 
+  const isFlow = mode === 'flow';
+  const finished = timeLeft <= 0;
+  const preStart = !isActive && !finished && timeLeft === TOTAL_TIME;
+
+  // Breathing pulse: one full expand/contract cycle per rep interval
+  const repProgress = repDuration > 0 ? 1 - (repTimeLeft / repDuration) : 0;
+  const breath = 0.5 - 0.5 * Math.cos(2 * Math.PI * repProgress);
+  const pulseScale = 0.6 + 0.5 * breath;
+
+  const controls = (
+    <div className="controls-container">
+      <div className="controls-group left">
+        <button className="icon-btn close" onClick={onClose} disabled={isLocked} aria-label="Close">
+          <IconClose />
+        </button>
+        <button className="icon-btn lock" onClick={() => setIsLocked(!isLocked)} aria-label={isLocked ? "Unlock" : "Lock"}>
+          {isLocked ? <IconLock /> : <IconUnlock />}
+        </button>
+      </div>
+
+      <div className="controls-group right">
+        <button className="icon-btn reset" onClick={resetTimer} disabled={isLocked} aria-label="Reset">
+          <IconReset />
+        </button>
+        <button className="icon-btn play" onClick={toggleTimer} disabled={isLocked} aria-label={isActive ? "Pause" : "Start"}>
+          {isActive ? <IconPause /> : <IconPlay />}
+        </button>
+      </div>
+    </div>
+  );
+
   const overlay = (
-    <div className={`burpee-timer-overlay ${timeLeft <= 0 ? 'finished' : ''}`}>
+    <div className={`burpee-timer-overlay${isFlow ? ' flow' : ''}${finished ? ' finished' : ''}`}>
       <div className="burpee-timer-modal">
-        <div className="timer-display-huge">
-          {formatRepTime(repTimeLeft)}
-        </div>
-
-        <div className="stats-row">
-          <div className="stat-item">
-            <span className="stat-label">ELAPSED</span>
-            <span className="stat-value">{formatTime(elapsedTime)}</span>
+        {preStart && (
+          <div className="mode-toggle" role="group" aria-label="Timer mode">
+            <button
+              className={`mode-btn${!isFlow ? ' mode-btn--active' : ''}`}
+              type="button"
+              onClick={() => selectMode('classic')}
+            >
+              Classic
+            </button>
+            <button
+              className={`mode-btn${isFlow ? ' mode-btn--active' : ''}`}
+              type="button"
+              onClick={() => selectMode('flow')}
+            >
+              Flow
+            </button>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">INTERVAL</span>
-            <span className="stat-value">{currentRep}/{totalReps}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">REMAINING</span>
-            <span className="stat-value">{formatTimeCeil(timeLeft)}</span>
-          </div>
-        </div>
+        )}
 
-        <div className="bottom-area">
-          <div className="rounds-container">
-            {timeLeft <= 0 ? (
-              <div className="end-timer-message">
-                Congratulations!
-              </div>
-            ) : (
-              <>
-                <div className="interval-info current">
-                  <span className="interval-label mobile-only">CURRENT</span>
-                  <span className="interval-round">Round {currentRep}</span>
-                  <span className="interval-time mobile-only">{formatRepTime(repTimeLeft)}</span>
-                </div>
-
-                <div className="interval-info next">
-                  {currentRep < totalReps ? (
-                    <>
-                      <span className="interval-label mobile-only">NEXT</span>
-                      <span className="interval-round">Round {currentRep + 1}</span>
-                      <span className="interval-time mobile-only">{formatRepTime(repDuration)}</span>
-                    </>
-                  ) : (
-                    <button className="end-timer-btn" onClick={finishTimer}>
-                      Done
-                    </button>
+        {isFlow ? (
+          <div className="bottom-area flow-bottom">
+            <div className="flow-area">
+              {finished ? (
+                <div className="end-timer-message">Well done.</div>
+              ) : (
+                <>
+                  <div
+                    className={`flow-pulse${preStart ? ' flow-pulse--idle' : ''}`}
+                    style={preStart ? undefined : { transform: `scale(${pulseScale.toFixed(3)})` }}
+                  />
+                  {preStart && (
+                    <p className="flow-hint">One burpee per chime. Follow the pulse.</p>
                   )}
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
+            {controls}
           </div>
-
-          <div className="controls-container">
-            <div className="controls-group left">
-              <button className="icon-btn close" onClick={onClose} disabled={isLocked} aria-label="Close">
-                <IconClose />
-              </button>
-              <button className="icon-btn lock" onClick={() => setIsLocked(!isLocked)} aria-label={isLocked ? "Unlock" : "Lock"}>
-                {isLocked ? <IconLock /> : <IconUnlock />}
-              </button>
+        ) : (
+          <>
+            <div className="timer-display-huge">
+              {formatRepTime(repTimeLeft)}
             </div>
 
-            <div className="controls-group right">
-              <button className="icon-btn reset" onClick={resetTimer} disabled={isLocked} aria-label="Reset">
-                <IconReset />
-              </button>
-              <button className="icon-btn play" onClick={toggleTimer} disabled={isLocked} aria-label={isActive ? "Pause" : "Start"}>
-                {isActive ? <IconPause /> : <IconPlay />}
-              </button>
+            <div className="stats-row">
+              <div className="stat-item">
+                <span className="stat-label">ELAPSED</span>
+                <span className="stat-value">{formatTime(elapsedTime)}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">INTERVAL</span>
+                <span className="stat-value">{currentRep}/{totalReps}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">REMAINING</span>
+                <span className="stat-value">{formatTimeCeil(timeLeft)}</span>
+              </div>
             </div>
-          </div>
-        </div>
+
+            <div className="bottom-area">
+              <div className="rounds-container">
+                {finished ? (
+                  <div className="end-timer-message">
+                    Congratulations!
+                  </div>
+                ) : (
+                  <>
+                    <div className="interval-info current">
+                      <span className="interval-label mobile-only">CURRENT</span>
+                      <span className="interval-round">Round {currentRep}</span>
+                      <span className="interval-time mobile-only">{formatRepTime(repTimeLeft)}</span>
+                    </div>
+
+                    <div className="interval-info next">
+                      {currentRep < totalReps ? (
+                        <>
+                          <span className="interval-label mobile-only">NEXT</span>
+                          <span className="interval-round">Round {currentRep + 1}</span>
+                          <span className="interval-time mobile-only">{formatRepTime(repDuration)}</span>
+                        </>
+                      ) : (
+                        <button className="end-timer-btn" onClick={finishTimer}>
+                          Done
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+              {controls}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -290,3 +290,118 @@
 .icon-btn.play svg {
   fill: #000;
 }
+
+/* ---- Mode toggle (pre-start) ---- */
+
+.mode-toggle {
+  display: flex;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 26px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #000;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.mode-btn--active {
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+/* ---- Flow mode ---- */
+
+/* Calm, dark backdrop while flowing; the finished state stays white */
+.burpee-timer-overlay.flow:not(.finished) {
+  background-color: #17313c;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .icon-btn {
+  color: #f5f0e6;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .icon-btn.play svg {
+  fill: #f5f0e6;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .end-timer-message {
+  color: #f5f0e6;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .mode-toggle {
+  border-color: rgba(245, 240, 230, 0.5);
+}
+
+.burpee-timer-overlay.flow:not(.finished) .mode-btn {
+  color: #f5f0e6;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .mode-btn--active {
+  background: rgba(245, 240, 230, 0.92);
+  color: #17313c;
+}
+
+.flow-bottom {
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Undo the desktop `display: contents` so flow keeps its own controls row */
+.flow-bottom .controls-container {
+  display: flex;
+}
+
+.flow-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.flow-pulse {
+  width: 46vmin;
+  height: 46vmin;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(245, 240, 230, 0.95) 0%,
+    rgba(245, 240, 230, 0.35) 60%,
+    transparent 75%
+  );
+  will-change: transform;
+}
+
+.flow-pulse--idle {
+  animation: flow-breathe 6s ease-in-out infinite;
+}
+
+@keyframes flow-breathe {
+  0%,
+  100% {
+    transform: scale(0.62);
+  }
+
+  50% {
+    transform: scale(0.78);
+  }
+}
+
+.flow-hint {
+  font-size: 1rem;
+  text-align: center;
+  color: rgba(245, 240, 230, 0.7);
+  margin: 0;
+}
