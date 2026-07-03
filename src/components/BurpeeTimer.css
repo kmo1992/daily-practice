@@ -371,6 +371,13 @@
   width: 100%;
 }
 
+.flow-pulse-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .flow-pulse {
   width: 46vmin;
   height: 46vmin;
@@ -382,6 +389,29 @@
     transparent 75%
   );
   will-change: transform;
+}
+
+/* Ripple ring fired at each strike (restarted via React key per rep) */
+.flow-ripple {
+  position: absolute;
+  width: 46vmin;
+  height: 46vmin;
+  border-radius: 50%;
+  border: 3px solid rgba(245, 240, 230, 0.9);
+  animation: flow-ripple 0.9s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes flow-ripple {
+  from {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
 }
 
 .flow-pulse--idle {

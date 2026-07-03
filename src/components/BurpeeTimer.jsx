@@ -193,7 +193,11 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
       }));
 
       if (newCalculatedRep > prevRepRef.current) {
-        if (newCalculatedRep <= totalReps) playChime();
+        if (newCalculatedRep <= totalReps) {
+          playChime();
+          // Haptic backup for when music drowns the chime (no-op on iOS)
+          if (navigator.vibrate) navigator.vibrate(60);
+        }
         prevRepRef.current = newCalculatedRep;
         warnedRef.current = false;
       }
@@ -351,10 +355,12 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
   const finished = timeLeft <= 0;
   const preStart = !isActive && !finished && timeLeft === TOTAL_TIME;
 
-  // Breathing pulse: one full expand/contract cycle per rep interval
+  // Bell-strike pulse: blooms instantly at each chime, then decays through
+  // the interval — the jump IS the "new burpee" signal, readable at a
+  // glance even with music on.
   const repProgress = repDuration > 0 ? 1 - (repTimeLeft / repDuration) : 0;
-  const breath = 0.5 - 0.5 * Math.cos(2 * Math.PI * repProgress);
-  const pulseScale = 0.6 + 0.5 * breath;
+  const decay = Math.pow(repProgress, 0.7);
+  const pulseScale = 1.05 - 0.45 * decay;
 
   const lastGrade = grading.reps.length > 0 ? grading.reps[grading.reps.length - 1].grade : null;
 
@@ -472,12 +478,18 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
                 </>
               ) : (
                 <>
-                  <div
-                    className={`flow-pulse${preStart ? ' flow-pulse--idle' : ''}`}
-                    style={preStart ? undefined : { transform: `scale(${pulseScale.toFixed(3)})` }}
-                  />
+                  <div className="flow-pulse-wrap">
+                    {/* keyed on the rep so the ripple restarts at every strike */}
+                    {!preStart && isActive && (
+                      <span key={currentRep} className="flow-ripple" />
+                    )}
+                    <div
+                      className={`flow-pulse${preStart ? ' flow-pulse--idle' : ''}`}
+                      style={preStart ? undefined : { transform: `scale(${pulseScale.toFixed(3)})` }}
+                    />
+                  </div>
                   {preStart && (
-                    <p className="flow-hint">One burpee per chime. Follow the pulse.</p>
+                    <p className="flow-hint">One burpee per strike — move when it blooms.</p>
                   )}
                 </>
               )}
