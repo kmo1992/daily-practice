@@ -1,0 +1,300 @@
+/* Flow timer — numbers-free, calm dark backdrop; finished state goes light */
+
+.flow-timer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #17313c;
+  z-index: 1000;
+  transition: background-color 0.5s ease;
+}
+
+.flow-timer-overlay.finished {
+  background-color: #ffffff;
+}
+
+.flow-timer-modal {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(2.5rem, env(safe-area-inset-top)) 1.5rem 1rem;
+  box-sizing: border-box;
+  color: #f5f0e6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  position: relative;
+}
+
+.flow-timer-overlay.finished .flow-timer-modal {
+  color: #1c1c1c;
+}
+
+/* ---- Pre-start controls ---- */
+
+.prestart-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-bottom: 0.75rem;
+}
+
+.camera-toggle {
+  background: transparent;
+  border: 1px solid rgba(245, 240, 230, 0.5);
+  border-radius: 999px;
+  padding: 6px 18px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #f5f0e6;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.camera-toggle--on {
+  background: rgba(245, 240, 230, 0.92);
+  color: #17313c;
+}
+
+.camera-picker {
+  max-width: 240px;
+  background: rgba(245, 240, 230, 0.1);
+  border: 1px solid rgba(245, 240, 230, 0.4);
+  border-radius: 6px;
+  color: #f5f0e6;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+}
+
+.camera-picker option {
+  color: #1c1c1c;
+}
+
+/* ---- Flow pulse ---- */
+
+.flow-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.flow-pulse-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-pulse {
+  width: 46vmin;
+  height: 46vmin;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(245, 240, 230, 0.95) 0%,
+    rgba(245, 240, 230, 0.35) 60%,
+    transparent 75%
+  );
+  will-change: transform;
+}
+
+.flow-pulse--idle {
+  animation: flow-breathe 6s ease-in-out infinite;
+}
+
+@keyframes flow-breathe {
+  0%,
+  100% {
+    transform: scale(0.62);
+  }
+
+  50% {
+    transform: scale(0.78);
+  }
+}
+
+/* Ripple ring fired at each strike (restarted via React key per rep) */
+.flow-ripple {
+  position: absolute;
+  width: 46vmin;
+  height: 46vmin;
+  border-radius: 50%;
+  border: 3px solid rgba(245, 240, 230, 0.9);
+  animation: flow-ripple 0.9s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes flow-ripple {
+  from {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.flow-hint {
+  font-size: 1rem;
+  text-align: center;
+  color: rgba(245, 240, 230, 0.7);
+  margin: 0;
+}
+
+/* ---- Finished ---- */
+
+.end-timer-message {
+  font-size: 3rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.count-report {
+  margin: 0;
+  font-size: 1.05rem;
+  opacity: 0.85;
+}
+
+.video-review {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(90vw, 420px);
+}
+
+.video-review video {
+  width: 100%;
+  border-radius: 10px;
+  background: #000;
+}
+
+.video-review-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.review-btn {
+  background: #1c1c1c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 26px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.review-btn--ghost {
+  background: transparent;
+  color: #1c1c1c;
+  border: 1px solid rgba(28, 28, 28, 0.4);
+}
+
+/* ---- Camera picture-in-picture ---- */
+
+.timer-pip {
+  position: absolute;
+  left: 12px;
+  bottom: 110px;
+  width: 30vmin;
+  max-width: 220px;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0d1f27;
+  border: 1px solid rgba(245, 240, 230, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  z-index: 5;
+}
+
+.timer-pip--dim {
+  opacity: 0.35;
+}
+
+.timer-pip video,
+.timer-pip canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pip-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #f5f0e6;
+  background: rgba(13, 31, 39, 0.7);
+}
+
+.pip-status--error {
+  color: #ffb3a7;
+}
+
+/* ---- Controls ---- */
+
+.controls-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 3rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.controls-group {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+  z-index: 10;
+}
+
+.icon-btn:active {
+  transform: scale(0.9);
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.icon-btn svg {
+  pointer-events: none;
+}
+
+.icon-btn.play svg {
+  fill: currentColor;
+}

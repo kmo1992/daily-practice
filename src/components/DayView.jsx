@@ -6,7 +6,7 @@ import MorningRitual from './MorningRitual';
 import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
 import Attributions from './Attributions';
-import BurpeeTimer from './BurpeeTimer';
+import FlowTimer from './FlowTimer';
 import SundayReflection from './SundayReflection';
 import TomorrowPreview from './TomorrowPreview';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
@@ -95,10 +95,10 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
-  const handleSaveFormSession = (session) => {
+  const handleSaveRepSession = (session) => {
     if (isFuture) return;
     onUpdateDay(dateStr, {
-      formSession: { ...session, gradedAt: new Date().toISOString() },
+      repSession: { ...session, recordedAt: new Date().toISOString() },
       workoutType: workoutSchedule.type,
     });
   };
@@ -146,7 +146,7 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         onSetPullups={handleSetPullups}
       />
 
-      <BurpeeTimer
+      <FlowTimer
         isOpen={showTimer}
         onClose={() => setShowTimer(false)}
         totalReps={(() => {
@@ -156,7 +156,7 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
           return targets?.burpees || targets?.navySeals || 0;
         })()}
         workoutType={workoutSchedule.type}
-        onSaveFormSession={handleSaveFormSession}
+        onSaveRepSession={handleSaveRepSession}
       />
 
       {isoWeekday === 7 && (() => {

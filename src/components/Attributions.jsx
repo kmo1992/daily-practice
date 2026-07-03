@@ -34,13 +34,6 @@ function Attributions() {
 
         <div className="attributions-extras">
           <p className="attributions-entry">
-            <Link href="https://apps.apple.com/us/app/seconds-interval-timer/id475816966">
-              Seconds Interval Timer
-            </Link>{' '}
-            — the app for all your training countdowns.
-          </p>
-
-          <p className="attributions-entry">
             <Link href="https://www.amazon.com/Four-Agreements-Practical-Personal-Freedom/dp/1878424319">
               The Four Agreements
             </Link>{' '}
