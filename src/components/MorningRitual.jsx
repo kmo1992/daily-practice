@@ -2,17 +2,20 @@ import HabitRow from './HabitRow';
 import PullupsRow from './PullupsRow';
 import { isSunday } from '../utils/scheduleUtils';
 
-function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, stretchLink, pullupsCount, pullupsTarget, onSetPullups }) {
+function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, onOpenFormCoach, stretchLink, pullupsCount, pullupsTarget, onSetPullups }) {
   const sunday = isSunday(isoWeekday);
   const workoutRest = workoutSchedule.type === 'Rest';
 
   // Workout label varies by day
   const workoutLabel = workoutRest ? 'Workout' : workoutSchedule.type;
 
-  // Build action button for workout row
+  // Build action buttons for workout row
   let workoutAction = null;
   if (workoutSchedule.hasTimer) {
-    workoutAction = { type: 'button', label: '20 min', onClick: onOpenTimer };
+    workoutAction = [
+      { type: 'button', label: '20 min', onClick: onOpenTimer },
+      { type: 'button', label: 'Form', onClick: onOpenFormCoach },
+    ];
   }
 
   // Stretch action button (active Mon-Sat)

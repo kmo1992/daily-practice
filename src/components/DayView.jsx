@@ -7,6 +7,7 @@ import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
 import Attributions from './Attributions';
 import BurpeeTimer from './BurpeeTimer';
+import FormCoach from './FormCoach';
 import SundayReflection from './SundayReflection';
 import TomorrowPreview from './TomorrowPreview';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
@@ -17,6 +18,7 @@ import { mobilityPractices } from '../data/practicesData';
 function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
   const [currentDate, setCurrentDate] = useState(() => getAppToday());
   const [showTimer, setShowTimer] = useState(false);
+  const [showFormCoach, setShowFormCoach] = useState(false);
 
   const dateStr = currentDate.format('YYYY-MM-DD');
   const isoWeekday = currentDate.isoWeekday();
@@ -42,6 +44,7 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
 
   const handleNavigate = (newDate) => {
     setShowTimer(false);
+    setShowFormCoach(false);
     setCurrentDate(newDate);
   };
 
@@ -95,6 +98,14 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
+  const handleSaveFormSession = (session) => {
+    if (isFuture) return;
+    onUpdateDay(dateStr, {
+      formSession: { ...session, gradedAt: new Date().toISOString() },
+      workoutType: workoutSchedule.type,
+    });
+  };
+
   // Today's pull-up target: the accepted number if set, else the schedule's
   const pullupsTarget = (() => {
     const accepted = dayData.acceptedTargets;
@@ -132,6 +143,7 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         onToggleHabit={handleToggleHabit}
         disabled={isReadOnly}
         onOpenTimer={() => setShowTimer(true)}
+        onOpenFormCoach={() => setShowFormCoach(true)}
         stretchLink={stretchLink}
         pullupsCount={Number(habits.pullupsCount) || (habits.pullups ? pullupsTarget : 0)}
         pullupsTarget={pullupsTarget}
@@ -147,6 +159,13 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
           const targets = accepted || getDailyTargets(isoWeekday, currentWeekGoals);
           return targets?.burpees || targets?.navySeals || 0;
         })()}
+      />
+
+      <FormCoach
+        isOpen={showFormCoach}
+        onClose={() => setShowFormCoach(false)}
+        workoutType={workoutSchedule.type}
+        onSave={handleSaveFormSession}
       />
 
       {isoWeekday === 7 && (() => {

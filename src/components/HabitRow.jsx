@@ -13,6 +13,9 @@ const DashIcon = () => (
 );
 
 function HabitRow({ label, checked, onToggle, disabled, isRest, actionButton, rewardStyle, emoji }) {
+  // Accept a single action or an array of them
+  const actions = Array.isArray(actionButton) ? actionButton : actionButton ? [actionButton] : [];
+
   const handleRowClick = (e) => {
     if (disabled || isRest) return;
     // Don't toggle if clicking the action button
@@ -50,29 +53,35 @@ function HabitRow({ label, checked, onToggle, disabled, isRest, actionButton, re
         {label}
         {emoji && <span className="habit-emoji">{emoji}</span>}
       </span>
-      {actionButton && !isRest && (
-        actionButton.type === 'link' ? (
-          <a
-            className="habit-action-btn"
-            href={actionButton.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {actionButton.label}
-          </a>
-        ) : (
-          <button
-            className="habit-action-btn"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              actionButton.onClick();
-            }}
-          >
-            {actionButton.label}
-          </button>
-        )
+      {actions.length > 0 && !isRest && (
+        <div className="habit-actions">
+          {actions.map((btn) =>
+            btn.type === 'link' ? (
+              <a
+                key={btn.label}
+                className="habit-action-btn"
+                href={btn.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {btn.label}
+              </a>
+            ) : (
+              <button
+                key={btn.label}
+                className="habit-action-btn"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  btn.onClick();
+                }}
+              >
+                {btn.label}
+              </button>
+            )
+          )}
+        </div>
       )}
     </div>
   );

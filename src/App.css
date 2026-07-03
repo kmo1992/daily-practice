@@ -438,6 +438,12 @@ body {
 }
 
 /* Action buttons (timer, link) — visually distinct from checkbox */
+.habit-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .habit-action-btn {
   background: var(--parchment-dark);
   border: 1px solid var(--rule-line);
