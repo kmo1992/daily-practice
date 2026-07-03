@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import useFormGrading from '../hooks/useFormGrading';
+import { summarizeGrades } from '../utils/formGrading';
 import './BurpeeTimer.css';
 
 // Audio Context helper
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
-const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
+const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', onSaveFormSession }) => {
   const BASE_TARGET_TIME = 20 * 60;
   const rawDuration = totalReps > 0 ? BASE_TARGET_TIME / totalReps : 0;
   const repDuration = Math.round(rawDuration);
@@ -39,6 +41,46 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       // localStorage unavailable — mode just won't persist
     }
   };
+
+  // Camera-based form grading, integrated with the timer session
+  const [cameraOn, setCameraOn] = useState(() => {
+    try {
+      return window.localStorage.getItem('burpee-timer-camera') === 'on';
+    } catch {
+      return false;
+    }
+  });
+  const [formSaved, setFormSaved] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const grading = useFormGrading({
+    videoRef,
+    canvasRef,
+    workoutType,
+    enabled: isOpen && cameraOn,
+  });
+
+  const toggleCamera = () => {
+    const next = !cameraOn;
+    setCameraOn(next);
+    try {
+      window.localStorage.setItem('burpee-timer-camera', next ? 'on' : 'off');
+    } catch {
+      // localStorage unavailable — preference just won't persist
+    }
+  };
+
+  // Kick off a graded session alongside the timer (fresh starts only —
+  // resuming from pause keeps the running session)
+  const startGradingIfOn = () => {
+    if (cameraOn) {
+      grading.start();
+      setFormSaved(false);
+    }
+  };
+
+  // Stable reference for the timer-loop effect
+  const { stop: stopGrading } = grading;
 
   const audioCtxRef = useRef(null);
   const startTimeRef = useRef(0);
@@ -114,6 +156,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
 
   const finishTimer = () => {
     setTimerState(prev => ({ ...prev, isActive: false, timeLeft: 0 }));
+    grading.stop();
     playChime();
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   };
@@ -165,6 +208,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
         animationFrameId = requestAnimationFrame(tick);
       } else {
         setTimerState(prev => ({ ...prev, isActive: false }));
+        stopGrading();
         playChime();
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       }
@@ -180,7 +224,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isActive, totalReps, repDuration, mode, playChime, playWarning]);
+  }, [isActive, totalReps, repDuration, mode, playChime, playWarning, stopGrading]);
 
   const toggleTimer = () => {
     if (totalReps <= 0) return;
@@ -197,6 +241,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       startTimeRef.current = 0;
       prevRepRef.current = 1;
       warnedRef.current = false;
+      startGradingIfOn();
       playChime();
       return;
     }
@@ -205,6 +250,7 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
       initAudio();
       setTimerState(prev => ({ ...prev, isActive: true }));
       if (timerState.timeLeft === TOTAL_TIME) {
+        startGradingIfOn();
         playChime();
         prevRepRef.current = timerState.currentRep;
       }
@@ -224,6 +270,19 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
     startTimeRef.current = 0;
     prevRepRef.current = 1;
     warnedRef.current = false;
+    stopGrading();
+  };
+
+  const saveGrades = () => {
+    if (!onSaveFormSession || grading.reps.length === 0) return;
+    const { total, counts } = summarizeGrades(grading.reps);
+    onSaveFormSession({
+      workoutType,
+      grades: grading.reps.map((r) => r.grade),
+      counts,
+      total,
+    });
+    setFormSaved(true);
   };
 
   useEffect(() => {
@@ -297,6 +356,43 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
   const breath = 0.5 - 0.5 * Math.cos(2 * Math.PI * repProgress);
   const pulseScale = 0.6 + 0.5 * breath;
 
+  const lastGrade = grading.reps.length > 0 ? grading.reps[grading.reps.length - 1].grade : null;
+
+  // End-of-session report card (both modes) when grading ran
+  const gradeSummary = cameraOn && grading.reps.length > 0 && (
+    <div className="grade-summary">
+      <div className="grade-summary-chips">
+        {grading.reps.map((r, i) => (
+          <span
+            key={i}
+            className={`grade-chip grade-${r.grade}`}
+            title={
+              Object.entries(r.checkpoints)
+                .filter(([, ok]) => !ok)
+                .map(([k]) => k)
+                .join(', ') || 'clean'
+            }
+          >
+            {r.grade}
+          </span>
+        ))}
+      </div>
+      {(() => {
+        const { total, counts } = summarizeGrades(grading.reps);
+        return (
+          <p className="grade-summary-line">
+            {total} graded · A×{counts.A} · B×{counts.B} · C×{counts.C}
+          </p>
+        );
+      })()}
+      {onSaveFormSession && (
+        <button className="save-grades-btn" type="button" onClick={saveGrades} disabled={formSaved}>
+          {formSaved ? 'Saved ✓' : 'Save grades'}
+        </button>
+      )}
+    </div>
+  );
+
   const controls = (
     <div className="controls-container">
       <div className="controls-group left">
@@ -323,21 +419,46 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
     <div className={`burpee-timer-overlay${isFlow ? ' flow' : ''}${finished ? ' finished' : ''}`}>
       <div className="burpee-timer-modal">
         {preStart && (
-          <div className="mode-toggle" role="group" aria-label="Timer mode">
+          <>
+            <div className="mode-toggle" role="group" aria-label="Timer mode">
+              <button
+                className={`mode-btn${!isFlow ? ' mode-btn--active' : ''}`}
+                type="button"
+                onClick={() => selectMode('classic')}
+              >
+                Classic
+              </button>
+              <button
+                className={`mode-btn${isFlow ? ' mode-btn--active' : ''}`}
+                type="button"
+                onClick={() => selectMode('flow')}
+              >
+                Flow
+              </button>
+            </div>
             <button
-              className={`mode-btn${!isFlow ? ' mode-btn--active' : ''}`}
+              className={`camera-toggle${cameraOn ? ' camera-toggle--on' : ''}`}
               type="button"
-              onClick={() => selectMode('classic')}
+              onClick={toggleCamera}
+              aria-pressed={cameraOn}
             >
-              Classic
+              {cameraOn ? '◉ Form grading on' : '○ Form grading off'}
             </button>
-            <button
-              className={`mode-btn${isFlow ? ' mode-btn--active' : ''}`}
-              type="button"
-              onClick={() => selectMode('flow')}
-            >
-              Flow
-            </button>
+          </>
+        )}
+
+        {/* Camera picture-in-picture — stays mounted while grading is on */}
+        {cameraOn && (
+          <div className={`timer-pip${finished ? ' timer-pip--dim' : ''}`}>
+            <video ref={videoRef} playsInline muted />
+            <canvas ref={canvasRef} />
+            {grading.status === 'loading' && <span className="pip-status">Loading…</span>}
+            {grading.status === 'error' && (
+              <span className="pip-status pip-status--error">{grading.error}</span>
+            )}
+            {!isFlow && !finished && lastGrade && (
+              <span className={`pip-grade grade-${lastGrade}`}>{lastGrade}</span>
+            )}
           </div>
         )}
 
@@ -345,7 +466,10 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
           <div className="bottom-area flow-bottom">
             <div className="flow-area">
               {finished ? (
-                <div className="end-timer-message">Well done.</div>
+                <>
+                  <div className="end-timer-message">Well done.</div>
+                  {gradeSummary}
+                </>
               ) : (
                 <>
                   <div
@@ -384,9 +508,12 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0 }) => {
             <div className="bottom-area">
               <div className="rounds-container">
                 {finished ? (
-                  <div className="end-timer-message">
-                    Congratulations!
-                  </div>
+                  <>
+                    <div className="end-timer-message">
+                      Congratulations!
+                    </div>
+                    {gradeSummary}
+                  </>
                 ) : (
                   <>
                     <div className="interval-info current">

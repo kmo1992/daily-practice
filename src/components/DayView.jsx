@@ -7,7 +7,6 @@ import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
 import Attributions from './Attributions';
 import BurpeeTimer from './BurpeeTimer';
-import FormCoach from './FormCoach';
 import SundayReflection from './SundayReflection';
 import TomorrowPreview from './TomorrowPreview';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
@@ -18,7 +17,6 @@ import { mobilityPractices } from '../data/practicesData';
 function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
   const [currentDate, setCurrentDate] = useState(() => getAppToday());
   const [showTimer, setShowTimer] = useState(false);
-  const [showFormCoach, setShowFormCoach] = useState(false);
 
   const dateStr = currentDate.format('YYYY-MM-DD');
   const isoWeekday = currentDate.isoWeekday();
@@ -44,7 +42,6 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
 
   const handleNavigate = (newDate) => {
     setShowTimer(false);
-    setShowFormCoach(false);
     setCurrentDate(newDate);
   };
 
@@ -143,7 +140,6 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         onToggleHabit={handleToggleHabit}
         disabled={isReadOnly}
         onOpenTimer={() => setShowTimer(true)}
-        onOpenFormCoach={() => setShowFormCoach(true)}
         stretchLink={stretchLink}
         pullupsCount={Number(habits.pullupsCount) || (habits.pullups ? pullupsTarget : 0)}
         pullupsTarget={pullupsTarget}
@@ -159,13 +155,8 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
           const targets = accepted || getDailyTargets(isoWeekday, currentWeekGoals);
           return targets?.burpees || targets?.navySeals || 0;
         })()}
-      />
-
-      <FormCoach
-        isOpen={showFormCoach}
-        onClose={() => setShowFormCoach(false)}
         workoutType={workoutSchedule.type}
-        onSave={handleSaveFormSession}
+        onSaveFormSession={handleSaveFormSession}
       />
 
       {isoWeekday === 7 && (() => {

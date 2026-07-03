@@ -405,3 +405,173 @@
   color: rgba(245, 240, 230, 0.7);
   margin: 0;
 }
+
+/* ---- Form grading (camera) ---- */
+
+.camera-toggle {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 999px;
+  padding: 6px 18px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #000;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.camera-toggle--on {
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .camera-toggle {
+  border-color: rgba(245, 240, 230, 0.5);
+  color: #f5f0e6;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .camera-toggle--on {
+  background: rgba(245, 240, 230, 0.92);
+  color: #17313c;
+}
+
+/* Picture-in-picture camera tile */
+.timer-pip {
+  position: absolute;
+  left: 12px;
+  bottom: 110px;
+  width: 30vmin;
+  max-width: 220px;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0d1f27;
+  border: 1px solid rgba(245, 240, 230, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  z-index: 5;
+}
+
+.timer-pip--dim {
+  opacity: 0.35;
+}
+
+.timer-pip video,
+.timer-pip canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pip-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #f5f0e6;
+  background: rgba(13, 31, 39, 0.7);
+}
+
+.pip-status--error {
+  color: #ffb3a7;
+}
+
+.pip-grade {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* End-of-session report card */
+.grade-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.grade-summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-height: 76px;
+  overflow-y: auto;
+}
+
+.grade-chip {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.grade-A {
+  color: #3d8b47;
+}
+
+.grade-B {
+  color: #b8860b;
+}
+
+.grade-C {
+  color: #b0402c;
+}
+
+.grade-chip.grade-A {
+  background: #2f6b38;
+  color: #eafbe9;
+}
+
+.grade-chip.grade-B {
+  background: #8a6d1f;
+  color: #fdf4dc;
+}
+
+.grade-chip.grade-C {
+  background: #8a3b2c;
+  color: #ffe9e3;
+}
+
+.grade-summary-line {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.save-grades-btn {
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 26px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-grades-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.burpee-timer-overlay.flow:not(.finished) .save-grades-btn {
+  background: rgba(245, 240, 230, 0.92);
+  color: #17313c;
+}
