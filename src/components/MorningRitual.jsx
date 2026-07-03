@@ -9,7 +9,7 @@ function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, dis
   // Workout label varies by day
   const workoutLabel = workoutRest ? 'Workout' : workoutSchedule.type;
 
-  // Build action button for workout row
+  // Build action button for workout row (form grading lives inside the timer)
   let workoutAction = null;
   if (workoutSchedule.hasTimer) {
     workoutAction = { type: 'button', label: '20 min', onClick: onOpenTimer };

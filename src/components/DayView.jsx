@@ -95,6 +95,14 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
+  const handleSaveFormSession = (session) => {
+    if (isFuture) return;
+    onUpdateDay(dateStr, {
+      formSession: { ...session, gradedAt: new Date().toISOString() },
+      workoutType: workoutSchedule.type,
+    });
+  };
+
   // Today's pull-up target: the accepted number if set, else the schedule's
   const pullupsTarget = (() => {
     const accepted = dayData.acceptedTargets;
@@ -147,6 +155,8 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
           const targets = accepted || getDailyTargets(isoWeekday, currentWeekGoals);
           return targets?.burpees || targets?.navySeals || 0;
         })()}
+        workoutType={workoutSchedule.type}
+        onSaveFormSession={handleSaveFormSession}
       />
 
       {isoWeekday === 7 && (() => {
