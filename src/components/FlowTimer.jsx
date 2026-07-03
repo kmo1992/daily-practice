@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import useRepCamera from '../hooks/useRepCamera';
-import './BurpeeTimer.css';
+import './FlowTimer.css';
 
 // Audio Context helper
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -21,7 +21,7 @@ const CHIME_BRIGHT = [
   [1245.9, 0.05, 0.9],
 ];
 
-const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', onSaveRepSession }) => {
+const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', onSaveRepSession }) => {
   const BASE_TARGET_TIME = 20 * 60;
   const repDuration = totalReps > 0 ? Math.round(BASE_TARGET_TIME / totalReps) : 0;
   const TOTAL_TIME = repDuration * totalReps;
@@ -308,8 +308,8 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
   const pulseScale = 1.05 - 0.45 * Math.pow(repProgress, 0.7);
 
   const overlay = (
-    <div className={`burpee-timer-overlay${finished ? ' finished' : ''}`}>
-      <div className="burpee-timer-modal">
+    <div className={`flow-timer-overlay${finished ? ' finished' : ''}`}>
+      <div className="flow-timer-modal">
         {preStart && (
           <div className="prestart-controls">
             <button
@@ -423,4 +423,4 @@ const BurpeeTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', 
   return createPortal(overlay, document.body);
 };
 
-export default BurpeeTimer;
+export default FlowTimer;

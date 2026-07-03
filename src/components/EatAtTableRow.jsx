@@ -1,9 +1,4 @@
-
-const CheckIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="2.5 7.5 5.5 10.5 11.5 3.5" />
-  </svg>
-);
+import { CheckIcon } from './icons';
 
 const UtensilIcon = ({ filled }) => (
   <svg width="20" height="24" viewBox="0 0 24 24" fill="none"

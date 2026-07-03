@@ -1,6 +1,6 @@
 /* Flow timer — numbers-free, calm dark backdrop; finished state goes light */
 
-.burpee-timer-overlay {
+.flow-timer-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,11 +11,11 @@
   transition: background-color 0.5s ease;
 }
 
-.burpee-timer-overlay.finished {
+.flow-timer-overlay.finished {
   background-color: #ffffff;
 }
 
-.burpee-timer-modal {
+.flow-timer-modal {
   width: 100%;
   height: 100%;
   display: flex;
@@ -28,7 +28,7 @@
   position: relative;
 }
 
-.burpee-timer-overlay.finished .burpee-timer-modal {
+.flow-timer-overlay.finished .flow-timer-modal {
   color: #1c1c1c;
 }
 

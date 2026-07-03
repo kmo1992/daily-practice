@@ -6,7 +6,7 @@ import MorningRitual from './MorningRitual';
 import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
 import Attributions from './Attributions';
-import BurpeeTimer from './BurpeeTimer';
+import FlowTimer from './FlowTimer';
 import SundayReflection from './SundayReflection';
 import TomorrowPreview from './TomorrowPreview';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
@@ -146,7 +146,7 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         onSetPullups={handleSetPullups}
       />
 
-      <BurpeeTimer
+      <FlowTimer
         isOpen={showTimer}
         onClose={() => setShowTimer(false)}
         totalReps={(() => {
