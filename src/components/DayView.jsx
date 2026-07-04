@@ -7,7 +7,6 @@ import EndOfDay from './EndOfDay';
 import FourAgreements from './FourAgreements';
 import Attributions from './Attributions';
 import FlowTimer from './FlowTimer';
-import PullupRecorder from './PullupRecorder';
 import SundayReflection from './SundayReflection';
 import TomorrowPreview from './TomorrowPreview';
 import { getAppToday, isFutureDate } from '../utils/dateUtils';
@@ -18,7 +17,6 @@ import { mobilityPractices } from '../data/practicesData';
 function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
   const [currentDate, setCurrentDate] = useState(() => getAppToday());
   const [showTimer, setShowTimer] = useState(false);
-  const [showPullupRecorder, setShowPullupRecorder] = useState(false);
 
   const dateStr = currentDate.format('YYYY-MM-DD');
   const isoWeekday = currentDate.isoWeekday();
@@ -44,7 +42,6 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
 
   const handleNavigate = (newDate) => {
     setShowTimer(false);
-    setShowPullupRecorder(false);
     setCurrentDate(newDate);
   };
 
@@ -138,12 +135,6 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
         pullupsCount={Number(habits.pullupsCount) || (habits.pullups ? pullupsTarget : 0)}
         pullupsTarget={pullupsTarget}
         onSetPullups={handleSetPullups}
-        onRecordPullups={() => setShowPullupRecorder(true)}
-      />
-
-      <PullupRecorder
-        isOpen={showPullupRecorder}
-        onClose={() => setShowPullupRecorder(false)}
       />
 
       <FlowTimer

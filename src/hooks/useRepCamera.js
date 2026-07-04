@@ -30,16 +30,14 @@ const pickRecorderType = () => {
   return candidates.find((t) => MediaRecorder.isTypeSupported(t)) ?? '';
 };
 
-// Camera for workout sessions: video recording plus (optional) on-device
-// rep counting.
+// Camera for workout sessions: on-device rep counting + video recording.
 //
 // While `enabled`, acquires the selected camera (front/user-facing by
-// default); with `counting` it also lazy-loads the MediaPipe pose
-// landmarker. `start()` begins a session: the rep counter resets and the
-// recorder starts. `stop()` ends it, finalizing the recording into
-// `videoUrl`/`videoBlob` for review and storage. Everything is on-device;
-// nothing is uploaded.
-export default function useRepCamera({ videoRef, canvasRef, enabled, counting = true }) {
+// default) and lazy-loads the MediaPipe pose landmarker. `start()` begins a
+// session: the rep counter resets and the recorder starts. `stop()` ends it,
+// finalizing the recording into `videoUrl`/`videoBlob` for review and
+// storage. Everything is on-device; nothing is uploaded.
+export default function useRepCamera({ videoRef, canvasRef, enabled }) {
   const [status, setStatus] = useState('idle'); // idle | loading | ready | counting | error
   const [error, setError] = useState('');
   const [count, setCount] = useState(0);
@@ -163,7 +161,7 @@ export default function useRepCamera({ videoRef, canvasRef, enabled, counting = 
         // Labels are only populated after permission is granted
         const all = await navigator.mediaDevices.enumerateDevices();
         if (!cancelled) setDevices(all.filter((d) => d.kind === 'videoinput'));
-        if (!cancelled && (!counting || landmarkerRef.current)) setStatus('ready');
+        if (!cancelled && landmarkerRef.current) setStatus('ready');
       } catch (err) {
         console.error('Camera setup failed', err);
         if (!cancelled) {
@@ -190,12 +188,11 @@ export default function useRepCamera({ videoRef, canvasRef, enabled, counting = 
         streamRef.current = null;
       }
     };
-  }, [enabled, counting, deviceId, videoRef]);
+  }, [enabled, deviceId, videoRef]);
 
-  // Pose model — loaded once per enable, independent of device switches.
-  // Skipped entirely when counting is off (record-only sessions).
+  // Pose model — loaded once per enable, independent of device switches
   useEffect(() => {
-    if (!enabled || !counting) return undefined;
+    if (!enabled) return undefined;
     let cancelled = false;
 
     (async () => {
@@ -233,7 +230,7 @@ export default function useRepCamera({ videoRef, canvasRef, enabled, counting = 
         landmarkerRef.current = null;
       }
     };
-  }, [enabled, counting]);
+  }, [enabled]);
 
   // Reset session state and release any recorded video when disabled
   useEffect(() => {
@@ -289,12 +286,12 @@ export default function useRepCamera({ videoRef, canvasRef, enabled, counting = 
       }
     }
 
-    if (counting && landmarkerRef.current) {
+    if (landmarkerRef.current) {
       runningRef.current = true;
       setStatus('counting');
       rafRef.current = requestAnimationFrame(loop);
     }
-  }, [counting, loop, releaseVideoUrl]);
+  }, [loop, releaseVideoUrl]);
 
   const stop = useCallback(() => {
     runningRef.current = false;

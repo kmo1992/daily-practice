@@ -258,60 +258,6 @@
   margin-top: 4px;
 }
 
-/* ---- Pull-up recorder ---- */
-
-.recorder-title {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.8;
-}
-
-.recorder-stage {
-  position: relative;
-  width: min(90vw, 480px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.recorder-preview {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  border-radius: 10px;
-  background: #0d1f27;
-  border: 1px solid rgba(245, 240, 230, 0.35);
-}
-
-.recorder-dot {
-  position: absolute;
-  top: 10px;
-  right: 14px;
-  color: #ff6b5a;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-/* review-btn colors are tuned for the white finished screen; on the dark
-   recorder backdrop use light variants */
-.recorder-rec {
-  background: #f5f0e6;
-  color: #17313c;
-}
-
-.recorder-rec:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.recorder-ghost {
-  color: #f5f0e6;
-  border-color: rgba(245, 240, 230, 0.5);
-}
-
 .review-btn {
   background: #1c1c1c;
   color: #fff;
