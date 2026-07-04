@@ -42,8 +42,9 @@ const crouch = () =>
 const feed = (counter, frames) =>
   frames.reduce((n, f) => n + (counter.update(analyzeFrame(f)) ? 1 : 0), 0);
 
-const stand3 = () => [standing(), standing(), standing()];
-const descent = () => [horizontal(), horizontal(), horizontal()];
+const repeat = (make, n) => Array.from({ length: n }, make);
+const stableStand = () => repeat(standing, 5);
+const descent = () => repeat(horizontal, 5);
 
 describe('angleDeg', () => {
   it('measures a straight line as 180', () => {
@@ -72,14 +73,14 @@ describe('analyzeFrame', () => {
 describe('createRepCounter', () => {
   it('counts a clean stand → ground → stand cycle as one rep', () => {
     const counter = createRepCounter();
-    const reps = feed(counter, [...stand3(), ...descent(), ...stand3()]);
+    const reps = feed(counter, [...stableStand(), ...descent(), ...stableStand()]);
     expect(reps).toBe(1);
     expect(counter.getCount()).toBe(1);
   });
 
   it('ignores a crouch that never goes horizontal', () => {
     const counter = createRepCounter();
-    const reps = feed(counter, [...stand3(), crouch(), crouch(), ...stand3()]);
+    const reps = feed(counter, [...stableStand(), crouch(), crouch(), ...stableStand()]);
     expect(reps).toBe(0);
     expect(counter.getCount()).toBe(0);
   });
@@ -87,10 +88,10 @@ describe('createRepCounter', () => {
   it('counts consecutive reps', () => {
     const counter = createRepCounter();
     const reps = feed(counter, [
-      ...stand3(),
-      ...descent(), ...stand3(),
-      ...descent(), ...stand3(),
-      ...descent(), ...stand3(),
+      ...stableStand(),
+      ...descent(), ...stableStand(),
+      ...descent(), ...stableStand(),
+      ...descent(), ...stableStand(),
     ]);
     expect(reps).toBe(3);
     expect(counter.getCount()).toBe(3);
@@ -99,14 +100,28 @@ describe('createRepCounter', () => {
   it('does not count until an initial stable stand is seen', () => {
     const counter = createRepCounter();
     // Starts mid-plank (e.g. camera turned on late) — no phantom rep
-    const reps = feed(counter, [...descent(), ...stand3()]);
+    const reps = feed(counter, [...descent(), ...stableStand()]);
     expect(reps).toBe(0);
   });
 
-  it('requires the stand to be stable, not a single frame', () => {
+  it('does not double-count when pose jitter fakes a brief stand mid-rep', () => {
     const counter = createRepCounter();
-    // One standing frame between descents is a wobble, not a completed rep
-    const reps = feed(counter, [...stand3(), ...descent(), standing(), ...descent(), ...stand3()]);
+    // 3 flickered "standing" frames mid-rep (under stableFrames) must not
+    // close the rep — this was the 23-of-20 overcount in the field
+    const reps = feed(counter, [
+      ...stableStand(),
+      ...descent(),
+      standing(), standing(), standing(),
+      ...descent(),
+      ...stableStand(),
+    ]);
     expect(reps).toBe(1);
+  });
+
+  it('ignores a single-frame ground flicker between stands', () => {
+    const counter = createRepCounter();
+    // One horizontal frame is jitter, not a descent
+    const reps = feed(counter, [...stableStand(), horizontal(), ...stableStand()]);
+    expect(reps).toBe(0);
   });
 });

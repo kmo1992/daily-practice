@@ -27,7 +27,10 @@ export const THRESHOLDS = {
   standMinHipAngle: 150,
   standMinKneeAngle: 150,
   groundMinTorsoTilt: 55, // deg from vertical → body near horizontal
-  stableFrames: 3, // consecutive standing frames that close out a rep
+  // Debounce against pose jitter: mid-rep landmark flicker can fake a brief
+  // "stand" or "ground", double-counting reps (seen live: 23 counted of 20).
+  stableFrames: 5, // consecutive standing frames that close out a rep
+  minGroundFrames: 4, // frames of horizontal required for a real descent
 };
 
 const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
@@ -104,8 +107,8 @@ export const createRepCounter = () => {
 
     if (standStreak >= THRESHOLDS.stableFrames) {
       state = 'stand';
-      // Never went horizontal: noise (a crouch), not a burpee
-      if (groundFrames > 0) {
+      // Too little horizontal time: a crouch or a jitter flicker, not a burpee
+      if (groundFrames >= THRESHOLDS.minGroundFrames) {
         count += 1;
         return true;
       }

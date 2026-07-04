@@ -30,14 +30,16 @@ const pickRecorderType = () => {
   return candidates.find((t) => MediaRecorder.isTypeSupported(t)) ?? '';
 };
 
-// Camera for the timer session: on-device rep counting + video recording.
+// Camera for workout sessions: video recording plus (optional) on-device
+// rep counting.
 //
 // While `enabled`, acquires the selected camera (front/user-facing by
-// default) and lazy-loads the MediaPipe pose landmarker. `start()` begins a
-// session: the rep counter resets and the recorder starts. `stop()` ends it,
-// finalizing the recording into `videoUrl` for in-app review. Everything is
-// on-device; nothing is uploaded.
-export default function useRepCamera({ videoRef, canvasRef, enabled }) {
+// default); with `counting` it also lazy-loads the MediaPipe pose
+// landmarker. `start()` begins a session: the rep counter resets and the
+// recorder starts. `stop()` ends it, finalizing the recording into
+// `videoUrl`/`videoBlob` for review and storage. Everything is on-device;
+// nothing is uploaded.
+export default function useRepCamera({ videoRef, canvasRef, enabled, counting = true }) {
   const [status, setStatus] = useState('idle'); // idle | loading | ready | counting | error
   const [error, setError] = useState('');
   const [count, setCount] = useState(0);
@@ -50,7 +52,8 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
     }
   });
   const [videoUrl, setVideoUrl] = useState(null);
-  const [videoExt, setVideoExt] = useState('webm');
+  const [videoBlob, setVideoBlob] = useState(null);
+  const [videoMime, setVideoMime] = useState('video/webm');
 
   const streamRef = useRef(null);
   const landmarkerRef = useRef(null);
@@ -68,6 +71,7 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
       videoUrlRef.current = null;
     }
     setVideoUrl(null);
+    setVideoBlob(null);
   }, []);
 
   const drawOverlay = useCallback(
@@ -159,7 +163,7 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
         // Labels are only populated after permission is granted
         const all = await navigator.mediaDevices.enumerateDevices();
         if (!cancelled) setDevices(all.filter((d) => d.kind === 'videoinput'));
-        if (!cancelled && landmarkerRef.current) setStatus('ready');
+        if (!cancelled && (!counting || landmarkerRef.current)) setStatus('ready');
       } catch (err) {
         console.error('Camera setup failed', err);
         if (!cancelled) {
@@ -186,11 +190,12 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
         streamRef.current = null;
       }
     };
-  }, [enabled, deviceId, videoRef]);
+  }, [enabled, counting, deviceId, videoRef]);
 
-  // Pose model — loaded once per enable, independent of device switches
+  // Pose model — loaded once per enable, independent of device switches.
+  // Skipped entirely when counting is off (record-only sessions).
   useEffect(() => {
-    if (!enabled) return undefined;
+    if (!enabled || !counting) return undefined;
     let cancelled = false;
 
     (async () => {
@@ -227,14 +232,16 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
         landmarkerRef.current.close();
         landmarkerRef.current = null;
       }
+    };
+  }, [enabled, counting]);
+
+  // Reset session state and release any recorded video when disabled
+  useEffect(() => {
+    if (!enabled) {
+      releaseVideoUrl();
       setStatus('idle');
       setCount(0);
-    };
-  }, [enabled]);
-
-  // Release any recorded video when the camera is disabled/unmounted
-  useEffect(() => {
-    if (!enabled) releaseVideoUrl();
+    }
   }, [enabled, releaseVideoUrl]);
 
   const selectDevice = useCallback((id) => {
@@ -272,7 +279,8 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
           const url = URL.createObjectURL(blob);
           videoUrlRef.current = url;
           setVideoUrl(url);
-          setVideoExt(type.includes('mp4') ? 'mp4' : 'webm');
+          setVideoBlob(blob);
+          setVideoMime(type);
         };
         recorder.start(1000);
         recorderRef.current = recorder;
@@ -281,12 +289,12 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
       }
     }
 
-    if (landmarkerRef.current) {
+    if (counting && landmarkerRef.current) {
       runningRef.current = true;
       setStatus('counting');
       rafRef.current = requestAnimationFrame(loop);
     }
-  }, [loop, releaseVideoUrl]);
+  }, [counting, loop, releaseVideoUrl]);
 
   const stop = useCallback(() => {
     runningRef.current = false;
@@ -308,7 +316,8 @@ export default function useRepCamera({ videoRef, canvasRef, enabled }) {
     start,
     stop,
     videoUrl,
-    videoExt,
+    videoBlob,
+    videoMime,
     discardVideo: releaseVideoUrl,
   };
 }

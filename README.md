@@ -7,8 +7,8 @@ A personal health and habit tracker built with React, shaped around the [Busy Da
 
 - **Morning Numbers**: Each day proposes your numbers (burpees or navy seals, pull-ups) from your weekly goals — review, adjust one-offs, and accept them.
 - **Flow Timer**: A numbers-free 20-minute workout timer. A bell-strike pulse blooms once per rep with a warm chime (plus haptics) — no counters, no clocks, no overthinking. Audio-only milestones mark the halfway rep and the final three, and a distinct descending phrase signals the finish.
-- **Camera Rep Counting & Recording** (optional): On-device pose estimation counts your reps (stand → ground → stand) while the session is recorded for self-review — replay at the end, then save to your device or discard. Video never leaves the device. Works with phone cameras or webcams, with a device picker.
-- **Daily Tracking**: Habit checkboxes (workout, stretch, read + coffee), pull-ups with actual rep counts, and numeric tallies (hydration, eat-at-table).
+- **Camera Rep Counting & Recording** (optional): On-device pose estimation counts your reps (stand → ground → stand) while the session is recorded for self-review. Recordings auto-save to on-device storage with a list to replay, download, or delete — video never leaves the device. Works with phone cameras or webcams, with a device picker. Pull-up sets can be recorded too.
+- **Daily Tracking**: Habit checkboxes (workout, stretch, read + coffee), pull-ups with actual rep counts, and a hydration tally.
 - **Weekly Goals**: Set targets for burpees, navy seals, and pull-ups each week, with carry-over when a week isn't explicitly set.
 - **Trends**: Current/longest streak, 30-day completion, a 12-week consistency heatmap, and pull-up progression.
 - **Tomorrow Preview**: A collapsed peek at tomorrow's workout and stretch routine for planning around real life.
@@ -143,13 +143,14 @@ src/
 │   ├── MorningTargets.jsx     # Accept/adjust today's numbers
 │   ├── MorningRitual.jsx      # Morning routine section
 │   ├── PullupsRow.jsx         # Pull-ups with rep stepper
-│   ├── EndOfDay.jsx           # Daily habits section
+│   ├── EndOfDay.jsx           # Hydration section
 │   ├── HabitRow.jsx           # Reusable checkbox row
 │   ├── HydrationRow.jsx       # 3-bottle water tracker
-│   ├── EatAtTableRow.jsx      # 3-plate meal tracker
 │   ├── icons.jsx              # Shared inline SVG icons
 │   ├── FlowTimer.jsx          # Flow workout timer + camera session
-│   ├── FlowTimer.css          # Timer styles
+│   ├── FlowTimer.css          # Timer + recorder styles
+│   ├── PullupRecorder.jsx     # Record pull-up sets for self-review
+│   ├── RecordingsList.jsx     # Saved recordings: play/download/delete
 │   ├── TrendsView.jsx         # Streaks, heatmap, pull-up progression
 │   ├── TomorrowPreview.jsx    # Collapsed peek at tomorrow's plan
 │   ├── FourAgreements.jsx     # Expandable philosophy section
@@ -166,6 +167,7 @@ src/
     ├── scheduleUtils.js       # Workout schedule, goal resolution
     ├── streakUtils.js         # Streak calculation
     ├── statsUtils.js          # Trends/heatmap statistics
+    ├── recordingsStore.js     # On-device video storage (IndexedDB)
     └── repCounter.js          # Pose-based burpee rep counting
 ```
 

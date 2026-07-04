@@ -2,7 +2,9 @@ import { getTrackableHabits } from './scheduleUtils';
 import { getAppToday } from './dateUtils';
 
 // Tally habits store numeric counts; legacy boolean true is also valid.
-const TALLY_HABITS = ['hydrate', 'eatAtTable'];
+// (eatAtTable was retired 2026-07 — old day docs may still carry its data,
+// but it is no longer trackable.)
+const TALLY_HABITS = ['hydrate'];
 
 /**
  * Whether a single habit is satisfied for a day's habits object.
