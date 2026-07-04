@@ -2,7 +2,7 @@ import HabitRow from './HabitRow';
 import PullupsRow from './PullupsRow';
 import { isSunday } from '../utils/scheduleUtils';
 
-function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, stretchLink, pullupsCount, pullupsTarget, onSetPullups }) {
+function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, disabled, onOpenTimer, stretchLink, pullupsCount, pullupsTarget, onSetPullups, onRecordPullups }) {
   const sunday = isSunday(isoWeekday);
   const workoutRest = workoutSchedule.type === 'Rest';
 
@@ -52,6 +52,7 @@ function MorningRitual({ habits, isoWeekday, workoutSchedule, onToggleHabit, dis
           target={pullupsTarget}
           disabled={disabled}
           onSetCount={onSetPullups}
+          onRecord={onRecordPullups}
         />
       )}
 

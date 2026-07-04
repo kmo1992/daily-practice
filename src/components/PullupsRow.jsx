@@ -2,7 +2,7 @@ import { CheckIcon } from './icons';
 
 // Pull-ups row: a checkbox for "done" plus a stepper to log the actual reps.
 // `count` is the reps completed today; `target` is the day's goal (for context).
-function PullupsRow({ count, target, disabled, onSetCount }) {
+function PullupsRow({ count, target, disabled, onSetCount, onRecord }) {
   const done = count > 0;
 
   const handleToggle = () => {
@@ -35,6 +35,18 @@ function PullupsRow({ count, target, disabled, onSetCount }) {
         {done && <CheckIcon />}
       </div>
       <span className={labelClasses}>Pull-ups</span>
+      {onRecord && !disabled && (
+        <button
+          className="habit-action-btn pullups-record"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRecord();
+          }}
+        >
+          Record
+        </button>
+      )}
       <div className="pullups-stepper" onClick={(e) => e.stopPropagation()}>
         <button
           className="pullups-step"

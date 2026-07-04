@@ -44,17 +44,17 @@ describe('isSunday', () => {
 
 describe('getTrackableHabits', () => {
   it('Sunday tracks rest-day habits (no workout/pullups/stretch)', () => {
-    expect(getTrackableHabits(7)).toEqual(['outside', 'readCoffee', 'eatAtTable', 'hydrate']);
+    expect(getTrackableHabits(7)).toEqual(['outside', 'readCoffee', 'hydrate']);
   });
 
   it('workout-rest days (Tue/Thu) still track pull-ups and stretch but not workout', () => {
-    const expected = ['pullups', 'stretch', 'readCoffee', 'eatAtTable', 'hydrate'];
+    const expected = ['pullups', 'stretch', 'readCoffee', 'hydrate'];
     expect(getTrackableHabits(2)).toEqual(expected);
     expect(getTrackableHabits(4)).toEqual(expected);
   });
 
   it('workout days track the workout too', () => {
-    const expected = ['workout', 'pullups', 'stretch', 'readCoffee', 'eatAtTable', 'hydrate'];
+    const expected = ['workout', 'pullups', 'stretch', 'readCoffee', 'hydrate'];
     [1, 3, 5, 6].forEach((d) => expect(getTrackableHabits(d)).toEqual(expected));
   });
 });

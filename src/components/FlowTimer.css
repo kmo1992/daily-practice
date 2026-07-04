@@ -145,6 +145,20 @@
   }
 }
 
+/* Final three reps: the pulse glows amber — the endgame is unmistakable */
+.flow-pulse--ember {
+  background: radial-gradient(
+    circle,
+    rgba(255, 196, 110, 0.95) 0%,
+    rgba(255, 172, 80, 0.35) 60%,
+    transparent 75%
+  );
+}
+
+.flow-ripple--ember {
+  border-color: rgba(255, 196, 110, 0.9);
+}
+
 .flow-hint {
   font-size: 1rem;
   text-align: center;
@@ -185,6 +199,119 @@
   gap: 12px;
 }
 
+.review-caption {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* ---- Recordings list (pre-start + recorder) ---- */
+
+.recordings {
+  width: min(90vw, 420px);
+  max-height: 32vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recordings-heading {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+}
+
+.recording-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+
+.recording-label {
+  flex: 1;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recording-play,
+.recording-action {
+  background: transparent;
+  border: 1px solid rgba(245, 240, 230, 0.4);
+  border-radius: 6px;
+  color: inherit;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.recording-player {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+  margin-top: 4px;
+}
+
+/* ---- Pull-up recorder ---- */
+
+.recorder-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.recorder-stage {
+  position: relative;
+  width: min(90vw, 480px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.recorder-preview {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #0d1f27;
+  border: 1px solid rgba(245, 240, 230, 0.35);
+}
+
+.recorder-dot {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  color: #ff6b5a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* review-btn colors are tuned for the white finished screen; on the dark
+   recorder backdrop use light variants */
+.recorder-rec {
+  background: #f5f0e6;
+  color: #17313c;
+}
+
+.recorder-rec:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.recorder-ghost {
+  color: #f5f0e6;
+  border-color: rgba(245, 240, 230, 0.5);
+}
+
 .review-btn {
   background: #1c1c1c;
   color: #fff;
@@ -211,8 +338,7 @@
   position: absolute;
   left: 12px;
   bottom: 110px;
-  width: 30vmin;
-  max-width: 220px;
+  width: clamp(120px, 30vmin, 440px);
   aspect-ratio: 3 / 4;
   border-radius: 10px;
   overflow: hidden;

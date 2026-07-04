@@ -21,14 +21,14 @@ export const isSunday = (isoWeekday) => isoWeekday === 7;
 export const getTrackableHabits = (isoWeekday) => {
   if (isoWeekday === 7) {
     // Sunday: full rest
-    return ['outside', 'readCoffee', 'eatAtTable', 'hydrate'];
+    return ['outside', 'readCoffee', 'hydrate'];
   }
   const workout = getWorkoutForDay(isoWeekday);
   if (workout.type === 'Rest') {
     // Tue/Thu: workout rest, but pull-ups and stretch still happen
-    return ['pullups', 'stretch', 'readCoffee', 'eatAtTable', 'hydrate'];
+    return ['pullups', 'stretch', 'readCoffee', 'hydrate'];
   }
-  return ['workout', 'pullups', 'stretch', 'readCoffee', 'eatAtTable', 'hydrate'];
+  return ['workout', 'pullups', 'stretch', 'readCoffee', 'hydrate'];
 };
 
 // ISO week start key for weekly goals lookup

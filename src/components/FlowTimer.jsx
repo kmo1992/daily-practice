@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import useRepCamera from '../hooks/useRepCamera';
+import RecordingsList from './RecordingsList';
+import { saveRecording, deleteRecording } from '../utils/recordingsStore';
 import './FlowTimer.css';
 
 // Audio Context helper
@@ -37,6 +39,7 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
   const { isActive, timeLeft, repTimeLeft, currentRep } = timerState;
   const [isLocked, setIsLocked] = useState(false);
   const [sessionSaved, setSessionSaved] = useState(false);
+  const [savedRecordingId, setSavedRecordingId] = useState(null);
 
   // Camera: rep counting + session recording, on-device
   const [cameraOn, setCameraOn] = useState(() => {
@@ -197,6 +200,7 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
 
   const startSession = () => {
     setSessionSaved(false);
+    setSavedRecordingId(null);
     if (cameraOn) camera.start();
   };
 
@@ -243,6 +247,7 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
     startTimeRef.current = 0;
     prevRepRef.current = 1;
     setSessionSaved(false);
+    setSavedRecordingId(null);
     stopCamera();
     discardVideo();
   }, [TOTAL_TIME, repDuration, stopCamera, discardVideo]);
@@ -278,6 +283,22 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
     }
   }, [isOpen, cameraOn, sessionSaved, timeLeft, camera.count, onSaveRepSession, workoutType, totalReps]);
 
+  // The session video auto-saves to on-device recordings once it finalizes
+  useEffect(() => {
+    if (!isOpen || timeLeft > 0 || savedRecordingId || !camera.videoBlob) return;
+    saveRecording({ label: workoutType, blob: camera.videoBlob, mime: camera.videoMime })
+      .then(setSavedRecordingId)
+      .catch((e) => console.error('Could not save recording', e));
+  }, [isOpen, timeLeft, savedRecordingId, camera.videoBlob, camera.videoMime, workoutType]);
+
+  const deleteSavedRecording = () => {
+    if (savedRecordingId) {
+      deleteRecording(savedRecordingId).catch((e) => console.error('Could not delete recording', e));
+    }
+    setSavedRecordingId(null);
+    discardVideo();
+  };
+
   const IconPlay = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
   );
@@ -307,8 +328,19 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
   const repProgress = repDuration > 0 ? 1 - (repTimeLeft / repDuration) : 0;
   const pulseScale = 1.05 - 0.45 * Math.pow(repProgress, 0.7);
 
+  // Ambient progress without numbers: the backdrop warms from cool teal to
+  // ember across the session, and the pulse itself glows amber for the
+  // final three reps — glanceable, but nothing to count.
+  const sessionProgress = TOTAL_TIME > 0 ? 1 - timeLeft / TOTAL_TIME : 0;
+  const warm = (from, to) => Math.round(from + (to - from) * sessionProgress);
+  const backdrop = finished
+    ? undefined
+    : { backgroundColor: `rgb(${warm(23, 66)}, ${warm(49, 42)}, ${warm(60, 18)})` };
+  const finalStretch = isActive && totalReps > 3 && currentRep >= totalReps - 2;
+  const videoExt = camera.videoMime.includes('mp4') ? 'mp4' : 'webm';
+
   const overlay = (
-    <div className={`flow-timer-overlay${finished ? ' finished' : ''}`}>
+    <div className={`flow-timer-overlay${finished ? ' finished' : ''}`} style={backdrop}>
       <div className="flow-timer-modal">
         {preStart && (
           <div className="prestart-controls">
@@ -334,6 +366,7 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
                 ))}
               </select>
             )}
+            <RecordingsList />
           </div>
         )}
 
@@ -363,16 +396,19 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
               {cameraOn && camera.videoUrl && (
                 <div className="video-review">
                   <video src={camera.videoUrl} controls playsInline />
+                  <p className="review-caption">
+                    {savedRecordingId ? 'Saved to recordings ✓' : 'Saving…'}
+                  </p>
                   <div className="video-review-actions">
                     <a
                       className="review-btn"
                       href={camera.videoUrl}
-                      download={`${workoutType.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.${camera.videoExt}`}
+                      download={`${workoutType.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.${videoExt}`}
                     >
-                      Save video
+                      Download
                     </a>
-                    <button className="review-btn review-btn--ghost" type="button" onClick={discardVideo}>
-                      Discard
+                    <button className="review-btn review-btn--ghost" type="button" onClick={deleteSavedRecording}>
+                      Delete
                     </button>
                   </div>
                 </div>
@@ -383,10 +419,10 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
               <div className="flow-pulse-wrap">
                 {/* keyed on the rep so the ripple restarts at every strike */}
                 {!preStart && isActive && (
-                  <span key={currentRep} className="flow-ripple" />
+                  <span key={currentRep} className={`flow-ripple${finalStretch ? ' flow-ripple--ember' : ''}`} />
                 )}
                 <div
-                  className={`flow-pulse${preStart ? ' flow-pulse--idle' : ''}`}
+                  className={`flow-pulse${preStart ? ' flow-pulse--idle' : ''}${finalStretch ? ' flow-pulse--ember' : ''}`}
                   style={preStart ? undefined : { transform: `scale(${pulseScale.toFixed(3)})` }}
                 />
               </div>
