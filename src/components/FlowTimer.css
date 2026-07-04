@@ -294,6 +294,15 @@
   z-index: 5;
 }
 
+/* Desktop: a fixed large tile — vmin is window-relative, so percentage
+   sizing quietly under-delivers in short or non-maximized windows.
+   38vh keeps it from swallowing squat windows. */
+@media (min-width: 900px) {
+  .timer-pip {
+    width: min(440px, 38vh);
+  }
+}
+
 .timer-pip--dim {
   opacity: 0.35;
 }
