@@ -469,10 +469,6 @@ body {
 
 /* ---- Pull-ups rep stepper ---- */
 
-.pullups-record {
-  margin-right: 10px;
-}
-
 .pullups-stepper {
   display: flex;
   align-items: center;
