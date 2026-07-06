@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import useRepCamera from '../hooks/useRepCamera';
+import useCameraRecorder from '../hooks/useCameraRecorder';
 import RecordingsList from './RecordingsList';
 import { saveRecording, deleteRecording } from '../utils/recordingsStore';
 import './FlowTimer.css';
@@ -23,7 +23,7 @@ const CHIME_BRIGHT = [
   [1245.9, 0.05, 0.9],
 ];
 
-const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', onSaveRepSession }) => {
+const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees' }) => {
   const BASE_TARGET_TIME = 20 * 60;
   const repDuration = totalReps > 0 ? Math.round(BASE_TARGET_TIME / totalReps) : 0;
   const TOTAL_TIME = repDuration * totalReps;
@@ -38,10 +38,9 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
 
   const { isActive, timeLeft, repTimeLeft, currentRep } = timerState;
   const [isLocked, setIsLocked] = useState(false);
-  const [sessionSaved, setSessionSaved] = useState(false);
   const [savedRecordingId, setSavedRecordingId] = useState(null);
 
-  // Camera: rep counting + session recording, on-device
+  // Camera: session recording for self-review, on-device
   const [cameraOn, setCameraOn] = useState(() => {
     try {
       return window.localStorage.getItem('burpee-timer-camera') === 'on';
@@ -50,8 +49,7 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
     }
   });
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const camera = useRepCamera({ videoRef, canvasRef, enabled: isOpen && cameraOn });
+  const camera = useCameraRecorder({ videoRef, enabled: isOpen && cameraOn });
   const { stop: stopCamera, discardVideo } = camera;
 
   const toggleCamera = () => {
@@ -199,7 +197,6 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
   }, [isActive, totalReps, repDuration, playChime, stopCamera]);
 
   const startSession = () => {
-    setSessionSaved(false);
     setSavedRecordingId(null);
     if (cameraOn) camera.start();
   };
@@ -246,7 +243,6 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
     });
     startTimeRef.current = 0;
     prevRepRef.current = 1;
-    setSessionSaved(false);
     setSavedRecordingId(null);
     stopCamera();
     discardVideo();
@@ -273,15 +269,6 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
   useEffect(() => {
     if (!isOpen) resetTimer();
   }, [isOpen, resetTimer]);
-
-  // A natural finish with the camera on records the detected count for the day
-  useEffect(() => {
-    if (!isOpen || !cameraOn || sessionSaved) return;
-    if (timeLeft <= 0 && camera.count > 0 && onSaveRepSession) {
-      onSaveRepSession({ workoutType, detected: camera.count, target: totalReps });
-      setSessionSaved(true);
-    }
-  }, [isOpen, cameraOn, sessionSaved, timeLeft, camera.count, onSaveRepSession, workoutType, totalReps]);
 
   // The session video auto-saves to on-device recordings once it finalizes
   useEffect(() => {
@@ -374,8 +361,7 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
             and recorder survive across start/finish/reset */}
         {cameraOn && (
           <div className={`timer-pip${finished ? ' timer-pip--dim' : ''}`}>
-            <video ref={videoRef} playsInline muted />
-            <canvas ref={canvasRef} />
+            <video className="video-mirror" ref={videoRef} playsInline muted />
             {camera.status === 'loading' && <span className="pip-status">Loading…</span>}
             {camera.status === 'error' && (
               <span className="pip-status pip-status--error">{camera.error}</span>
@@ -387,15 +373,9 @@ const FlowTimer = ({ isOpen, onClose, totalReps = 0, workoutType = 'Burpees', on
           {finished ? (
             <>
               <div className="end-timer-message">Well done.</div>
-              {cameraOn && camera.count > 0 && (
-                <p className="count-report">
-                  Camera counted {camera.count} of {totalReps}
-                  {sessionSaved ? ' · saved' : ''}
-                </p>
-              )}
               {cameraOn && camera.videoUrl && (
                 <div className="video-review">
-                  <video src={camera.videoUrl} controls playsInline />
+                  <video className="video-mirror" src={camera.videoUrl} controls playsInline />
                   <p className="review-caption">
                     {savedRecordingId ? 'Saved to recordings ✓' : 'Saving…'}
                   </p>

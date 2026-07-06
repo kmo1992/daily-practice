@@ -83,7 +83,7 @@ function RecordingsList() {
             </button>
           </div>
           {active?.id === item.id && (
-            <video className="recording-player" src={active.url} controls autoPlay playsInline />
+            <video className="recording-player video-mirror" src={active.url} controls autoPlay playsInline />
           )}
         </div>
       ))}
