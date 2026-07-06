@@ -7,7 +7,7 @@ A personal health and habit tracker built with React, shaped around the [Busy Da
 
 - **Morning Numbers**: Each day proposes your numbers (burpees or navy seals, pull-ups) from your weekly goals — review, adjust one-offs, and accept them.
 - **Flow Timer**: A numbers-free 20-minute workout timer. A bell-strike pulse blooms once per rep with a warm chime (plus haptics) — no counters, no clocks, no overthinking. Audio-only milestones mark the halfway rep and the final three, and a distinct descending phrase signals the finish.
-- **Camera Rep Counting & Recording** (optional): On-device pose estimation counts your reps (stand → ground → stand) while the session is recorded for self-review. Recordings auto-save to on-device storage with a list to replay, download, or delete — video never leaves the device. Works with phone cameras or webcams, with a device picker.
+- **Session Recording** (optional): record your workout for self-review with a mirrored live preview. Recordings auto-save to on-device storage with a list to replay, download, or delete — video never leaves the device. Works with phone cameras or webcams, with a device picker.
 - **Daily Tracking**: Habit checkboxes (workout, stretch, read + coffee), pull-ups with actual rep counts, and a hydration tally.
 - **Weekly Goals**: Set targets for burpees, navy seals, and pull-ups each week, with carry-over when a week isn't explicitly set.
 - **Trends**: Current/longest streak, 30-day completion, a 12-week consistency heatmap, and pull-up progression.
@@ -22,7 +22,6 @@ A personal health and habit tracker built with React, shaped around the [Busy Da
 - **React 18** with Vite
 - **Firebase** (Auth + Firestore + Hosting)
 - **Google Identity Services** for OAuth sign-in
-- **MediaPipe Tasks Vision** for on-device pose estimation (lazy-loaded)
 - **Moment.js** for date handling
 - **Vitest** for unit tests
 - **vite-plugin-pwa** for offline support
@@ -97,7 +96,7 @@ npm run test:watch # watch mode
 npm run lint       # eslint
 ```
 
-The suite covers the pure logic: workout scheduling and goal carry-over, streak calculation, trends/statistics, and camera rep counting (via synthetic pose landmarks).
+The suite covers the pure logic: workout scheduling and goal carry-over, streak calculation, and trends/statistics.
 
 ### Production Build
 
@@ -158,7 +157,7 @@ src/
 │   ├── Modal.jsx              # Generic modal
 │   └── Attributions.jsx       # Footer credits
 ├── hooks/
-│   └── useRepCamera.js        # Camera + pose counting + session recording
+│   └── useCameraRecorder.js   # Camera + session recording
 ├── data/
 │   └── practicesData.js       # Mobility video links
 └── utils/
@@ -166,8 +165,7 @@ src/
     ├── scheduleUtils.js       # Workout schedule, goal resolution
     ├── streakUtils.js         # Streak calculation
     ├── statsUtils.js          # Trends/heatmap statistics
-    ├── recordingsStore.js     # On-device video storage (IndexedDB)
-    └── repCounter.js          # Pose-based burpee rep counting
+    └── recordingsStore.js     # On-device video storage (IndexedDB)
 ```
 
 ## Author

@@ -86,14 +86,6 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
     });
   };
 
-  const handleSaveRepSession = (session) => {
-    if (isFuture) return;
-    onUpdateDay(dateStr, {
-      repSession: { ...session, recordedAt: new Date().toISOString() },
-      workoutType: workoutSchedule.type,
-    });
-  };
-
   // Today's pull-up target: the accepted number if set, else the schedule's
   const pullupsTarget = (() => {
     const accepted = dayData.acceptedTargets;
@@ -147,7 +139,6 @@ function DayView({ data, weekGoals, onUpdateDay, onOpenSettings }) {
           return targets?.burpees || targets?.navySeals || 0;
         })()}
         workoutType={workoutSchedule.type}
-        onSaveRepSession={handleSaveRepSession}
       />
 
       {isoWeekday === 7 && (() => {
