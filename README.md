@@ -8,15 +8,29 @@ A personal health and habit tracker built with React, shaped around the [Busy Da
 - **Morning Numbers**: Each day proposes your numbers (burpees or navy seals, pull-ups) from your weekly goals — review, adjust one-offs, and accept them.
 - **Flow Timer**: A numbers-free 20-minute workout timer. A bell-strike pulse blooms once per rep with a warm chime (plus haptics) — no counters, no clocks, no overthinking. Audio-only milestones mark the halfway rep and the final three, and a distinct descending phrase signals the finish.
 - **Session Recording** (optional): record your workout for self-review with a mirrored live preview. Recordings auto-save to on-device storage with a list to replay, download, or delete — video never leaves the device. Works with phone cameras or webcams, with a device picker.
-- **Daily Tracking**: Habit checkboxes (workout, stretch, read + coffee), pull-ups with actual rep counts, and a hydration tally — organized time-neutrally, so the practice fits any hour of the day.
+- **Daily Tracking**: Habit checkboxes (workout, stretch, read + coffee, and outside time on Sundays), pull-ups with actual rep counts, and a 3-bottle hydration tally — organized time-neutrally, so the practice fits any hour of the day.
 - **Clean Eating**: tracked by exception — every day starts clean and costs zero taps; slips get logged against five trigger foods (Gluten, Dairy, Fried, Sweets, Alcohol). One free day per week forgives its slips. A separate clean streak sits beside the practice streak, and Trends shows a 30-day slip tally per food.
-- **Weekly Goals**: Set targets for burpees, navy seals, and pull-ups each week, with carry-over when a week isn't explicitly set.
+- **Weekly Goals**: Set targets for burpees, navy seals, and pull-ups each week. An unset week carries over the most recent goals from the previous 4 weeks, and falls back to a coach baseline (30 burpees, 10 navy seals, 3 pull-ups per session).
 - **Trends**: Current/longest streak, 30-day completion, a 12-week consistency heatmap, and pull-up progression.
 - **Tomorrow Preview**: A collapsed peek at tomorrow's workout and stretch routine for planning around real life.
 - **Sunday Reflection**: Weekly planning section showing next week's numbers inline.
 - **Mobility Links**: Rotating WLC stretch videos (Mon–Sat).
-- **Progressive Web App**: Works offline, installable, auto-updates.
+- **Progressive Web App**: Works offline and is installable. It checks for updates on focus and every hour, then reloads itself to pick up a new version (but not in the middle of a workout).
 - **Firebase Auth & Firestore**: Google sign-in (via Google Identity Services) with per-user cloud data, locked down by version-controlled security rules (`firestore.rules`).
+
+## The Weekly Rhythm
+
+| Day | Workout | Pull-ups | Stretch | Other |
+|---|---|---|---|---|
+| Mon | Burpees (20-min Flow Timer) | ✓ | ✓ | Read + Coffee, Hydrate |
+| Tue | Rest | ✓ | ✓ | Read + Coffee, Hydrate |
+| Wed | Navy Seals (20-min Flow Timer) | ✓ | ✓ | Read + Coffee, Hydrate |
+| Thu | Rest | ✓ | ✓ | Read + Coffee, Hydrate |
+| Fri | Burpees (20-min Flow Timer) | ✓ | ✓ | Read + Coffee, Hydrate |
+| Sat | Navy Seals (20-min Flow Timer) | ✓ | ✓ | Read + Coffee, Hydrate |
+| Sun | Full rest | — | — | Outside time, Read + Coffee, Hydrate, weekly reflection |
+
+A day counts toward the practice streak when every habit tracked that day is done (hydration needs all 3 bottles). Clean eating has its own streak and does not affect this one. The schedule lives in `src/utils/scheduleUtils.js` and the completion rules in `src/utils/streakUtils.js`.
 
 ## Technologies
 
@@ -106,6 +120,15 @@ npm run build
 npm run preview   # preview locally
 ```
 
+## Data Model
+
+Each user's data lives under `users/{uid}` in Firestore, and the security rules let only that user read or write it:
+
+- `users/{uid}/days/{YYYY-MM-DD}`: that day's habits, pull-up count, hydration, clean-eating slips, and `freeDay` flag
+- `users/{uid}/weeks/{YYYY-MM-DD}`: weekly goals, keyed by the ISO week's Monday
+
+Session recordings are stored only in the browser's IndexedDB (`src/utils/recordingsStore.js`) and never go to Firestore.
+
 ## Deploying to Firebase Hosting
 
 1. Create a Firebase project and web app. Copy config values into `.env.local` (see `.env.example`).
@@ -132,7 +155,7 @@ Required GitHub Actions secrets:
 
 ```
 src/
-├── main.jsx                   # Entry point, PWA registration
+├── main.jsx                   # Entry point, PWA registration + update/reload logic
 ├── App.jsx                    # Root component, auth, data loading, view toggle
 ├── App.css                    # Global styles (paper aesthetic)
 ├── firebase.js                # Firebase initialization
